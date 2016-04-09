@@ -1,6 +1,6 @@
 package unimelb.distributed_algo_game;
 
-public class WhisperGameApp {
+public class HighCardGameApp {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
