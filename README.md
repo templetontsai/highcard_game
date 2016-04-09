@@ -1,1 +1,1 @@
-# whisper_game
+# highcard_game
