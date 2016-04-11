@@ -24,8 +24,8 @@ public class HighCardGameApp {
 		Player p2 = new AIPlayer("AI", 2);
 		Thread t1 = new Thread(p1);
 		Thread t2 = new Thread(p2);
-		p1.setCards(deck.getCards(5));
-		p2.setCards(deck.getCards(5));
+		p1.setCards(deck.getCards(1));
+		p2.setCards(deck.getCards(1));
 		t1.start();
 	//	t2.start();
 	

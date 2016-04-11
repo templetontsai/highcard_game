@@ -38,7 +38,7 @@ public abstract class Player implements Serializable, Runnable {
 	public ArrayList<Card> showHand() {
 		if (this.cards != null) {
 			for (Card card : cards) {
-				System.out.println(card.getCardRank() + "," + card.getPattern());
+				System.out.println(card.getCardRank().getCode() + "," + card.getPattern());
 			}
 			return cards;
 		} else
