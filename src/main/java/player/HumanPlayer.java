@@ -35,6 +35,7 @@ public class HumanPlayer extends Player {
 			}**/
 			if(option>0 && option<53){
 				showCard(option);
+				terminateGame(true);
 			}else{
 				System.out.println("Wrong option");
 			}
