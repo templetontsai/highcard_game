@@ -11,7 +11,7 @@ import unimelb.distributed_algo_game.pokers.Card;
  */
 public abstract class Player implements Serializable, Runnable {
 
-	private ArrayList<Card> cards = new ArrayList<Card>(5);
+	private ArrayList<Card> cards = new ArrayList<Card>(52);
 	private String name = null;
 	private int id = -1;
 
@@ -33,6 +33,14 @@ public abstract class Player implements Serializable, Runnable {
 			this.cards = cards;
 		else
 			throw new NullPointerException();
+	}
+	
+	public void selectFromDeck(){
+		
+	}
+	
+	public void showCard(int option){
+		System.out.println("You selected "+cards.get(option).getCardRank() + "," + cards.get(option).getPattern());
 	}
 
 	public ArrayList<Card> showHand() {

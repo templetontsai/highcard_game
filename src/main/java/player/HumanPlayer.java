@@ -19,12 +19,12 @@ public class HumanPlayer extends Player {
 		Scanner scanner = null;
 		while(!gameIsOver) {
 			
-			System.out.println("Enter your option: 1.Show your hand");
+			System.out.println("Please select from the deck between 1-52");
 			scanner = new Scanner(System.in);
 			int option = scanner.nextInt();
 			
-			switch (option) {
-				case 1:
+		/**	switch (option) {
+				case 1-52:
 					showHand();
 					break;
 				case 2:
@@ -32,6 +32,11 @@ public class HumanPlayer extends Player {
 					break;
 				default:
 					System.out.println("Wrong option");
+			}**/
+			if(option>0 && option<53){
+				showCard(option);
+			}else{
+				System.out.println("Wrong option");
 			}
 		}
 		

@@ -64,5 +64,10 @@ public final class Deck {
 		}
 	}
 	
+	public ArrayList<Card> getDeck(){
+		return deck;
+	}
+
+	
 	
 }
