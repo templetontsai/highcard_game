@@ -25,8 +25,13 @@ public class HighCardGameApp {
 		Thread t1 = new Thread(p1);
 		Thread t2 = new Thread(p2);
 <<<<<<< HEAD
+<<<<<<< HEAD
 		p1.setCards(deck.getDeck());
 		p2.setCards(deck.getDeck());
+=======
+		p1.setCards(deck.getCards(1));
+		p2.setCards(deck.getCards(1));
+>>>>>>> origin/development
 =======
 		p1.setCards(deck.getCards(1));
 		p2.setCards(deck.getCards(1));
