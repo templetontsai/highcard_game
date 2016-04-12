@@ -57,6 +57,11 @@ public final class Deck {
 		return cards;
 	}
 	
+	public Card getCardFromDeck(int option){
+		Card card;
+		card = deck.get(option);
+		return card;
+	}
 	public void showCards() {
 		
 		for(Card c: deck) {
