@@ -24,19 +24,16 @@ public class HighCardGameApp {
 	
 		
 		Player p1 = new HumanPlayer("Templeton", 1);
-		Player p2 = new AIPlayer("AI", 2);
-		//Thread t1 = new Thread(p1);
-		//Thread t2 = new Thread(p2);
+		Player p2 = new AIPlayer("AI 1", 2);
+		Player p3 = new AIPlayer("AI 2", 3);
 
 		Random random = new Random();
-		//p1.setCards(deck.getDeck());
 		
 		ArrayList<Player> players = new ArrayList<Player>();
 		players.add(p1);
 		players.add(p2);
+		players.add(p3);
 		
-		//t1.start();
-		//t2.start();
 		boolean isFinished = false;
 		boolean roundDone = false;
 		Util deckComparison = new Util();
@@ -44,6 +41,8 @@ public class HighCardGameApp {
 		while(!isFinished){
 		    int choice = random.nextInt(51) + 0;
 		    p2.selectFromDeck(deck.getCardFromDeck(choice));
+		    choice = random.nextInt(51) + 0;
+		    p3.selectFromDeck(deck.getCardFromDeck(choice));
 			while(!roundDone){
 				System.out.println("Please select from the deck between 1-52");
 				scanner = new Scanner(System.in);

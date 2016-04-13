@@ -11,16 +11,26 @@ import player.Player;
 public class Util {
 
 	public static String highCard(ArrayList<Player> players) {
-		String winner = "";
-		String matchDetails = players.get(0).getSelectedCard().getCardRank()+" "+players.get(0).getSelectedCard().getPattern()+
-				" and the other player drew "+players.get(1).getSelectedCard().getCardRank()+" "+players.get(1).getSelectedCard().getPattern();
-		if(!players.isEmpty())
-			if(players.get(0).getSelectedCard().getCardRank().getCode()>players.get(1).getSelectedCard().getCardRank().getCode())
-				winner = players.get(0).getName()+" has won the match. You drew "+matchDetails;
-			else if(players.get(0).getSelectedCard().getCardRank().getCode()<players.get(1).getSelectedCard().getCardRank().getCode())
-				winner = players.get(1).getName()+" has won the match. You drew "+matchDetails;
+		    String matchDetails = players.get(0).getName()+" drew "+players.get(0).getSelectedCard().getCardRank()+" "+players.get(0).getSelectedCard().getPattern();
+			int winningScore = 0;
+			int playerID = 0;
+			boolean matchDraw = false;
+			StringBuilder sb = new StringBuilder(matchDetails);
+			for(int i=0; i <players.size(); i++){
+				if(players.get(i).getSelectedCard().getCardRank().getCode()>winningScore){
+					winningScore = players.get(i).getSelectedCard().getCardRank().getCode();
+					playerID = i;
+				}else if(players.get(i).getSelectedCard().getCardRank().getCode()==winningScore){
+					matchDraw = true;
+				}
+				if(i>0)
+					sb.append(", "+players.get(i).getName()+" drew "+players.get(i).getSelectedCard().getCardRank()+" "+players.get(i).getSelectedCard().getPattern());
+			}
+			String winner = "";
+			if(!matchDraw)
+			   winner = players.get(playerID).getName()+" has won the match. "+sb.toString();
 			else
-				winner = "The match was a draw. You drew "+matchDetails;
+			   winner = "The match was declared a draw. "+sb.toString();
 			return winner;
 	}
 }
