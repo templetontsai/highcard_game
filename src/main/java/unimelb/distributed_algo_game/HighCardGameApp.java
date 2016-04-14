@@ -36,7 +36,7 @@ public class HighCardGameApp {
 		
 		boolean isFinished = false;
 		boolean roundDone = false;
-		Util deckComparison = new Util();
+		
 		Scanner scanner = null;
 		while(!isFinished){
 		    int choice = random.nextInt(51) + 0;
@@ -56,7 +56,7 @@ public class HighCardGameApp {
 					System.out.println("Invalid selection.");
 				}
 			}
-			System.out.println(deckComparison.highCard(players));
+			System.out.println(Util.compareRank(players));
 			boolean newMatch = false;
 			while(!newMatch){
 			   System.out.println("Do you want to continue? [Y/N]");

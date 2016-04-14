@@ -10,7 +10,7 @@ import player.Player;
  */
 public class Util {
 
-	public static String highCard(ArrayList<Player> players) {
+	public static String compareRank(ArrayList<Player> players) {
 		    String matchDetails = players.get(0).getName()+" drew "+players.get(0).getSelectedCard().getCardRank()+" "+players.get(0).getSelectedCard().getPattern();
 			int winningScore = 0;
 			int playerID = 0;
