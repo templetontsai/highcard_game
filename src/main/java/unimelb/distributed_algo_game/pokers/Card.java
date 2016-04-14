@@ -60,6 +60,10 @@ public abstract class Card implements Serializable {
 	public CardRank getCardRank() {
 		return cardRank;
 	}
+	
+	public int gethandRank() {
+		return cardRank.getCode() + cardPattern.getCode();
+	}
 
 
 }
