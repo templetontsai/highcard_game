@@ -11,15 +11,22 @@ import unimelb.distributed_algo_game.pokers.Card.CardRank;
  */
 public final class Deck {
 
+	//Initialize the variables for the deck class
 	private static Deck instance = null;
 	private static final int DECK_SIZE = 52;
 	private ArrayList<Card> deck = new ArrayList<Card>(DECK_SIZE);
 	
-
+	/**
+	 * Initialize the card deck
+	 */
 	protected Deck() {
 		init();
 	}
 
+	
+	/**
+	 * Returns the existing of the card deck if it exists else it initializes a new deck
+	 */
 	public static Deck getInstance() {
 		if (instance == null) {
 			instance = new Deck();
@@ -27,6 +34,9 @@ public final class Deck {
 		return instance;
 	}
 
+	/**
+	 * Creates a new deck and adds all the cards for each rank and pattern/suite
+	 */
 	private void init() {
 		for (CardRank cardRank : CardRank.values()) {
 			deck.add(new Clubs(cardRank, CardPattern.Clubs));
@@ -37,6 +47,9 @@ public final class Deck {
 
 	}
 
+	/**
+	 * This method reorders the cards in the deck in a random order
+	 */
 	public void shuffle() {
 		ArrayList<Card> temp = new ArrayList<Card>();
 		while (!deck.isEmpty()) {
@@ -47,6 +60,9 @@ public final class Deck {
 		deck = temp;
 	}
 	
+	/**
+	 * This returns a specific number of cards from the deck specified by the user
+	 */
 	public ArrayList<Card> getCards(int numCards) {
 		ArrayList<Card> cards = new ArrayList<Card>(numCards);
 		while(numCards != 0) {
@@ -57,11 +73,19 @@ public final class Deck {
 		return cards;
 	}
 	
+	/**
+	 *Returns a single card from a the deck at a specified position
+	 */
 	public Card getCardFromDeck(int option){
 		Card card;
 		card = deck.get(option);
+		deck.remove(option);
 		return card;
 	}
+	
+	/**
+	 * Prints out the current cards in the deck
+	 */
 	public void showCards() {
 		
 		for(Card c: deck) {
@@ -69,10 +93,24 @@ public final class Deck {
 		}
 	}
 	
+	/**
+	 * Returns the current deck of cards
+	 */
 	public ArrayList<Card> getDeck(){
 		return deck;
 	}
 
-	
+	/**
+	 * This method clears the deck and re-initializes the deck with new cards
+	 */
+	public void resetDeck(){
+		deck.clear();
+		for (CardRank cardRank : CardRank.values()) {
+			deck.add(new Clubs(cardRank, CardPattern.Clubs));
+			deck.add(new Hearts(cardRank,CardPattern.Hearts));
+			deck.add(new Diamonds(cardRank, CardPattern.Diamonds));
+			deck.add(new Spades(cardRank, CardPattern.Spades));
+		}
+	}
 	
 }

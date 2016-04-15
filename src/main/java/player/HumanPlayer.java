@@ -17,10 +17,11 @@ public class HumanPlayer extends Player {
 	
 	private static PlayerState playerState = null;
 
+	/**
+	 *Public constructor that initializes a player object using name, id, game state and score
+	 */
 	public HumanPlayer(String name, int id) {
-		super(name, id, playerState);
-		
-
+		super(name, id, playerState, new PlayerScore(id));
 	}
 
 	public void run() {
