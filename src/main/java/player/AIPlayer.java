@@ -1,28 +1,24 @@
 package player;
 
-
+import player.PlayerState.GameState;
 
 /**
  * @author Ting-Ying Tsai
  *
  */
 public class AIPlayer extends Player{
-	private boolean gameIsOver = false;
-
+	private static PlayerState playerState = null;
 	public AIPlayer(String name, int id) {
-		super(name, id);
+		super(name, id, playerState);
 	}
 
 	public void run() {
-		
-		while (!gameIsOver) {
+		this.setPlayStatus(GameState.Play);
+		while (playerState.play()) {
 			showHand();
 		}
 
 	}
 
-	public void terminateGame(boolean gameIsOver) {
-		this.gameIsOver = gameIsOver;
-	}
 	
 }
