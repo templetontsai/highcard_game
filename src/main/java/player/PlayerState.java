@@ -7,7 +7,7 @@ package player;
 public interface PlayerState {
 	// TODO put more state if needed
 	enum GameState {
-		Play, Leave
+		Play, Leave, Participant, NonParticipant, Coordinator 
 	};
 	
 	public boolean play();
