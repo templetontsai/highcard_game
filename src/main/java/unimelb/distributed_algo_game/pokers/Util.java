@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import player.Player;
-import player.PlayerScore;
+import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.player.PlayerScore;
 
 /**
  * @author Ting-Ying Tsai

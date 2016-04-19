@@ -1,9 +1,11 @@
-package player;
+package unimelb.distributed_algo_game.player;
 
-import unimelb.distributed_algo_game_network.GameClient;
-import unimelb.distributed_algo_game_network.GameServer;
+import java.util.Observable;
 
-import player.PlayerState.GameState;
+import unimelb.distributed_algo_game.network.GameClient;
+import unimelb.distributed_algo_game.network.GameServer;
+import unimelb.distributed_algo_game.state.PlayerState;
+import unimelb.distributed_algo_game.state.PlayerState.GameState;
 
 /**
  * @author Ting-Ying Tsai
@@ -36,12 +38,18 @@ public class HumanPlayer extends Player {
 
 	public void run() {
 		gameServerThread = new Thread(gameServer);
+		gameServer.connect();
 		gameServerThread.start();
 		gameClient.setPlayer(this);
+		gameClient.connect();
 		gameClientThread = new Thread(gameClient);
 		gameClientThread.start();
-		//gameServer.stopServer(true);
-		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		/*
 		Scanner scanner = null;
 
@@ -66,7 +74,17 @@ public class HumanPlayer extends Player {
 		*/
 
 	}
-	
+
+
+
+
+
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }

@@ -1,4 +1,4 @@
-package player;
+package unimelb.distributed_algo_game.player;
 /**
  * 
  * @author David

@@ -1,18 +1,22 @@
-package player;
+package unimelb.distributed_algo_game.player;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Observer;
 
-import player.PlayerState.GameState;
 import unimelb.distributed_algo_game.pokers.Card;
+import unimelb.distributed_algo_game.state.PlayState;
+import unimelb.distributed_algo_game.state.PlayerState;
+import unimelb.distributed_algo_game.state.StopState;
+import unimelb.distributed_algo_game.state.PlayerState.GameState;
 
 /**
  * @author Ting-Ying Tsai
  *
  */
-public abstract class Player implements Serializable, Runnable {
+public abstract class Player implements Serializable, Runnable, NetworkObserver {
 
-	//Initialize the variables to be used in the game
+	// Initialize the variables to be used in the game
 	private ArrayList<Card> cards = new ArrayList<Card>(52);
 	private Card selectedCard = null;
 	protected PlayerState playerState = null;
@@ -42,25 +46,25 @@ public abstract class Player implements Serializable, Runnable {
 	public int getID() {
 		return this.id;
 	}
-	
+
 	/**
 	 * Returns the card user selected from the deck
 	 */
-	public Card getSelectedCard(){
+	public Card getSelectedCard() {
 		return selectedCard;
 	}
-	
+
 	/**
 	 * This method returns a player score object
 	 */
-	public PlayerScore getPlayerScore(){
+	public PlayerScore getPlayerScore() {
 		return playerScore;
 	}
-	
+
 	/**
 	 * This method updates the player score
 	 */
-	public void updateScore(){
+	public void updateScore() {
 		playerScore.updateScore();
 	}
 
@@ -73,19 +77,19 @@ public abstract class Player implements Serializable, Runnable {
 		else
 			throw new NullPointerException();
 	}
-	
+
 	/**
 	 * Sets the card the user selected from the deck
 	 */
-	public void selectFromDeck(Card card){
+	public void selectFromDeck(Card card) {
 		selectedCard = card;
 	}
-	
+
 	/**
 	 * Prints out the card selected by the user
 	 */
-	public void showCard(int option){
-		System.out.println("You selected "+selectedCard.getCardRank() + "," + selectedCard.getPattern());
+	public void showCard(int option) {
+		System.out.println("You selected " + selectedCard.getCardRank() + "," + selectedCard.getPattern());
 	}
 
 	/**
@@ -100,11 +104,13 @@ public abstract class Player implements Serializable, Runnable {
 		} else
 			throw new NullPointerException();
 	}
-	
+
 	/**
-	 * This is the method to change the state for a player. 
-	 * This might be refactor out later to actual player class.
-	 * @param gameState: State.Play, State.Leave
+	 * This is the method to change the state for a player. This might be
+	 * refactor out later to actual player class.
+	 * 
+	 * @param gameState:
+	 *            State.Play, State.Leave
 	 * 
 	 */
 	public void setPlayStatus(GameState gameState) {
@@ -118,5 +124,8 @@ public abstract class Player implements Serializable, Runnable {
 
 		}
 	}
+
 	
+	public abstract void update();
+
 }

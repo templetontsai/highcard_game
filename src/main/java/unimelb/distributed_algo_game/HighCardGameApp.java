@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-import player.AIPlayer;
-import player.HumanPlayer;
-import player.Player;
+import unimelb.distributed_algo_game.player.AIPlayer;
+import unimelb.distributed_algo_game.player.HumanPlayer;
+import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.pokers.Deck;
 import unimelb.distributed_algo_game.pokers.Util;
