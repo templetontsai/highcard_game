@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package unimelb.distributed_algo_game.pokers;
 
 import java.util.ArrayList;
@@ -5,27 +8,36 @@ import java.util.ArrayList;
 import unimelb.distributed_algo_game.pokers.Card.CardPattern;
 import unimelb.distributed_algo_game.pokers.Card.CardRank;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author Ting-Ying Tsai
+ * The Class Deck.
  *
+ * @author Ting-Ying Tsai
  */
 public final class Deck {
 
-	//Initialize the variables for the deck class
+	/** The instance. */
+	// Initialize the variables for the deck class
 	private static Deck instance = null;
+
+	/** The Constant DECK_SIZE. */
 	private static final int DECK_SIZE = 52;
+
+	/** The deck. */
 	private ArrayList<Card> deck = new ArrayList<Card>(DECK_SIZE);
-	
+
 	/**
-	 * Initialize the card deck
+	 * Initialize the card deck.
 	 */
 	protected Deck() {
 		init();
 	}
 
-	
 	/**
-	 * Returns the existing of the card deck if it exists else it initializes a new deck
+	 * Returns the existing of the card deck if it exists else it initializes a
+	 * new deck.
+	 *
+	 * @return single instance of Deck
 	 */
 	public static Deck getInstance() {
 		if (instance == null) {
@@ -35,12 +47,13 @@ public final class Deck {
 	}
 
 	/**
-	 * Creates a new deck and adds all the cards for each rank and pattern/suite
+	 * Creates a new deck and adds all the cards for each rank and
+	 * pattern/suite.
 	 */
 	private void init() {
 		for (CardRank cardRank : CardRank.values()) {
 			deck.add(new Clubs(cardRank, CardPattern.Clubs));
-			deck.add(new Hearts(cardRank,CardPattern.Hearts));
+			deck.add(new Hearts(cardRank, CardPattern.Hearts));
 			deck.add(new Diamonds(cardRank, CardPattern.Diamonds));
 			deck.add(new Spades(cardRank, CardPattern.Spades));
 		}
@@ -48,7 +61,7 @@ public final class Deck {
 	}
 
 	/**
-	 * This method reorders the cards in the deck in a random order
+	 * This method reorders the cards in the deck in a random order.
 	 */
 	public void shuffle() {
 		ArrayList<Card> temp = new ArrayList<Card>();
@@ -59,58 +72,69 @@ public final class Deck {
 		}
 		deck = temp;
 	}
-	
+
 	/**
-	 * This returns a specific number of cards from the deck specified by the user
+	 * This returns a specific number of cards from the deck specified by the
+	 * user.
+	 *
+	 * @param numCards
+	 *            the num cards
+	 * @return the cards
 	 */
 	public ArrayList<Card> getCards(int numCards) {
 		ArrayList<Card> cards = new ArrayList<Card>(numCards);
-		while(numCards != 0) {
+		while (numCards != 0) {
 			cards.add(deck.get(numCards));
 			deck.remove(numCards);
 			numCards--;
 		}
 		return cards;
 	}
-	
+
 	/**
-	 *Returns a single card from a the deck at a specified position
+	 * Returns a single card from a the deck at a specified position.
+	 *
+	 * @param option
+	 *            the option
+	 * @return the card from deck
 	 */
-	public Card getCardFromDeck(int option){
+	public Card getCardFromDeck(int option) {
 		Card card;
 		card = deck.get(option);
 		deck.remove(option);
 		return card;
 	}
-	
+
 	/**
-	 * Prints out the current cards in the deck
+	 * Prints out the current cards in the deck.
 	 */
 	public void showCards() {
-		
-		for(Card c: deck) {
+
+		for (Card c : deck) {
 			System.out.println(c.getPattern() + "," + c.getCardRank());
 		}
 	}
-	
+
 	/**
-	 * Returns the current deck of cards
+	 * Returns the current deck of cards.
+	 *
+	 * @return the deck
 	 */
-	public ArrayList<Card> getDeck(){
+	public ArrayList<Card> getDeck() {
 		return deck;
 	}
 
 	/**
-	 * This method clears the deck and re-initializes the deck with new cards
+	 * This method clears the deck and re-initializes the deck with new cards.
 	 */
-	public void resetDeck(){
+	public void resetDeck() {
 		deck.clear();
 		for (CardRank cardRank : CardRank.values()) {
 			deck.add(new Clubs(cardRank, CardPattern.Clubs));
-			deck.add(new Hearts(cardRank,CardPattern.Hearts));
+			deck.add(new Hearts(cardRank, CardPattern.Hearts));
 			deck.add(new Diamonds(cardRank, CardPattern.Diamonds));
 			deck.add(new Spades(cardRank, CardPattern.Spades));
 		}
 	}
-	
+
 }

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package unimelb.distributed_algo_game.network;
 
 import java.io.IOException;
@@ -7,19 +10,43 @@ import java.net.Socket;
 
 import unimelb.distributed_algo_game.network.NetworkInterface.ConnectionState;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author Ting-Ying Tsai
+ * The Class PlayerClientThread.
  *
+ * @author Ting-Ying Tsai
  */
 public class PlayerClientThread extends Thread implements ClientNetworkObserver {
+
+	/** The m socket. */
 	private Socket mSocket = null;
+
+	/** The client id. */
 	private int clientID = -1;
+
+	/** The m game reveice data object. */
 	private Object mGameReveiceDataObject = null;
+
+	/** The m object output stream. */
 	private ObjectOutputStream mObjectOutputStream = null;
+
+	/** The m object input stream. */
 	private ObjectInputStream mObjectInputStream = null;
+
+	/** The m lock. */
 	private Object mLock = null;
+
+	/** The connection state. */
 	private ConnectionState connectionState = null;
 
+	/**
+	 * Instantiates a new player client thread.
+	 *
+	 * @param mSocket
+	 *            the m socket
+	 * @param clientID
+	 *            the client id
+	 */
 	public PlayerClientThread(Socket mSocket, int clientID) {
 		if (mSocket != null) {
 			this.mSocket = mSocket;
@@ -30,6 +57,11 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		connectionState = ConnectionState.DISCONNECT;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Thread#run()
+	 */
 	public void run() {
 
 		connectionState = ConnectionState.CONNECT;
@@ -56,6 +88,12 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		}
 	}
 
+	/**
+	 * Send message.
+	 *
+	 * @param mGameSendDataObject
+	 *            the m game send data object
+	 */
 	private void sendMessage(Object mGameSendDataObject) {
 
 		try {
@@ -70,6 +108,9 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 	}
 
+	/**
+	 * Receive message.
+	 */
 	private void receiveMessage() {
 
 		try {
@@ -87,6 +128,11 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see unimelb.distributed_algo_game.network.ClientNetworkObserver#update()
+	 */
 	public void update() {
 		sendMessage("Game is Over");
 		// connectionState = ConnectionState.DISCONNECT;

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package unimelb.distributed_algo_game.network;
 
 import java.io.IOException;
@@ -6,28 +9,52 @@ import java.net.Socket;
 
 import unimelb.distributed_algo_game.player.Player;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author Ting-Ying Tsai
+ * The Class GameServer.
  *
+ * @author Ting-Ying Tsai
  */
 public final class GameServer implements Runnable, NetworkInterface {
 
+	/** The instance. */
 	private static GameServer instance = null;
+
+	/** The id. */
 	private int id = -1;
 
+	/** The m player. */
 	private Player mPlayer = null;
+
+	/** The m socket. */
 	private Socket mSocket = null;
+
+	/** The m server socket. */
 	private ServerSocket mServerSocket = null;
+
+	/** The m lock. */
 	private Object mLock;
-	private ConnectionState mCconnectionState;
+
+	/** The connection state. */
+	private ConnectionState mConnectionState;
+
+	/** The m player client manager. */
 	private PlayerClientManager mPlayerClientManager;
 
+	/**
+	 * Instantiates a new game server.
+	 */
 	protected GameServer() {
 		mLock = new Object();
-		mCconnectionState = ConnectionState.DISCONNECT;
+		mConnectionState = ConnectionState.DISCONNECT;
 		mPlayerClientManager = new PlayerClientManager(10);
 	}
 
+	/**
+	 * Gets the single instance of GameServer.
+	 *
+	 * @return single instance of GameServer
+	 */
 	public static GameServer getInstance() {
 		if (instance == null) {
 			instance = new GameServer();
@@ -35,16 +62,27 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return instance;
 	}
 
+	/**
+	 * Sets the id.
+	 *
+	 * @param id
+	 *            the new id
+	 */
 	public void setId(int id) {
 		this.id = id;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		try {
 			if (mServerSocket != null) {
 				System.out.println("Server Start, Waiting....");
 				synchronized (mLock) {
-					while (mCconnectionState == ConnectionState.CONNECT) {
+					while (mConnectionState == ConnectionState.CONNECT) {
 
 						mSocket = mServerSocket.accept();
 						PlayerClientThread t = new PlayerClientThread(mSocket, 1);
@@ -68,12 +106,17 @@ public final class GameServer implements Runnable, NetworkInterface {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see unimelb.distributed_algo_game.network.NetworkInterface#connect()
+	 */
 	public synchronized boolean connect() {
 
 		try {
 
 			mServerSocket = new ServerSocket(NetworkInterface.PORT);
-			mCconnectionState = ConnectionState.CONNECT;
+			mConnectionState = ConnectionState.CONNECT;
 
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -83,7 +126,12 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see unimelb.distributed_algo_game.network.NetworkInterface#disconnect()
+	 */
 	public synchronized void disconnect() {
-		mCconnectionState = ConnectionState.DISCONNECT;
+		mConnectionState = ConnectionState.DISCONNECT;
 	}
 }
