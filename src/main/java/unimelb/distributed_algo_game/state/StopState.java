@@ -1,4 +1,4 @@
-package player;
+package unimelb.distributed_algo_game.state;
 
 /**
  * @author Ting-Ying Tsai

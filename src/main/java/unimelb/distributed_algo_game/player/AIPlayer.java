@@ -1,6 +1,9 @@
-package player;
+package unimelb.distributed_algo_game.player;
 
-import player.PlayerState.GameState;
+import java.util.Observable;
+
+import unimelb.distributed_algo_game.state.PlayerState;
+import unimelb.distributed_algo_game.state.PlayerState.GameState;
 
 /**
  * @author Ting-Ying Tsai
@@ -21,6 +24,12 @@ public class AIPlayer extends Player{
 			showHand();
 		}
 
+	}
+
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

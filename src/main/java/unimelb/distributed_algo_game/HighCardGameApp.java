@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-import player.AIPlayer;
-import player.HumanPlayer;
-import player.Player;
+import unimelb.distributed_algo_game.player.AIPlayer;
+import unimelb.distributed_algo_game.player.HumanPlayer;
+import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.pokers.Deck;
 import unimelb.distributed_algo_game.pokers.Util;
@@ -16,7 +16,7 @@ import unimelb.distributed_algo_game.pokers.Util;
 public class HighCardGameApp {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		
 		
 	    //Create card deck for the game and shuffle
 		Deck deck = Deck.getInstance();
@@ -24,6 +24,14 @@ public class HighCardGameApp {
 	
 		//Initialize players
 		Player p1 = new HumanPlayer("Templeton", 1);
+
+		
+		Thread t = new Thread(p1);
+		t.start();
+		
+
+		
+
 		Player p2 = new AIPlayer("AI 1", 2);
 		Player p3 = new AIPlayer("AI 2", 3);
 
@@ -83,6 +91,7 @@ public class HighCardGameApp {
 				  System.out.println("Invalid selection.");
 			}
 		}
+
 	
 	}
 
