@@ -3,8 +3,8 @@
  */
 package unimelb.distributed_algo_game.network;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -13,7 +13,7 @@ import java.util.List;
 public final class PlayerClientManager {
 
 	/** The playe client list. */
-	private List<PlayerClientThread> playeClientList = null;
+	private Map<Integer, PlayerClientThread> playerClientList = null;
 
 	/**
 	 * Instantiates a new player client manager.
@@ -22,7 +22,7 @@ public final class PlayerClientManager {
 	 *            the player client num
 	 */
 	public PlayerClientManager(int playerClientNum) {
-		playeClientList = new ArrayList<PlayerClientThread>(playerClientNum);
+		playerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
 	}
 
 	/**
@@ -31,8 +31,8 @@ public final class PlayerClientManager {
 	 * @param clientThread
 	 *            the client thread
 	 */
-	public void addClient(PlayerClientThread clientThread) {
-		playeClientList.add(clientThread);
+	public void addClient(int clientID,PlayerClientThread clientThread) {
+		playerClientList.put(clientID, clientThread);
 	}
 
 	/**
@@ -41,18 +41,21 @@ public final class PlayerClientManager {
 	 * @param clientThread
 	 *            the client thread
 	 */
-	public void removeClient(PlayerClientThread clientThread) {
-		playeClientList.remove(clientThread);
+	public void removeClient(int clientThread) {
+		playerClientList.remove(clientThread);
 	}
 
 	/**
 	 * Notify all clients.
 	 */
-	public void notifyAllClients() {
-		for (PlayerClientThread t : playeClientList) {
-			System.out.println("Notifying");
-			t.update();
+	public void notifyAllClients(Object object) {
+		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
+			t.getValue().sendMessage(object);
 		}
+	}
+	
+	public void sendMessageToClient(Object mesasge, int clientID) {
+		playerClientList.get(clientID).sendMessage(mesasge);
 	}
 
 }

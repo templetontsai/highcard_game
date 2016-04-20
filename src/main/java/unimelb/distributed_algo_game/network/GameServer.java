@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -61,6 +62,22 @@ public final class GameServer implements Runnable, NetworkInterface {
 		}
 		return instance;
 	}
+	
+	/**
+	 * Sets the player.
+	 *
+	 * @param mPlayer
+	 *            the new player
+	 */
+	public void setPlayer(Player mPlayer) {
+		if (mPlayer != null) {
+			this.mPlayer = mPlayer;
+		} else {
+			System.out.println("Player can't be null");
+			throw new NullPointerException();
+		}
+
+	}
 
 	/**
 	 * Sets the id.
@@ -86,11 +103,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 						mSocket = mServerSocket.accept();
 						PlayerClientThread t = new PlayerClientThread(mSocket, 1);
-						mPlayerClientManager.addClient(t);
+						mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
 						t.start();
-
-						mPlayerClientManager.notifyAllClients();
-
 					}
 
 					mServerSocket.close();
@@ -134,4 +148,14 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public synchronized void disconnect() {
 		mConnectionState = ConnectionState.DISCONNECT;
 	}
+	
+	public void broadcastToClients(Object object) {
+		mPlayerClientManager.notifyAllClients(object);
+	}
+	
+	public void sendCard(Card card, int id) {
+		mPlayerClientManager.sendMessageToClient(card, id);
+	}
+	
+
 }

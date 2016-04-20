@@ -5,7 +5,9 @@ package unimelb.distributed_algo_game.player;
 
 import unimelb.distributed_algo_game.network.GameClient;
 import unimelb.distributed_algo_game.network.GameServer;
-import unimelb.distributed_algo_game.state.PlayerState;
+import unimelb.distributed_algo_game.pokers.Card;
+import unimelb.distributed_algo_game.state.GameState;
+
 
 // TODO: Auto-generated Javadoc
 /**
@@ -19,8 +21,6 @@ public class HumanPlayer extends Player {
 	/** The game is over. */
 	private boolean gameIsOver = false;
 
-	/** The player state. */
-	private static PlayerState playerState = null;
 
 	/** The game client. */
 	private GameClient gameClient = null;
@@ -44,7 +44,7 @@ public class HumanPlayer extends Player {
 	 *            the id
 	 */
 	public HumanPlayer(String name, int id) {
-		super(name, id, playerState, new PlayerScore(id));
+		super(name, id, GameState.NONE, new PlayerScore(id));
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 
@@ -56,19 +56,44 @@ public class HumanPlayer extends Player {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		gameServerThread = new Thread(gameServer);
-		gameServer.connect();
-		gameServerThread.start();
-		gameClient.setPlayer(this);
-		gameClient.connect();
-		gameClientThread = new Thread(gameClient);
-		gameClientThread.start();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		if (this.isDealer()) {
+
+			gameServer.setPlayer(this);
+			gameServerThread = new Thread(gameServer);
+			gameServer.connect();
+			gameServerThread.start();
+			
+			this.setGameState(GameState.PLAY);
+			while(this.getGameState() == GameState.PLAY) {
+				gameServer.broadcastToClients("hi");
+				Card card = this.getCard(1);
+				gameServer.sendCard(card, 1);
+				
+			}
+
+		} else {
+
+			gameClient.setPlayer(this);
+			gameClientThread = new Thread(gameClient);
+			gameClient.connect();
+			gameClientThread.start();
+			
+			this.setGameState(GameState.PLAY);
+			while(this.getGameState() == GameState.PLAY) {
+				Object obj = gameClient.receiveData();
+				if(obj != null) {
+					((Card)obj).showCard();
+					gameClient.disconnect();
+					this.setGameState(GameState.LEAVE);
+				}
+			}
+
 		}
+	
+
+	
+
 		/*
 		 * Scanner scanner = null;
 		 * 

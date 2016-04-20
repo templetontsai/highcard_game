@@ -7,10 +7,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import unimelb.distributed_algo_game.pokers.Card;
-import unimelb.distributed_algo_game.state.PlayState;
-import unimelb.distributed_algo_game.state.PlayerState;
-import unimelb.distributed_algo_game.state.PlayerState.GameState;
-import unimelb.distributed_algo_game.state.StopState;
+import unimelb.distributed_algo_game.pokers.Deck;
+import unimelb.distributed_algo_game.state.GameState;
+
 
 // TODO: Auto-generated Javadoc
 /**
@@ -31,8 +30,6 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	/** The selected card. */
 	private Card selectedCard = null;
 
-	/** The player state. */
-	protected PlayerState playerState = null;
 
 	/** The player score. */
 	protected PlayerScore playerScore = null;
@@ -42,6 +39,14 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 
 	/** The id. */
 	private int id = -1;
+	
+	private boolean isDealer = false;
+	
+	private GameState gameState = null;
+	
+	private Deck mDeck = null;
+
+
 
 	/**
 	 * Method to initialize the player name, id and state.
@@ -55,10 +60,11 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	 * @param playerScore
 	 *            the player score
 	 */
-	public Player(String name, int id, PlayerState playerState, PlayerScore playerScore) {
+	public Player(String name, int id, GameState gameState, PlayerScore playerScore) {
 		this.name = name;
 		this.id = id;
 		this.playerScore = playerScore;
+		this.gameState = gameState;
 	}
 
 	/**
@@ -152,23 +158,35 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 			throw new NullPointerException();
 	}
 
-	/**
-	 * This is the method to change the state for a player. This might be
-	 * refactor out later to actual player class.
-	 *
-	 * @param gameState
-	 *            the new play status
-	 */
-	public void setPlayStatus(GameState gameState) {
-		switch (gameState) {
-		case Play:
-			playerState = new PlayState();
-			break;
-		case Leave:
-			playerState = new StopState();
-			break;
-
+	public void setDealer(boolean isDealer) {
+		this.isDealer = isDealer;
+		// Create card deck for the game and shuffle
+		mDeck = Deck.getInstance();
+		mDeck.shuffle();
+	}
+	
+	public boolean isDealer() {
+		return this.isDealer;
+	}
+	
+	public Card getCard(int cardIndex) {
+		Card card = null;
+		if(this.isDealer)
+			card = mDeck.getCard(cardIndex);
+		else {
+			System.out.println("Only dealer can be in charge of giving cards");
+			throw new NullPointerException();
 		}
+		
+		return card;
+	}
+	
+	public GameState getGameState() {
+		return gameState;
+	}
+
+	public void setGameState(GameState gameState) {
+		this.gameState = gameState;
 	}
 
 	/*

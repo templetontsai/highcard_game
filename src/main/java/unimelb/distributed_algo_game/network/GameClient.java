@@ -101,16 +101,24 @@ public final class GameClient implements Runnable, NetworkInterface {
 				mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 
 				while (connectionState == ConnectionState.CONNECT) {
-
-					System.out.println("Client Connected, say hi to server");
-					// Object sendObj = mPlayer;
-					// System.out.println(((HumanPlayer)sendObj).getName());
-					// getData();
-					// objectOutputStream.writeObject(gameSendDataObject);
-					mObjectOutputStream.writeObject("Hey from Client");
-					// gameSendDataObject = null;
-					getData();
-
+					synchronized(mLock) {
+						if(gameSendDataObject != null) {
+							mObjectOutputStream.writeObject(gameSendDataObject);
+						} 
+						try {
+							gameReveiceDataObject = mObjectInputStream.readObject();
+							
+						} catch (ClassNotFoundException e) {
+							System.out.println("writing undefined class");
+							e.printStackTrace();
+						}
+						
+					}
+					//reset send data object
+					gameSendDataObject = null;
+					
+					Thread.sleep(100);
+	
 				}
 				System.out.println("conection closing...");
 				mObjectOutputStream.close();
@@ -119,6 +127,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 			} catch (IOException ioe) {
 				// TODO Adding error handling
 				ioe.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Adding error handling
+				e.printStackTrace();
 			}
 
 		}
@@ -154,33 +165,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		connectionState = ConnectionState.DISCONNECT;
 	}
 
-	/**
-	 * Gets the data.
-	 *
-	 * @return the data
-	 */
-	private void getData() {
 
-		if (mSocket != null) {
-			try {
-
-				synchronized (mLock) {
-					gameReveiceDataObject = mObjectInputStream.readObject();
-					System.out.println(gameReveiceDataObject);
-					// if(gameReveiceDataObject != null)
-					// notifyAllObservers();
-				}
-
-			} catch (IOException ioe) {
-				System.out.println("Error when getting input stream");
-				ioe.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				System.out.println("Object class is not supported");
-				e.printStackTrace();
-			}
-		}
-
-	}
 
 	/**
 	 * Send data.
@@ -188,14 +173,15 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * @param object
 	 *            the object
 	 */
-	public void sendData(Object object) {
+	public synchronized void sendData(Object object) {
 
-		synchronized (mLock) {
-			if (object != null)
-				gameSendDataObject = object;
-			else
-				System.out.println("Can't send null object");
+		if (object != null)
+			gameSendDataObject = object;
+		else {
+			System.out.println("Can't send null object");
+			throw new NullPointerException();
 		}
+
 	}
 
 	/**
@@ -206,13 +192,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public synchronized Object receiveData() {
 
 		if (gameReveiceDataObject != null) {
-			System.out.println(gameReveiceDataObject);
 			return gameReveiceDataObject;
 		} else {
 			System.out.println("gameReveiceDataObject is null");
+			throw new NullPointerException();
 		}
 
-		return null;
 	}
 
 	/**

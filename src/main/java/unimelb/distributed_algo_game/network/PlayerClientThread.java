@@ -94,7 +94,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @param mGameSendDataObject
 	 *            the m game send data object
 	 */
-	private void sendMessage(Object mGameSendDataObject) {
+	public void sendMessage(Object mGameSendDataObject) {
 
 		try {
 			if (mObjectOutputStream != null) {
@@ -111,7 +111,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/**
 	 * Receive message.
 	 */
-	private void receiveMessage() {
+	public void receiveMessage() {
 
 		try {
 			if (mObjectInputStream != null) {
@@ -134,7 +134,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @see unimelb.distributed_algo_game.network.ClientNetworkObserver#update()
 	 */
 	public void update() {
-		sendMessage("Game is Over");
+		//sendMessage("Game );
 		// connectionState = ConnectionState.DISCONNECT;
 
 	}

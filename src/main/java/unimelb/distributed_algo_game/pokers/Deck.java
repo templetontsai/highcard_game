@@ -21,7 +21,7 @@ public final class Deck {
 	private static Deck instance = null;
 
 	/** The Constant DECK_SIZE. */
-	private static final int DECK_SIZE = 52;
+	private static final int DECK_SIZE = 13;//For testing changing it to 13 from 52
 
 	/** The deck. */
 	private ArrayList<Card> deck = new ArrayList<Card>(DECK_SIZE);
@@ -73,37 +73,15 @@ public final class Deck {
 		deck = temp;
 	}
 
-	/**
-	 * This returns a specific number of cards from the deck specified by the
-	 * user.
-	 *
-	 * @param numCards
-	 *            the num cards
-	 * @return the cards
-	 */
-	public ArrayList<Card> getCards(int numCards) {
-		ArrayList<Card> cards = new ArrayList<Card>(numCards);
-		while (numCards != 0) {
-			cards.add(deck.get(numCards));
-			deck.remove(numCards);
-			numCards--;
-		}
-		return cards;
-	}
 
-	/**
-	 * Returns a single card from a the deck at a specified position.
-	 *
-	 * @param option
-	 *            the option
-	 * @return the card from deck
-	 */
-	public Card getCardFromDeck(int option) {
-		Card card;
-		card = deck.get(option);
-		deck.remove(option);
+	public Card getCard(int cardIndex) {
+		
+			Card card = deck.get(cardIndex);
+			deck.remove(cardIndex);
+		
 		return card;
 	}
+
 
 	/**
 	 * Prints out the current cards in the deck.
