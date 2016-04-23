@@ -8,6 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import org.json.simple.JSONObject;
+
 import unimelb.distributed_algo_game.network.NetworkInterface.ConnectionState;
 
 // TODO: Auto-generated Javadoc
@@ -39,6 +41,10 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/** The connection state. */
 	private ConnectionState connectionState = null;
 
+	private JSONObject mMessage = null;
+
+	private boolean isRunning = false;
+
 	/**
 	 * Instantiates a new player client thread.
 	 *
@@ -54,7 +60,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			throw new NullPointerException();
 		this.clientID = clientID;
 		mLock = new Object();
-		connectionState = ConnectionState.DISCONNECT;
+		connectionState = ConnectionState.DISCONNECTED;
+		mMessage = new JSONObject();
 	}
 
 	/*
@@ -64,17 +71,50 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 */
 	public void run() {
 
-		connectionState = ConnectionState.CONNECT;
+		
+		isRunning = true;
 		try {
 			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 		} catch (IOException ioe) {
 			ioe.getStackTrace();
 		}
-		while (connectionState == ConnectionState.CONNECT) {
-			// sendMessage("Hi, this is Gmae Server");
-			receiveMessage();
-			// System.out.println("Client running");
+		
+		JSONObject m;
+		String body;
+		ConnectionState clientConnectionState;
+		
+		while (isRunning) {
+			
+			m = (JSONObject) receiveMessage();
+			
+			if(m != null) {
+				connectionState = (ConnectionState) m.get("header");
+
+				switch (connectionState) {
+				
+				case CONNECTING:
+				case CONNECTED:
+					body = "Connected Successful";
+					mMessage.put("header", connectionState);
+					mMessage.put("body", body);
+					sendMessage(mMessage);
+					break;
+				case DISCONNECTING:
+				case DISCONNECTED:
+					body = "hi from server";
+					mMessage.put("header", connectionState);
+					mMessage.put("body", body);
+					isRunning = false;
+					break;
+				default:
+					System.out.println("Uknown State");
+					break;
+
+				}
+			}
+			
+			
 		}
 
 		try {
@@ -111,12 +151,14 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/**
 	 * Receive message.
 	 */
-	public void receiveMessage() {
+	public Object receiveMessage() {
+		
+		Object message = null;
 
 		try {
 			if (mObjectInputStream != null) {
-				mGameReveiceDataObject = mObjectInputStream.readObject();
-				System.out.println(mGameReveiceDataObject);
+				message = mObjectInputStream.readObject();
+				//System.out.println(mGameReveiceDataObject);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Adding Error Handling
@@ -125,6 +167,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			// TODO Adding Error Handling
 			ioe.printStackTrace();
 		}
+		
+		return message;
 
 	}
 
@@ -134,7 +178,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @see unimelb.distributed_algo_game.network.ClientNetworkObserver#update()
 	 */
 	public void update() {
-		//sendMessage("Game );
+		// sendMessage("Game );
 		// connectionState = ConnectionState.DISCONNECT;
 
 	}

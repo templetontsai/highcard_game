@@ -21,11 +21,16 @@ public interface NetworkInterface {
 	 * The Enum ConnectionState.
 	 */
 	public enum ConnectionState {
-
-		/** The connect. */
-		CONNECT,
+		/** The connecting. */
+		INIT,
+		/** The connecting. */
+		CONNECTING,
+		/** The connected. */
+		CONNECTED,
+		/** The disconnecting. */
+		DISCONNECTING,
 		/** The disconnect. */
-		DISCONNECT
+		DISCONNECTED
 	};
 
 	/**

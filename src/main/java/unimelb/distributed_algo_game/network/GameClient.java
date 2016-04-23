@@ -10,6 +10,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONObject;
+
+import unimelb.distributed_algo_game.network.NetworkInterface.ConnectionState;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
 
@@ -50,13 +53,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/** The connection state. */
 	private ConnectionState connectionState;
+	
+	private JSONObject mMessage = null;
+	
+	private boolean isRunning = false;
 
 	/**
 	 * Instantiates a new game client.
 	 */
 	protected GameClient() {
 		mLock = new Object();
-		connectionState = ConnectionState.DISCONNECT;
+		connectionState = ConnectionState.DISCONNECTED;
 	}
 
 	/**
@@ -99,23 +106,41 @@ public final class GameClient implements Runnable, NetworkInterface {
 			try {
 				mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 				mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
+				isRunning = true;
+				JSONObject m;
+				String body;
 
-				while (connectionState == ConnectionState.CONNECT) {
-					synchronized(mLock) {
-						if(gameSendDataObject != null) {
-							mObjectOutputStream.writeObject(gameSendDataObject);
-						} 
-						try {
-							gameReveiceDataObject = mObjectInputStream.readObject();
-							
-						} catch (ClassNotFoundException e) {
-							System.out.println("writing undefined class");
-							e.printStackTrace();
-						}
+				while (isRunning) {
+					
+					m = (JSONObject) receiveMessage();
+					if(m != null) {
+						connectionState = (ConnectionState) m.get("header");
+
+						switch (connectionState) {
 						
+						case CONNECTING:
+						case CONNECTED:
+							System.out.println(((String)m.get("body")));
+							body = "Ack from client";
+							mMessage.put("header", connectionState);
+							mMessage.put("body", body);
+							sendMessage(mMessage);
+							break;
+						case DISCONNECTING:
+						case DISCONNECTED:
+							body = "hi from server";
+							mMessage.put("header", connectionState);
+							mMessage.put("body", body);
+							isRunning = false;
+							break;
+						default:
+							System.out.println("Uknown State");
+							break;
+
+						}
 					}
-					//reset send data object
-					gameSendDataObject = null;
+					
+				
 					
 					Thread.sleep(100);
 	
@@ -145,7 +170,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		try {
 
 			mSocket = new Socket("localhost", NetworkInterface.PORT);
-			connectionState = ConnectionState.CONNECT;
+			connectionState = ConnectionState.CONNECTING;
 
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -162,7 +187,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * @see unimelb.distributed_algo_game.network.NetworkInterface#disconnect()
 	 */
 	public void disconnect() {
-		connectionState = ConnectionState.DISCONNECT;
+		connectionState = ConnectionState.DISCONNECTING;
 	}
 
 
@@ -173,13 +198,16 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * @param object
 	 *            the object
 	 */
-	public synchronized void sendData(Object object) {
+	public void sendMessage(Object mGameSendDataObject) {
 
-		if (object != null)
-			gameSendDataObject = object;
-		else {
-			System.out.println("Can't send null object");
-			throw new NullPointerException();
+		try {
+			if (mObjectOutputStream != null) {
+				System.out.println("Sending message from Server");
+				mObjectOutputStream.writeObject(mGameSendDataObject);
+			}
+		} catch (IOException ioe) {
+			// TODO Adding Error Handling
+			ioe.printStackTrace();
 		}
 
 	}
@@ -189,14 +217,27 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 *
 	 * @return the object
 	 */
-	public synchronized Object receiveData() {
+	/**
+	 * Receive message.
+	 */
+	public  Object receiveMessage() {
+		
+		Object message = null;
 
-		if (gameReveiceDataObject != null) {
-			return gameReveiceDataObject;
-		} else {
-			System.out.println("gameReveiceDataObject is null");
-			throw new NullPointerException();
+		try {
+			if (mObjectInputStream != null) {
+				message = mObjectInputStream.readObject();
+				//System.out.println(mGameReveiceDataObject);
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Adding Error Handling
+			e.printStackTrace();
+		} catch (IOException ioe) {
+			// TODO Adding Error Handling
+			ioe.printStackTrace();
 		}
+		
+		return message;
 
 	}
 
