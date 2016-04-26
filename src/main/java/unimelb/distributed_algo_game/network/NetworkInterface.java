@@ -18,9 +18,9 @@ public interface NetworkInterface {
 	public static final String GameServerName = "HighCard Game";
 
 	/**
-	 * The Enum ConnectionState.
+	 * The Enum ServerConnectionState.
 	 */
-	public enum ConnectionState {
+	public enum ServerConnectionState {
 		/** The connecting. */
 		INIT,
 		/** The connecting. */
@@ -30,8 +30,29 @@ public interface NetworkInterface {
 		/** The disconnecting. */
 		DISCONNECTING,
 		/** The disconnect. */
-		DISCONNECTED
+		DISCONNECTED,
+		/** Ack */
+		ACK
 	};
+	
+	/**
+	 * The Enum ClientConnectionState.
+	 */
+	public enum ClientConnectionState {
+		/** The connecting. */
+		INIT,
+		/** The connecting. */
+		CONNECTING,
+		/** The connected. */
+		CONNECTED,
+		/** The disconnecting. */
+		DISCONNECTING,
+		/** The disconnect. */
+		DISCONNECTED,
+		/** Ack */
+		ACK
+	};
+
 
 	/**
 	 * Connect.

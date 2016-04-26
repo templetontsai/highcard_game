@@ -37,7 +37,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private Object mLock;
 
 	/** The connection state. */
-	private ConnectionState mConnectionState;
+	private ServerConnectionState mConnectionState;
 
 	/** The m player client manager. */
 	private PlayerClientManager mPlayerClientManager;
@@ -47,7 +47,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	protected GameServer() {
 		mLock = new Object();
-		mConnectionState = ConnectionState.DISCONNECT;
+		mConnectionState = ServerConnectionState.DISCONNECTED;
 		mPlayerClientManager = new PlayerClientManager(10);
 	}
 
@@ -99,7 +99,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 			if (mServerSocket != null) {
 				System.out.println("Server Start, Waiting....");
 				synchronized (mLock) {
-					while (mConnectionState == ConnectionState.CONNECT) {
+					while (mConnectionState == ServerConnectionState.CONNECTED) {
 
 						mSocket = mServerSocket.accept();
 						PlayerClientThread t = new PlayerClientThread(mSocket, 1);
@@ -130,7 +130,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		try {
 
 			mServerSocket = new ServerSocket(NetworkInterface.PORT);
-			mConnectionState = ConnectionState.CONNECT;
+			mConnectionState = ServerConnectionState.CONNECTED;
 
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -146,7 +146,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * @see unimelb.distributed_algo_game.network.NetworkInterface#disconnect()
 	 */
 	public synchronized void disconnect() {
-		mConnectionState = ConnectionState.DISCONNECT;
+		mConnectionState = ServerConnectionState.DISCONNECTED;
 	}
 	
 	public void broadcastToClients(Object object) {

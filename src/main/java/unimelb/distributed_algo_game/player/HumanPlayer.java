@@ -81,7 +81,7 @@ public class HumanPlayer extends Player {
 			
 			this.setGameState(GameState.PLAY);
 			while(this.getGameState() == GameState.PLAY) {
-				Object obj = gameClient.receiveData();
+				Object obj = gameClient.receiveMessage();
 				if(obj != null) {
 					((Card)obj).showCard();
 					gameClient.disconnect();

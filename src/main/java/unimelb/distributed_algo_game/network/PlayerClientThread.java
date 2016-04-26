@@ -10,7 +10,7 @@ import java.net.Socket;
 
 import org.json.simple.JSONObject;
 
-import unimelb.distributed_algo_game.network.NetworkInterface.ConnectionState;
+import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -39,7 +39,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	private Object mLock = null;
 
 	/** The connection state. */
-	private ConnectionState connectionState = null;
+	private ClientConnectionState connectionState = null;
 
 	private JSONObject mMessage = null;
 
@@ -60,7 +60,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			throw new NullPointerException();
 		this.clientID = clientID;
 		mLock = new Object();
-		connectionState = ConnectionState.DISCONNECTED;
+		connectionState = ClientConnectionState.DISCONNECTED;
 		mMessage = new JSONObject();
 	}
 
@@ -82,26 +82,28 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		
 		JSONObject m;
 		String body;
-		ConnectionState clientConnectionState;
+		ClientConnectionState clientConnectionState;
 		
 		while (isRunning) {
 			
 			m = (JSONObject) receiveMessage();
 			
 			if(m != null) {
-				connectionState = (ConnectionState) m.get("header");
+				clientConnectionState = (ClientConnectionState) m.get("header");
 
-				switch (connectionState) {
+				switch (clientConnectionState) {
 				
 				case CONNECTING:
 				case CONNECTED:
-					body = "Connected Successful";
+					System.out.println("connected from client");
+					body = "Connected Successful, ACK";
 					mMessage.put("header", connectionState);
 					mMessage.put("body", body);
 					sendMessage(mMessage);
 					break;
 				case DISCONNECTING:
 				case DISCONNECTED:
+					System.out.println("disconnected from client");
 					body = "hi from server";
 					mMessage.put("header", connectionState);
 					mMessage.put("body", body);

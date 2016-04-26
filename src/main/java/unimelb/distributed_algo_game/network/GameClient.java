@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.json.simple.JSONObject;
 
-import unimelb.distributed_algo_game.network.NetworkInterface.ConnectionState;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
 
@@ -52,7 +51,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 	private Object mLock;
 
 	/** The connection state. */
-	private ConnectionState connectionState;
+	private ClientConnectionState clientConnectionState;
+	
+	/** The connection state. */
+	private ServerConnectionState serverConnectionState;
 	
 	private JSONObject mMessage = null;
 	
@@ -63,7 +65,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 */
 	protected GameClient() {
 		mLock = new Object();
-		connectionState = ConnectionState.DISCONNECTED;
+		clientConnectionState = ClientConnectionState.DISCONNECTED;
 	}
 
 	/**
@@ -114,17 +116,27 @@ public final class GameClient implements Runnable, NetworkInterface {
 					
 					m = (JSONObject) receiveMessage();
 					if(m != null) {
-						connectionState = (ConnectionState) m.get("header");
+						serverConnectionState = (ServerConnectionState) m.get("header");
 
-						switch (connectionState) {
+						switch (clientConnectionState) {
 						
 						case CONNECTING:
 						case CONNECTED:
-							System.out.println(((String)m.get("body")));
-							body = "Ack from client";
-							mMessage.put("header", connectionState);
-							mMessage.put("body", body);
-							sendMessage(mMessage);
+							if(serverConnectionState != null) {
+								switch(serverConnectionState) {
+								
+								case ACK:
+									System.out.println(((String)m.get("body")));
+									body = "Ack from client";
+									mMessage.put("header", connectionState);
+									mMessage.put("body", body);
+									sendMessage(mMessage);
+									break;
+								
+								}
+							}
+						
+					
 							break;
 						case DISCONNECTING:
 						case DISCONNECTED:
@@ -170,7 +182,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		try {
 
 			mSocket = new Socket("localhost", NetworkInterface.PORT);
-			connectionState = ConnectionState.CONNECTING;
+			clientConnectionState = ClientConnectionState.CONNECTING;
 
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -187,7 +199,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * @see unimelb.distributed_algo_game.network.NetworkInterface#disconnect()
 	 */
 	public void disconnect() {
-		connectionState = ConnectionState.DISCONNECTING;
+		clientConnectionState = ClientConnectionState.DISCONNECTING;
 	}
 
 
