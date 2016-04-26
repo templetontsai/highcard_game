@@ -127,10 +127,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 								
 								case ACK:
 									System.out.println(((String)m.get("body")));
-									body = "Ack from client";
-									mMessage.put("header", connectionState);
-									mMessage.put("body", body);
-									sendMessage(mMessage);
+									body = "Ack from Server";
+									//mMessage.put("header", clientConnectionState);
+									//mMessage.put("body", body);
+									//sendMessage(mMessage);
 									break;
 								
 								}
@@ -141,8 +141,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 						case DISCONNECTING:
 						case DISCONNECTED:
 							body = "hi from server";
-							mMessage.put("header", connectionState);
-							mMessage.put("body", body);
+							//mMessage.put("header", connectionState);
+							//mMessage.put("body", body);
 							isRunning = false;
 							break;
 						default:
