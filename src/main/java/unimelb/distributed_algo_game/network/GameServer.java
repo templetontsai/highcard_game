@@ -4,9 +4,14 @@
 package unimelb.distributed_algo_game.network;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.json.simple.JSONObject;
+
+import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
@@ -41,6 +46,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	/** The m player client manager. */
 	private PlayerClientManager mPlayerClientManager;
+	
+
+
 
 	/**
 	 * Instantiates a new game server.
@@ -72,6 +80,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
+			mPlayerClientManager.setPlayer(this.mPlayer);
 		} else {
 			System.out.println("Player can't be null");
 			throw new NullPointerException();
@@ -95,29 +104,82 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		try {
-			if (mServerSocket != null) {
-				System.out.println("Server Start, Waiting....");
-				synchronized (mLock) {
-					while (mConnectionState == ServerConnectionState.CONNECTED) {
+		
+		
+		if (mPlayer.isDealer()) {
+			
+			try {
+				runLeaderState();
+			} catch (IOException ioe) {
+				// TODO Adding error handling
+				ioe.printStackTrace();
 
-						mSocket = mServerSocket.accept();
-						PlayerClientThread t = new PlayerClientThread(mSocket, 1);
-						mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
-						t.start();
-					}
+			} finally {
 
-					mServerSocket.close();
-				}
+				System.out.println("Connection Closed");
 			}
-		} catch (IOException ioe) {
-			// TODO Adding error handling
-			ioe.printStackTrace();
 
-		} finally {
+			
+			
+			
+		} else {
+			try {
+				runSlaveState();
+			} catch (IOException ioe) {
+				// TODO Adding error handling
+				ioe.printStackTrace();
 
-			System.out.println("Connection Closed");
+			} finally {
+
+				System.out.println("Connection Closed");
+			}
+			
 		}
+		
+	}
+	
+	private void runLeaderState() throws IOException {
+		
+		if (mServerSocket != null) {
+			System.out.println("Server Start, Waiting....");
+			synchronized (mLock) {
+				while (mConnectionState == ServerConnectionState.CONNECTED) {
+
+					mSocket = mServerSocket.accept();
+					PlayerClientThread t = new PlayerClientThread(mSocket, 1);
+					mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
+					t.start();
+				}
+
+				mServerSocket.close();
+			}
+		}
+		
+		
+
+	}
+	
+	private void runSlaveState() throws IOException {
+		//TODO slavestate for a cue to work
+		/*
+		mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
+		mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
+		isRunning = true;
+		
+		if (mServerSocket != null) {
+			System.out.println("Server Start, Waiting....");
+			synchronized (mLock) {
+				while (mConnectionState == ServerConnectionState.CONNECTED) {
+
+					mSocket = mServerSocket.accept();
+					PlayerClientThread t = new PlayerClientThread(mSocket, 1);
+					mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
+					t.start();
+				}
+
+				mServerSocket.close();
+			}
+		}*/
 	}
 
 	/*
@@ -150,11 +212,11 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 	
 	public void broadcastToClients(Object object) {
-		mPlayerClientManager.notifyAllClients(object, mConnectionState);
+		mPlayerClientManager.notifyAllClients(object, mConnectionState, MessageType.BCT);
 	}
 	
 	public void sendCard(Card card, int id) {
-		mPlayerClientManager.sendMessageToClient(card, id, mConnectionState);
+		mPlayerClientManager.sendMessageToClient(card, id, mConnectionState, MessageType.CRD);
 	}
 	
 

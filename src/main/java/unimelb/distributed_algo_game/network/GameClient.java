@@ -52,12 +52,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/** The connection state. */
 	private ClientConnectionState clientConnectionState;
-	
+
 	/** The connection state. */
 	private ServerConnectionState serverConnectionState;
-	
+
 	private JSONObject mMessage = null;
-	
+
 	private boolean isRunning = false;
 
 	/**
@@ -109,54 +109,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 				mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 				mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 				isRunning = true;
-				JSONObject m;
-				String body;
 
 				while (isRunning) {
-					
-					m = (JSONObject) receiveMessage();
-					if(m != null) {
-						serverConnectionState = (ServerConnectionState) m.get("header");
 
-						switch (clientConnectionState) {
-						
-						case CONNECTING:
-						case CONNECTED:
-							if(serverConnectionState != null) {
-								switch(serverConnectionState) {
-								
-								case ACK:
-									System.out.println(((String)m.get("body")));
-									body = "Ack from Server";
-									//mMessage.put("header", clientConnectionState);
-									//mMessage.put("body", body);
-									//sendMessage(mMessage);
-									break;
-								
-								}
-							}
-						
-					
-							break;
-						case DISCONNECTING:
-						case DISCONNECTED:
-							body = "hi from server";
-							//mMessage.put("header", connectionState);
-							//mMessage.put("body", body);
-							isRunning = false;
-							break;
-						default:
-							System.out.println("Uknown State");
-							break;
-
-						}
+					if (mPlayer.isDealer()) {
+						runLeaderState();
+					} else {
+						runSlaveState();
 					}
-					
-				
-					
+
 					Thread.sleep(100);
-	
 				}
+
 				System.out.println("conection closing...");
 				mObjectOutputStream.close();
 				mObjectInputStream.close();
@@ -170,6 +134,85 @@ public final class GameClient implements Runnable, NetworkInterface {
 			}
 
 		}
+	}
+
+	private void runSlaveState() throws IOException {
+		//TODO here
+		JSONObject m = new JSONObject();
+		String body = "";
+
+		switch (clientConnectionState) {
+
+		case CONNECTING:
+		case CONNECTED:
+			if (serverConnectionState != null) {
+				switch (serverConnectionState) {
+
+				case ACK:
+					System.out.println(((String) m.get("body")));
+					body = "Ack from Server";
+					// mMessage.put("header",
+					// clientConnectionState);
+					// mMessage.put("body", body);
+					// sendMessage(mMessage);
+					break;
+
+				}
+			}
+
+			break;
+		case DISCONNECTING:
+		case DISCONNECTED:
+			body = "hi from server";
+			// mMessage.put("header", connectionState);
+			// mMessage.put("body", body);
+			isRunning = false;
+			break;
+		default:
+			System.out.println("Uknown State");
+			break;
+
+		}
+	}
+
+	private void runLeaderState() throws IOException {
+		//TODO here
+		JSONObject m = new JSONObject();
+		String body = "";
+
+		switch (clientConnectionState) {
+
+		case CONNECTING:
+		case CONNECTED:
+			if (serverConnectionState != null) {
+				switch (serverConnectionState) {
+
+				case ACK:
+					System.out.println(((String) m.get("body")));
+					body = "Ack from Server";
+					// mMessage.put("header",
+					// clientConnectionState);
+					// mMessage.put("body", body);
+					// sendMessage(mMessage);
+					break;
+
+				}
+			}
+
+			break;
+		case DISCONNECTING:
+		case DISCONNECTED:
+			body = "hi from server";
+			// mMessage.put("header", connectionState);
+			// mMessage.put("body", body);
+			isRunning = false;
+			break;
+		default:
+			System.out.println("Uknown State");
+			break;
+
+		}
+
 	}
 
 	/*
@@ -202,8 +245,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 		clientConnectionState = ClientConnectionState.DISCONNECTING;
 	}
 
-
-
 	/**
 	 * Send data.
 	 *
@@ -216,6 +257,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			if (mObjectOutputStream != null) {
 				System.out.println("Sending message from Server");
 				mObjectOutputStream.writeObject(mGameSendDataObject);
+				mObjectOutputStream.flush();
 			}
 		} catch (IOException ioe) {
 			// TODO Adding Error Handling
@@ -232,14 +274,14 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/**
 	 * Receive message.
 	 */
-	public  Object receiveMessage() {
-		
+	public Object receiveMessage() {
+
 		Object message = null;
 
 		try {
 			if (mObjectInputStream != null) {
 				message = mObjectInputStream.readObject();
-				System.out.println("Message is "+message);
+				// System.out.println("Message is "+message);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Adding Error Handling
@@ -248,7 +290,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			// TODO Adding Error Handling
 			ioe.printStackTrace();
 		}
-		System.out.println("Client Received "+message);
+		// System.out.println("Client Received "+message);
 		return message;
 
 	}

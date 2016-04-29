@@ -10,7 +10,9 @@ import java.net.Socket;
 
 import org.json.simple.JSONObject;
 
+import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -39,7 +41,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	private Object mLock = null;
 
 	/** The connection state. */
-	private ClientConnectionState connectionState = null;
+	private ServerConnectionState serverConnectionState = null;
 
 	private JSONObject mMessage = null;
 
@@ -60,7 +62,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			throw new NullPointerException();
 		this.clientID = clientID;
 		mLock = new Object();
-		connectionState = ClientConnectionState.DISCONNECTED;
+		serverConnectionState = ServerConnectionState.DISCONNECTED;
 		mMessage = new JSONObject();
 	}
 
@@ -81,38 +83,30 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		}
 		
 		JSONObject m;
-		BodyMessageJSON bodyMessage;
+		BodyMessage bodyMessage;
 		ClientConnectionState clientConnectionState;
 		
 		while (isRunning) {
-			Object mess = receiveMessage();
-			m = null;
-			if(mess!=null)
-			   if(mess.getClass().equals(JSONObject.class))
-			      m = (JSONObject) mess;
+			
+			m = (JSONObject)receiveMessage();
+			
 			   
 			
 			if(m != null) {
 				clientConnectionState = (ClientConnectionState) m.get("header");
+				bodyMessage = (BodyMessage)m.get("body");
 
 				switch (clientConnectionState) {
 				
 				case CONNECTING:
 				case CONNECTED:
 					System.out.println("connected from client");
-					
-					bodyMessage = new BodyMessageJSON(0, "ACK", "Connected Successful, ACK");
-					mMessage.put("header", connectionState);
-					mMessage.put("body", bodyMessage);
-					sendMessage(mMessage);
+					checkMessageType(bodyMessage);
 					break;
 				case DISCONNECTING:
 				case DISCONNECTED:
 					System.out.println("disconnected from client");
-					bodyMessage = new BodyMessageJSON(0, "DSC", "hi from server");
-					mMessage.put("header", connectionState);
-					mMessage.put("body", bodyMessage);
-					sendMessage(mMessage);
+					
 					isRunning = false;
 					break;
 				default:
@@ -135,6 +129,30 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			ioe.printStackTrace();
 		}
 	}
+	
+	private void checkMessageType(BodyMessage mBodyMessage) {
+		MessageType messagType = mBodyMessage.getMessageType();
+		switch(messagType) {
+		case ACK:
+			System.out.println(mBodyMessage.getMessage());
+			break;
+		case CRD:
+			ClientConnectionState connectionState = ClientConnectionState.CONNECTED;
+			//TODO get card
+			mBodyMessage = new BodyMessage(this.clientID, MessageType.CRD, "card");
+			mMessage.put("header", connectionState);
+			mMessage.put("body", mBodyMessage);
+			sendMessage(mMessage);
+			break;
+		case BCT:
+			System.out.println(mBodyMessage.getMessage());
+			break;
+		case DSC:
+			System.out.println(mBodyMessage.getMessage());
+			break;
+		
+		}
+	}
 
 	/**
 	 * Send message.
@@ -142,12 +160,13 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @param mGameSendDataObject
 	 *            the m game send data object
 	 */
-	public void sendMessage(Object mGameSendDataObject) {
+	public synchronized void sendMessage(Object mGameSendDataObject) {
 
 		try {
 			if (mObjectOutputStream != null) {
 				System.out.println("Sending message from Server");
 				mObjectOutputStream.writeObject(mGameSendDataObject);
+				mObjectOutputStream.flush();
 			}
 		} catch (IOException ioe) {
 			// TODO Adding Error Handling
@@ -159,7 +178,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/**
 	 * Receive message.
 	 */
-	public Object receiveMessage() {
+	public synchronized Object receiveMessage() {
 		
 		Object message = null;
 

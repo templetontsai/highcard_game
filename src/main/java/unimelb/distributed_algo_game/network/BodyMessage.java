@@ -7,15 +7,39 @@ import java.io.Serializable;
  * @author Lupiya
  *This class is generic type to carry JSON data in messages
  */
-public class BodyMessageJSON implements Serializable{
-	int clientID;
-	String messageType;
-	Object message;
+public class BodyMessage implements Serializable{
+	private int clientID;
+	private MessageType messageType;
+	private Object message;
+	
+	public enum MessageType {
+		ACK(0),
+		BCT(1),
+		CRD(2),
+		DSC(3);
+		
+		/** The code. */
+		private int code;
+
+		
+		private MessageType(int c) {
+			code = c;
+		}
+
+		/**
+		 * Gets the code.
+		 *
+		 * @return the code
+		 */
+		public int getCode() {
+			return code;
+		}
+	}
 	
 	/**
 	 * Main constructor for this class
 	 */
-	public BodyMessageJSON(int clientID, String messageType, Object message){
+	public BodyMessage(int clientID, MessageType messageType, Object message){
 		this.clientID = clientID;
 		this.messageType = messageType;
 		this.message = message;
@@ -29,7 +53,7 @@ public class BodyMessageJSON implements Serializable{
 	/**
 	 * Returns the message type
 	 */
-	public String getMessageType(){ return messageType; }
+	public MessageType getMessageType(){ return messageType; }
 	
 	/**
 	 * Returns the generic message
@@ -46,7 +70,7 @@ public class BodyMessageJSON implements Serializable{
 	/**
 	 * Sets the message type
 	 */
-	public void setMessageType(String messageType){
+	public void setMessageType(MessageType messageType){
 		this.messageType = messageType;
 	}
 	

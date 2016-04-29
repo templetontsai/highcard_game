@@ -11,7 +11,9 @@ import javax.swing.text.html.HTMLDocument.Iterator;
 
 import org.json.simple.JSONObject;
 
+import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
+import unimelb.distributed_algo_game.player.Player;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -21,6 +23,8 @@ public final class PlayerClientManager {
 
 	/** The playe client list. */
 	private Map<Integer, PlayerClientThread> playerClientList = null;
+	/** The m player. */
+	private Player mPlayer = null;
 
 	/**
 	 * Instantiates a new player client manager.
@@ -30,6 +34,11 @@ public final class PlayerClientManager {
 	 */
 	public PlayerClientManager(int playerClientNum) {
 		playerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
+		
+	}
+	
+	public void setPlayer(Player mPlayer) {
+		this.mPlayer = mPlayer;
 	}
 
 	/**
@@ -38,7 +47,7 @@ public final class PlayerClientManager {
 	 * @param clientThread
 	 *            the client thread
 	 */
-	public void addClient(int clientID,PlayerClientThread clientThread) {
+	public void addClient(int clientID, PlayerClientThread clientThread) {
 		playerClientList.put(clientID, clientThread);
 	}
 
@@ -55,24 +64,25 @@ public final class PlayerClientManager {
 	/**
 	 * Notify all clients.
 	 */
-	public void notifyAllClients(Object object, ServerConnectionState mConnectionState) {
+	public void notifyAllClients(Object object, ServerConnectionState mConnectionState, MessageType messageType) {
 		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
-			   BodyMessageJSON bodyMessage = new BodyMessageJSON(t.getKey(), "BCT", object);
-			   mMessage.put("header", mConnectionState);
-			   mMessage.put("body", bodyMessage);
+			BodyMessage bodyMessage = new BodyMessage(t.getKey(), messageType, object);
+			mMessage.put("header", mConnectionState);
+			mMessage.put("body", bodyMessage);
 			t.getValue().sendMessage(mMessage);
 		}
 	}
-	
-	public void sendMessageToClient(Object message, int clientID,ServerConnectionState mConnectionState) {
-		//System.out.println("Message: "+message+" ID: "+clientID);
-		if(playerClientList.size()>0){
-		   JSONObject mMessage = new JSONObject();
-		   BodyMessageJSON bodyMessage = new BodyMessageJSON(clientID, "CRD", message);
-		   mMessage.put("header", mConnectionState);
-		   mMessage.put("body", bodyMessage);
-		   playerClientList.get(clientID).sendMessage(mMessage);
+
+	public void sendMessageToClient(Object message, int clientID, ServerConnectionState mConnectionState,
+			MessageType messageType) {
+		// System.out.println("Message: "+message+" ID: "+clientID);
+		if (playerClientList.size() > 0) {
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = new BodyMessage(clientID, messageType, message);
+			mMessage.put("header", mConnectionState);
+			mMessage.put("body", bodyMessage);
+			playerClientList.get(clientID).sendMessage(mMessage);
 		}
 	}
 

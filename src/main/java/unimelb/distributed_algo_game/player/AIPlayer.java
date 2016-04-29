@@ -50,29 +50,27 @@ public class AIPlayer extends Player {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (this.isDealer()) {
-
-			gameServer.setPlayer(this);
-			gameServerThread = new Thread(gameServer);
-			gameServer.connect();
-			gameServerThread.start();
-
-		} else {
-
-			gameClient.setPlayer(this);
-			gameClientThread = new Thread(gameClient);
-			gameClient.connect();
-			gameClientThread.start();
-			
-			this.setGameState(GameState.PLAY);
-			while(this.getGameState() == GameState.PLAY) {
-				Object obj = gameClient.receiveMessage();
-				if(obj != null) {
-					((Card)obj).showCard();
-					System.out.println("Client received: "+((Card)obj).gethandRank());
-					gameClient.disconnect();
-					this.setGameState(GameState.LEAVE);
-				}
+		gameServer.setPlayer(this);
+		gameServerThread = new Thread(gameServer);
+		gameServer.connect();
+		gameServerThread.start();
+		
+		gameClient.setPlayer(this);
+		gameClientThread = new Thread(gameClient);
+		gameClient.connect();
+		gameClientThread.start();
+		
+		this.setGameState(GameState.PLAY);
+		while(this.getGameState() == GameState.PLAY) {
+			if (this.isDealer()) {
+				//TODO do dealer stuff here, checking connection, updating stuff
+				System.out.println("dealer/node0 is playing game");
+				//Card card = this.getCard(1);
+				//gameServer.sendCard(card, 1);
+			} else {
+				//TODO do client stuff here, checking connection, updating stuff
+				System.out.println("client is playing game");
+				
 			}
 
 		}
