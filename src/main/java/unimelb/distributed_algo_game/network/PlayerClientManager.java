@@ -55,9 +55,13 @@ public final class PlayerClientManager {
 	/**
 	 * Notify all clients.
 	 */
-	public void notifyAllClients(Object object) {
+	public void notifyAllClients(Object object, ServerConnectionState mConnectionState) {
 		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
-			t.getValue().sendMessage(object);
+			JSONObject mMessage = new JSONObject();
+			   BodyMessageJSON bodyMessage = new BodyMessageJSON(t.getKey(), "CRD", object);
+			   mMessage.put("header", mConnectionState);
+			   mMessage.put("body", bodyMessage);
+			t.getValue().sendMessage(mMessage);
 		}
 	}
 	

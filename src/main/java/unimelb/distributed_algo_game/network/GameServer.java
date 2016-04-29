@@ -150,7 +150,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 	
 	public void broadcastToClients(Object object) {
-		mPlayerClientManager.notifyAllClients(object);
+		mPlayerClientManager.notifyAllClients(object, mConnectionState);
 	}
 	
 	public void sendCard(Card card, int id) {

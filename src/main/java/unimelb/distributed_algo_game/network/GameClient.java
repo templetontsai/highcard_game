@@ -239,7 +239,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		try {
 			if (mObjectInputStream != null) {
 				message = mObjectInputStream.readObject();
-				//System.out.println(mGameReveiceDataObject);
+				System.out.println("Message is "+message);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Adding Error Handling
