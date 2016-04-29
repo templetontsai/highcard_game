@@ -23,10 +23,6 @@ import unimelb.distributed_algo_game.state.GameState;
  */
 public abstract class Player implements Serializable, Runnable, NetworkObserver {
 
-	/** The cards. */
-	// Initialize the variables to be used in the game
-	private ArrayList<Card> cards = new ArrayList<Card>(52);
-
 	/** The selected card. */
 	private Card selectedCard = null;
 
@@ -111,19 +107,6 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	}
 
 	/**
-	 * Returns the cards randomly selected by the player.
-	 *
-	 * @param cards
-	 *            the new cards
-	 */
-	public void setCards(ArrayList<Card> cards) {
-		if (cards != null)
-			this.cards = cards;
-		else
-			throw new NullPointerException();
-	}
-
-	/**
 	 * Sets the card the user selected from the deck.
 	 *
 	 * @param card
@@ -141,21 +124,6 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	 */
 	public void showCard(int option) {
 		System.out.println("You selected " + selectedCard.getCardRank() + "," + selectedCard.getPattern());
-	}
-
-	/**
-	 * Prints out the cards randomly selected for the user.
-	 *
-	 * @return the array list
-	 */
-	public ArrayList<Card> showHand() {
-		if (this.cards != null) {
-			for (Card card : cards) {
-				System.out.println(card.getCardRank().getCode() + "," + card.getPattern());
-			}
-			return cards;
-		} else
-			throw new NullPointerException();
 	}
 
 	public void setDealer(boolean isDealer) {
