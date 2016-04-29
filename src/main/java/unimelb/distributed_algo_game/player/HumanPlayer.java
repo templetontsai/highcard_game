@@ -88,7 +88,6 @@ public class HumanPlayer extends Player {
 					this.setGameState(GameState.LEAVE);
 				}
 			}
-
 		}
 	
 

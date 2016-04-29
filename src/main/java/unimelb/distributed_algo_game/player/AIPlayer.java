@@ -69,6 +69,7 @@ public class AIPlayer extends Player {
 				Object obj = gameClient.receiveMessage();
 				if(obj != null) {
 					((Card)obj).showCard();
+					System.out.println("Client received: "+((Card)obj).gethandRank());
 					gameClient.disconnect();
 					this.setGameState(GameState.LEAVE);
 				}

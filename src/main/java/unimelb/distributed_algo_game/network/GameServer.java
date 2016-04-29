@@ -154,7 +154,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 	
 	public void sendCard(Card card, int id) {
-		mPlayerClientManager.sendMessageToClient(card, id);
+		mPlayerClientManager.sendMessageToClient(card, id, mConnectionState);
 	}
 	
 

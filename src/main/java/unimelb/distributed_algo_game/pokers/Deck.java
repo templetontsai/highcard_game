@@ -77,7 +77,7 @@ public final class Deck {
 	public Card getCard(int cardIndex) {
 		
 			Card card = deck.get(cardIndex);
-			deck.remove(cardIndex);
+			//deck.remove(cardIndex);
 		
 		return card;
 	}

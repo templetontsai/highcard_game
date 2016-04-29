@@ -81,12 +81,16 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		}
 		
 		JSONObject m;
-		String body;
+		BodyMessageJSON bodyMessage;
 		ClientConnectionState clientConnectionState;
 		
 		while (isRunning) {
-			
-			m = (JSONObject) receiveMessage();
+			Object mess = receiveMessage();
+			m = null;
+			if(mess!=null)
+			   if(mess.getClass().equals(JSONObject.class))
+			      m = (JSONObject) mess;
+			   
 			
 			if(m != null) {
 				clientConnectionState = (ClientConnectionState) m.get("header");
@@ -96,17 +100,19 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 				case CONNECTING:
 				case CONNECTED:
 					System.out.println("connected from client");
-					body = "Connected Successful, ACK";
+					
+					bodyMessage = new BodyMessageJSON(0, "ACK", "Connected Successful, ACK");
 					mMessage.put("header", connectionState);
-					mMessage.put("body", body);
+					mMessage.put("body", bodyMessage);
 					sendMessage(mMessage);
 					break;
 				case DISCONNECTING:
 				case DISCONNECTED:
 					System.out.println("disconnected from client");
-					body = "hi from server";
+					bodyMessage = new BodyMessageJSON(0, "DSC", "hi from server");
 					mMessage.put("header", connectionState);
-					mMessage.put("body", body);
+					mMessage.put("body", bodyMessage);
+					sendMessage(mMessage);
 					isRunning = false;
 					break;
 				default:

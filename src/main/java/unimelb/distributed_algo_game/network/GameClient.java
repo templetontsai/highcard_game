@@ -248,7 +248,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			// TODO Adding Error Handling
 			ioe.printStackTrace();
 		}
-		
+		System.out.println("Client Received "+message);
 		return message;
 
 	}

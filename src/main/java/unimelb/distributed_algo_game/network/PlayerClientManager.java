@@ -5,6 +5,13 @@ package unimelb.distributed_algo_game.network;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
+
+import org.json.simple.JSONObject;
+
+import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -54,8 +61,15 @@ public final class PlayerClientManager {
 		}
 	}
 	
-	public void sendMessageToClient(Object mesasge, int clientID) {
-		playerClientList.get(clientID).sendMessage(mesasge);
+	public void sendMessageToClient(Object message, int clientID,ServerConnectionState mConnectionState) {
+		//System.out.println("Message: "+message+" ID: "+clientID);
+		if(playerClientList.size()>0){
+		   JSONObject mMessage = new JSONObject();
+		   BodyMessageJSON bodyMessage = new BodyMessageJSON(clientID, "CRD", message);
+		   mMessage.put("header", mConnectionState);
+		   mMessage.put("body", bodyMessage);
+		   playerClientList.get(clientID).sendMessage(mMessage);
+		}
 	}
 
 }
