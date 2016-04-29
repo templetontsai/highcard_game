@@ -58,7 +58,7 @@ public final class PlayerClientManager {
 	public void notifyAllClients(Object object, ServerConnectionState mConnectionState) {
 		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
-			   BodyMessageJSON bodyMessage = new BodyMessageJSON(t.getKey(), "CRD", object);
+			   BodyMessageJSON bodyMessage = new BodyMessageJSON(t.getKey(), "BCT", object);
 			   mMessage.put("header", mConnectionState);
 			   mMessage.put("body", bodyMessage);
 			t.getValue().sendMessage(mMessage);
