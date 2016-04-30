@@ -43,7 +43,7 @@ public final class PlayerClientManager {
 
 	/**
 	 * Adds the client.
-	 *
+	 *l
 	 * @param clientThread
 	 *            the client thread
 	 */
@@ -85,5 +85,6 @@ public final class PlayerClientManager {
 			playerClientList.get(clientID).sendMessage(mMessage);
 		}
 	}
+	
 
 }

@@ -47,6 +47,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 	private boolean isRunning = false;
 
+	private GameServer mGameServer = null;
 	/**
 	 * Instantiates a new player client thread.
 	 *
@@ -55,7 +56,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @param clientID
 	 *            the client id
 	 */
-	public PlayerClientThread(Socket mSocket, int clientID) {
+	public PlayerClientThread(Socket mSocket, int clientID, GameServer mGameServer) {
 		if (mSocket != null) {
 			this.mSocket = mSocket;
 		} else
@@ -64,6 +65,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		mLock = new Object();
 		serverConnectionState = ServerConnectionState.DISCONNECTED;
 		mMessage = new JSONObject();
+		this.mGameServer = mGameServer;
 	}
 
 	/*
@@ -138,8 +140,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			break;
 		case CRD:
 			ClientConnectionState connectionState = ClientConnectionState.CONNECTED;
-			//TODO get card
-			mBodyMessage = new BodyMessage(this.clientID, MessageType.CRD, "card");
+			//Player specifies the card to 
+			mBodyMessage = new BodyMessage(this.clientID, MessageType.CRD, mGameServer.getCard(1));
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);
 			sendMessage(mMessage);

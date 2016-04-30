@@ -146,7 +146,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 				while (mConnectionState == ServerConnectionState.CONNECTED) {
 
 					mSocket = mServerSocket.accept();
-					PlayerClientThread t = new PlayerClientThread(mSocket, 1);
+					PlayerClientThread t = new PlayerClientThread(mSocket, 1, this);
 					mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
 					t.start();
 				}
@@ -217,6 +217,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 	
 	public void sendCard(Card card, int id) {
 		mPlayerClientManager.sendMessageToClient(card, id, mConnectionState, MessageType.CRD);
+	}
+	
+	public synchronized Card getCard(int index){
+		return mPlayer.getCard(index);
 	}
 	
 
