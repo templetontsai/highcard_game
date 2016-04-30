@@ -43,10 +43,13 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/** The connection state. */
 	private ServerConnectionState serverConnectionState = null;
 
+	/** The JSON body message */
 	private JSONObject mMessage = null;
 
+	/** The boolean for running the client thread */
 	private boolean isRunning = false;
 
+	/** The game server object */
 	private GameServer mGameServer = null;
 	/**
 	 * Instantiates a new player client thread.
@@ -68,16 +71,15 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		this.mGameServer = mGameServer;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#run()
+	/**
+	 * Runs the main method of the client thread
 	 */
 	public void run() {
 
 		
 		isRunning = true;
 		try {
+			//Receives input and sends message using server socket
 			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 		} catch (IOException ioe) {
@@ -88,18 +90,22 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		BodyMessage bodyMessage;
 		ClientConnectionState clientConnectionState;
 		
+		//Main loop to run the client thread
 		while (isRunning) {
 			
+			//Receive JSON message object from server
 			m = (JSONObject)receiveMessage();
 			
 			   
-			
+			//Only process the message if it's not null
 			if(m != null) {
+				//Get the client connection state and body from the message
 				clientConnectionState = (ClientConnectionState) m.get("header");
 				bodyMessage = (BodyMessage)m.get("body");
 
 				switch (clientConnectionState) {
 				
+				//Process the message based on the connection state
 				case CONNECTING:
 				case CONNECTED:
 					System.out.println("connected from client");
@@ -121,23 +127,31 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			
 		}
 
+		//Close the input and output streams to the server
 		try {
 			mObjectInputStream.close();
 			mObjectOutputStream.close();
 			mSocket.close();
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
-			// TODO Adding Error Handling
+			//Print out the details of the exception error
 			ioe.printStackTrace();
 		}
 	}
 	
+	/**
+	 * This method checks the type of JSON body message and carries out the 
+	 * necessary action for each message type
+	 * @param mBodyMessage
+	 */
 	private void checkMessageType(BodyMessage mBodyMessage) {
 		MessageType messagType = mBodyMessage.getMessageType();
 		switch(messagType) {
+		//Used to acknowledge the server is still alive
 		case ACK:
 			System.out.println(mBodyMessage.getMessage());
 			break;
+		//Used to send a card to the client after receiving a request message
 		case CRD:
 			ClientConnectionState connectionState = ClientConnectionState.CONNECTED;
 			//Player specifies the card to 
@@ -146,9 +160,11 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			mMessage.put("body", mBodyMessage);
 			sendMessage(mMessage);
 			break;
+		//Used to send send a broadcast message
 		case BCT:
 			System.out.println(mBodyMessage.getMessage());
 			break;
+	    //Used to send a disconnect message
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
 			break;
@@ -157,7 +173,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	}
 
 	/**
-	 * Send message.
+	 * Sends message to a client.
 	 *
 	 * @param mGameSendDataObject
 	 *            the m game send data object
@@ -171,14 +187,14 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 				mObjectOutputStream.flush();
 			}
 		} catch (IOException ioe) {
-			// TODO Adding Error Handling
+			//Print out the details of the exception error
 			ioe.printStackTrace();
 		}
 
 	}
 
 	/**
-	 * Receive message.
+	 * Receive message from the client.
 	 */
 	public synchronized Object receiveMessage() {
 		
@@ -190,10 +206,10 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 				//System.out.println(mGameReveiceDataObject);
 			}
 		} catch (ClassNotFoundException e) {
-			// TODO Adding Error Handling
+			//Print out the details of the exception error
 			e.printStackTrace();
 		} catch (IOException ioe) {
-			// TODO Adding Error Handling
+			//Print out the details of the exception error
 			ioe.printStackTrace();
 		}
 		
@@ -201,10 +217,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see unimelb.distributed_algo_game.network.ClientNetworkObserver#update()
+	/**
+	 * Used to send an update message
 	 */
 	public void update() {
 		// sendMessage("Game );

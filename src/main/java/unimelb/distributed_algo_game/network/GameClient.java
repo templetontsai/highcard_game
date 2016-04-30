@@ -56,8 +56,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** The connection state. */
 	private ServerConnectionState serverConnectionState;
 
+	/**The JSON Message object to be sent. */
 	private JSONObject mMessage = null;
 
+	/** The boolean for the client thread */
 	private boolean isRunning = false;
 
 	/**
@@ -97,21 +99,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
+	 * Runs the thread for the game client
 	 */
 	public void run() {
 
 		if (mSocket != null) {
 
 			try {
+				/** Read input stream from the server and write output stream to the server */
 				mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 				mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 				isRunning = true;
 
+				/** Main while loop for the thread */
 				while (isRunning) {
-
+					/** Distinguish the function of the leader in game client and slave to the server */
 					if (mPlayer.isDealer()) {
 						runLeaderState();
 					} else {
@@ -120,7 +122,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 					Thread.sleep(100);
 				}
-
+				
+				/** Close socket connection and data streams once the main thread is no longer running */
 				System.out.println("conection closing...");
 				mObjectOutputStream.close();
 				mObjectInputStream.close();
@@ -136,8 +139,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
+	/** This runs the game client as a slave to the server */
 	private void runSlaveState() throws IOException {
-		//TODO here
+		//Read the JSON message from the client to determine the action to take
 		JSONObject m = new JSONObject();
 		String body = "";
 
@@ -145,9 +149,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		case CONNECTING:
 		case CONNECTED:
+			//Ensure that the server is still running the game
 			if (serverConnectionState != null) {
 				switch (serverConnectionState) {
 
+				//Acknowledgement that the server is still alive
 				case ACK:
 					System.out.println(((String) m.get("body")));
 					body = "Ack from Server";
@@ -162,6 +168,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			break;
 		case DISCONNECTING:
+		//Stop running the thread if the server disconnects from the client
 		case DISCONNECTED:
 			body = "hi from server";
 			// mMessage.put("header", connectionState);
@@ -175,8 +182,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
+	/** Runs the game client as the leader of the game */
 	private void runLeaderState() throws IOException {
-		//TODO here
+		//Reads the JSON object to determine the action of the message
 		JSONObject m = new JSONObject();
 		String body = "";
 
@@ -184,9 +192,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		case CONNECTING:
 		case CONNECTED:
+			//Ensure that the server is still running the game
 			if (serverConnectionState != null) {
 				switch (serverConnectionState) {
-
+				//Acknowledgement that the server is still alive
 				case ACK:
 					System.out.println(((String) m.get("body")));
 					body = "Ack from Server";
@@ -201,6 +210,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			break;
 		case DISCONNECTING:
+		//Stop running the thread if the server disconnects from the client
 		case DISCONNECTED:
 			body = "hi from server";
 			// mMessage.put("header", connectionState);
@@ -216,9 +226,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see unimelb.distributed_algo_game.network.NetworkInterface#connect()
+	 * Establishes connection with the server on the defined post on the local host
 	 */
 	public boolean connect() {
 
@@ -236,20 +244,16 @@ public final class GameClient implements Runnable, NetworkInterface {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see unimelb.distributed_algo_game.network.NetworkInterface#disconnect()
+	/**
+	 * Changes state of the client in order to stop receiving messages from the server and be 
+	 * removed from the server thread pool
 	 */
 	public void disconnect() {
 		clientConnectionState = ClientConnectionState.DISCONNECTING;
 	}
 
 	/**
-	 * Send data.
-	 *
-	 * @param object
-	 *            the object
+	 * This method sends a generic message object to the game server
 	 */
 	public void sendMessage(Object mGameSendDataObject) {
 
@@ -267,12 +271,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Receive data.
-	 *
-	 * @return the object
-	 */
-	/**
-	 * Receive message.
+	 * This method receives messages sent by the server of generic object type
 	 */
 	public Object receiveMessage() {
 
@@ -284,10 +283,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 				// System.out.println("Message is "+message);
 			}
 		} catch (ClassNotFoundException e) {
-			// TODO Adding Error Handling
+			//Print the details of the exception error
 			e.printStackTrace();
 		} catch (IOException ioe) {
-			// TODO Adding Error Handling
+			//Print the details of the exception error
 			ioe.printStackTrace();
 		}
 		// System.out.println("Client Received "+message);
@@ -296,20 +295,14 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Attach player.
-	 *
-	 * @param observer
-	 *            the observer
+	 * Attaches the player to the network observer
 	 */
 	public void attachPlayer(NetworkObserver observer) {
 		observers.add(observer);
 	}
 
 	/**
-	 * Dettach player.
-	 *
-	 * @param observer
-	 *            the observer
+	 * Removes the player from the network observer
 	 */
 	public void dettachPlayer(NetworkObserver observer) {
 		observers.remove(observer);

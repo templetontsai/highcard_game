@@ -19,10 +19,18 @@ public enum GameState {
 	
 	private int statusCode;
 	
+	/**
+	 * Constructor for the game state
+	 * @param c
+	 */
 	private GameState(int c) {
 		statusCode = c;
 	}
 	
+	/**
+	 * Returns the status code
+	 * @return
+	 */
 	public int getCode() {
 		return statusCode;
 	}
