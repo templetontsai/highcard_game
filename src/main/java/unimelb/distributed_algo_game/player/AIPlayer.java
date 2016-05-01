@@ -73,6 +73,7 @@ public class AIPlayer extends Player {
 			} else {
 				//TODO do client stuff here, checking connection, updating stuff
 				//System.out.println("client is playing game");
+				gameClient.play();
 				
 				
 			}

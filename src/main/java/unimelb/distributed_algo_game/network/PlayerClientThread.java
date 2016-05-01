@@ -3,6 +3,7 @@
  */
 package unimelb.distributed_algo_game.network;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -51,6 +52,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 	/** The game server object */
 	private GameServer mGameServer = null;
+
 	/**
 	 * Instantiates a new player client thread.
 	 *
@@ -76,46 +78,44 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 */
 	public void run() {
 
-		
 		isRunning = true;
 		try {
-			//Receives input and sends message using server socket
+			// Receives input and sends message using server socket
 			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 		} catch (IOException ioe) {
 			ioe.getStackTrace();
 		}
-		
+
 		JSONObject m;
 		BodyMessage bodyMessage;
 		ClientConnectionState clientConnectionState;
-		
-		//Main loop to run the client thread
-		while (isRunning) {
-			
-			//Receive JSON message object from server
-			m = (JSONObject)receiveMessage();
 
-			   
-			//Only process the message if it's not null
-			if(m != null) {
-				//Get the client connection state and body from the message
+		// Main loop to run the client thread
+		while (isRunning) {
+
+			// Receive JSON message object from server
+			m = (JSONObject) receiveMessage();
+
+			// Only process the message if it's not null
+			if (m != null) {
+
+				// Get the client connection state and body from the message
 				clientConnectionState = (ClientConnectionState) m.get("header");
-				bodyMessage = (BodyMessage)m.get("body");
-				System.out.println(m);
+				bodyMessage = (BodyMessage) m.get("body");
 
 				switch (clientConnectionState) {
-				
-				//Process the message based on the connection state
+
+				// Process the message based on the connection state
 				case CONNECTING:
 				case CONNECTED:
-					//System.out.println("connected from client");
+					// System.out.println("connected from client");
 					checkMessageType(bodyMessage);
 					break;
 				case DISCONNECTING:
 				case DISCONNECTED:
-					//System.out.println("disconnected from client");
-					
+					// System.out.println("disconnected from client");
+
 					isRunning = false;
 					break;
 				default:
@@ -124,53 +124,55 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 				}
 			}
-			
-			
+
 		}
 
-		//Close the input and output streams to the server
+		// Close the input and output streams to the server
 		try {
 			mObjectInputStream.close();
 			mObjectOutputStream.close();
 			mSocket.close();
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
-			//Print out the details of the exception error
+			// Print out the details of the exception error
 			ioe.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * This method checks the type of JSON body message and carries out the 
+	 * This method checks the type of JSON body message and carries out the
 	 * necessary action for each message type
+	 * 
 	 * @param mBodyMessage
 	 */
 	private void checkMessageType(BodyMessage mBodyMessage) {
 		MessageType messagType = mBodyMessage.getMessageType();
-		switch(messagType) {
-		//Used to acknowledge the server is still alive
+		Object message = mBodyMessage.getMessage();
+		switch (messagType) {
+		// Used to acknowledge the server is still alive
 		case ACK:
-			System.out.println(mBodyMessage.getMessage());
+			//System.out.println(mBodyMessage.getMessage());
 			break;
-		//Used to send a card to the client after receiving a request message
+		// Used to send a card to the client after receiving a request message
 		case CRD:
-			ClientConnectionState connectionState = ClientConnectionState.CONNECTED;
-			//Player specifies the card to 
-			mBodyMessage = new BodyMessage(this.clientID, MessageType.CRD, mGameServer.getCard(1));
 			
+			ClientConnectionState connectionState = ClientConnectionState.CONNECTED;
+			// Player specifies the card to
+			mBodyMessage = new BodyMessage(this.clientID, MessageType.CRD, mGameServer.getCard(1));
+
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);
 			sendMessage(mMessage);
 			break;
-		//Used to send send a broadcast message
+		// Used to send send a broadcast message
 		case BCT:
 			System.out.println(mBodyMessage.getMessage());
 			break;
-	    //Used to send a disconnect message
+		// Used to send a disconnect message
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
 			break;
-		
+
 		}
 	}
 
@@ -184,12 +186,12 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 		try {
 			if (mObjectOutputStream != null && mGameSendDataObject != null) {
-				System.out.println("Sending message from Server");
+
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
 			}
 		} catch (IOException ioe) {
-			//Print out the details of the exception error
+			// Print out the details of the exception error
 			ioe.printStackTrace();
 		}
 
@@ -199,23 +201,26 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * Receive message from the client.
 	 */
 	public synchronized Object receiveMessage() {
-		
+
 		Object message = null;
 
 		try {
+
 			if (mObjectInputStream != null) {
 				message = mObjectInputStream.readObject();
-				System.out.println(message);
-			
 			}
+		} catch (EOFException e) {
+
+			return null;
+
 		} catch (ClassNotFoundException e) {
-			//Print out the details of the exception error
+			// Print out the details of the exception error
 			e.printStackTrace();
 		} catch (IOException ioe) {
-			//Print out the details of the exception error
+			// Print out the details of the exception error
 			ioe.printStackTrace();
 		}
-		
+
 		return message;
 
 	}
@@ -224,8 +229,6 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * Used to send an update message
 	 */
 	public void update() {
-		// sendMessage("Game );
-		// connectionState = ConnectionState.DISCONNECT;
 
 	}
 

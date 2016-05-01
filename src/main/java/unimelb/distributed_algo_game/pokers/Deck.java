@@ -21,7 +21,8 @@ public final class Deck {
 	private static Deck instance = null;
 
 	/** The Constant DECK_SIZE. */
-	private static final int DECK_SIZE = 13;//For testing changing it to 13 from 52
+	private static final int DECK_SIZE = 52;// For testing changing it to 13
+											// from 52
 
 	/** The deck. */
 	private ArrayList<Card> deck = new ArrayList<Card>(DECK_SIZE);
@@ -75,17 +76,27 @@ public final class Deck {
 
 	/**
 	 * Returns a card from the deck at the given index.
+	 * 
 	 * @param cardIndex
 	 * @return
 	 */
 	public Card getCard(int cardIndex) {
+		Card card = null;
 		
-			Card card = deck.get(cardIndex);
-			//deck.remove(cardIndex);
-		
+		if(!deck.isEmpty()) {
+			card = deck.get(cardIndex - 1);
+			deck.remove(cardIndex - 1);		
+			
+		} else {
+			resetDeck();
+			shuffle();
+			card = deck.get(cardIndex - 1);
+			deck.remove(cardIndex - 1);
+		}
+	
+
 		return card;
 	}
-
 
 	/**
 	 * Prints out the current cards in the deck.
@@ -109,7 +120,7 @@ public final class Deck {
 	/**
 	 * This method clears the deck and re-initializes the deck with new cards.
 	 */
-	public void resetDeck() {
+	private void resetDeck() {
 		deck.clear();
 		for (CardRank cardRank : CardRank.values()) {
 			deck.add(new Clubs(cardRank, CardPattern.Clubs));

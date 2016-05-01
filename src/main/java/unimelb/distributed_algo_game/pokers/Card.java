@@ -5,6 +5,8 @@ package unimelb.distributed_algo_game.pokers;
 
 import java.io.Serializable;
 
+import unimelb.distributed_algo_game.pokers.Card.CardRank;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class Card.
@@ -20,6 +22,8 @@ public abstract class Card implements Serializable {
 	/** The card pattern. */
 	private CardPattern cardPattern = null;
 
+	private int cRank = 0, cPattern = 0;
+
 	/**
 	 * Instantiates a new card.
 	 *
@@ -31,6 +35,7 @@ public abstract class Card implements Serializable {
 	public Card(CardRank cardRank, CardPattern cardPattern) {
 		this.cardRank = cardRank;
 		this.cardPattern = cardPattern;
+		setPatternRank();
 	}
 
 	/**
@@ -57,7 +62,7 @@ public abstract class Card implements Serializable {
 		 *            the c
 		 */
 		private CardPattern(int c) {
-			code = c;
+			this.code = c;
 		}
 
 		/**
@@ -66,7 +71,11 @@ public abstract class Card implements Serializable {
 		 * @return the code
 		 */
 		public int getCode() {
-			return code;
+			return this.code;
+		}
+
+		public void setCode(int code) {
+			this.code = code;
 		}
 	}
 
@@ -112,7 +121,7 @@ public abstract class Card implements Serializable {
 		 *            the c
 		 */
 		private CardRank(int c) {
-			code = c;
+			this.code = c;
 		}
 
 		/**
@@ -121,7 +130,11 @@ public abstract class Card implements Serializable {
 		 * @return the code
 		 */
 		public int getCode() {
-			return code;
+			return this.code;
+		}
+
+		public void setCode(int code) {
+			this.code = code;
 		}
 
 	}
@@ -130,7 +143,10 @@ public abstract class Card implements Serializable {
 	 * Show card.
 	 */
 	public void showCard() {
-		System.out.println(this.cardPattern + "," + this.cardRank);
+		this.cardPattern = getPattern();
+		this.cardRank = getCardRank();
+		//System.out.println(this.cardPattern + "," + this.cardRank);
+		System.out.println("Rank = " + this.cRank + "Pattern = " + this.cPattern);
 	}
 
 	/**
@@ -139,6 +155,21 @@ public abstract class Card implements Serializable {
 	 * @return the pattern
 	 */
 	public CardPattern getPattern() {
+		switch (cPattern) {
+		case 0:
+			cardPattern = CardPattern.Hearts;
+			break;
+		case 1:
+			cardPattern = CardPattern.Diamonds;
+			break;
+		case 2:
+			cardPattern = CardPattern.Clubs;
+			break;
+		case 3:
+			cardPattern = CardPattern.Spades;
+			break;
+		}
+
 		return cardPattern;
 	}
 
@@ -148,6 +179,11 @@ public abstract class Card implements Serializable {
 	 * @return the card rank
 	 */
 	public CardRank getCardRank() {
+		for (CardRank cardRank : CardRank.values()) {
+			if(this.cRank == cardRank.getCode())
+				this.cardRank = cardRank;
+		}
+		
 		return cardRank;
 	}
 
@@ -158,6 +194,11 @@ public abstract class Card implements Serializable {
 	 */
 	public int gethandRank() {
 		return cardRank.getCode() + cardPattern.getCode();
+	}
+
+	private void setPatternRank() {
+		this.cRank = cardRank.getCode();
+		this.cPattern = cardPattern.getCode();
 	}
 
 }
