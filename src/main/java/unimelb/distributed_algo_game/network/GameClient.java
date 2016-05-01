@@ -12,8 +12,10 @@ import java.util.List;
 
 import org.json.simple.JSONObject;
 
+import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -109,7 +111,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 				mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 				mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 				isRunning = true;
-
+				
 				while (isRunning) {
 
 					if (mPlayer.isDealer()) {
@@ -137,48 +139,69 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	private void runSlaveState() throws IOException {
-		//TODO here
-		JSONObject m = new JSONObject();
-		String body = "";
+		// TODO here
+		mMessage = new JSONObject();
+		
+		
+		
+		
+		
+		mMessage = (JSONObject) receiveMessage();
+		
+		if(mMessage != null) {
+			clientConnectionState = (ClientConnectionState)mMessage.get("header");
+			BodyMessage bodyMessage = (BodyMessage) mMessage.get("body");
+			switch (clientConnectionState) {
 
-		switch (clientConnectionState) {
+			case CONNECTING:
+				
+				break;
+			case CONNECTED:
+				
+				checkMessageType(bodyMessage);
 
-		case CONNECTING:
-		case CONNECTED:
-			if (serverConnectionState != null) {
-				switch (serverConnectionState) {
 
-				case ACK:
-					System.out.println(((String) m.get("body")));
-					body = "Ack from Server";
-					// mMessage.put("header",
-					// clientConnectionState);
-					// mMessage.put("body", body);
-					// sendMessage(mMessage);
-					break;
+				break;
+			case DISCONNECTING:
+			case DISCONNECTED:
+		
+				isRunning = false;
+				break;
+			default:
+				System.out.println("Uknown State");
+				break;
 
-				}
 			}
+		}
 
+	}
+	
+	private void checkMessageType(BodyMessage mBodyMessage) {
+		MessageType messageType = mBodyMessage.getMessageType();
+		switch(messageType) {
+		case ACK:
+			System.out.println(mBodyMessage.getMessage());
 			break;
-		case DISCONNECTING:
-		case DISCONNECTED:
-			body = "hi from server";
-			// mMessage.put("header", connectionState);
-			// mMessage.put("body", body);
-			isRunning = false;
+		case CRD:
+			System.out.println((Card)mBodyMessage.getMessage());
 			break;
-		default:
-			System.out.println("Uknown State");
+		case BCT:
+			System.out.println(mBodyMessage.getMessage());
 			break;
-
+		case DSC:
+			System.out.println(mBodyMessage.getMessage());
+			break;
+		
 		}
 	}
 
+
 	private void runLeaderState() throws IOException {
-		//TODO here
+		// TODO here
 		JSONObject m = new JSONObject();
 		String body = "";
+		BodyMessage mBodyMessage;
+		
 
 		switch (clientConnectionState) {
 
@@ -189,11 +212,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 				case ACK:
 					System.out.println(((String) m.get("body")));
-					body = "Ack from Server";
-					// mMessage.put("header",
-					// clientConnectionState);
-					// mMessage.put("body", body);
-					// sendMessage(mMessage);
+					mBodyMessage = new BodyMessage(1, MessageType.CRD, "get card request");
+					mMessage.put("header", clientConnectionState);
+					mMessage.put("body", body);
+					sendMessage(mMessage);
 					break;
 
 				}
@@ -255,7 +277,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		try {
 			if (mObjectOutputStream != null) {
-				System.out.println("Sending message from Server");
+				// System.out.println("Sending message from Server");
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
 			}
@@ -281,7 +303,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		try {
 			if (mObjectInputStream != null) {
 				message = mObjectInputStream.readObject();
-				// System.out.println("Message is "+message);
+				System.out.println("Message is " + message);
+		
+
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Adding Error Handling
@@ -323,6 +347,20 @@ public final class GameClient implements Runnable, NetworkInterface {
 			observer.update();
 		}
 
+	}
+	
+	public void play() {
+		
+		if(isRunning) {
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = new BodyMessage(1, MessageType.CRD, "request a card");
+			mMessage.put("header", clientConnectionState);
+			mMessage.put("body", mMessage);
+			
+			sendMessage(mMessage);
+		}
+		
+	
 	}
 
 }

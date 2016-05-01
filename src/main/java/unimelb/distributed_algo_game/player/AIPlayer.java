@@ -3,8 +3,12 @@
  */
 package unimelb.distributed_algo_game.player;
 
+import org.json.simple.JSONObject;
+
+import unimelb.distributed_algo_game.network.BodyMessage;
 import unimelb.distributed_algo_game.network.GameClient;
 import unimelb.distributed_algo_game.network.GameServer;
+import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.state.GameState;
 
@@ -50,10 +54,11 @@ public class AIPlayer extends Player {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
+		/*
 		gameServer.setPlayer(this);
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
-		gameServerThread.start();
+		gameServerThread.start();*/
 		
 		gameClient.setPlayer(this);
 		gameClientThread = new Thread(gameClient);
@@ -64,12 +69,13 @@ public class AIPlayer extends Player {
 		while(this.getGameState() == GameState.PLAY) {
 			if (this.isDealer()) {
 				//TODO do dealer stuff here, checking connection, updating stuff
-				System.out.println("dealer/node0 is playing game");
+				//System.out.println("dealer/node0 is playing game");
 				//Card card = this.getCard(1);
 				//gameServer.sendCard(card, 1);
 			} else {
 				//TODO do client stuff here, checking connection, updating stuff
-				System.out.println("client is playing game");
+				//System.out.println("client is playing game");
+				
 				
 			}
 

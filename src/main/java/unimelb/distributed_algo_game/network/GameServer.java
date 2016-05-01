@@ -146,6 +146,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 				while (mConnectionState == ServerConnectionState.CONNECTED) {
 
 					mSocket = mServerSocket.accept();
+					//System.out.println("dd");
 					PlayerClientThread t = new PlayerClientThread(mSocket, 1, this);
 					mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
 					t.start();

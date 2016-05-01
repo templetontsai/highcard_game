@@ -88,26 +88,28 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		BodyMessage bodyMessage;
 		ClientConnectionState clientConnectionState;
 		
+		
 		while (isRunning) {
 			
 			m = (JSONObject)receiveMessage();
-			
+
 			   
 			
 			if(m != null) {
 				clientConnectionState = (ClientConnectionState) m.get("header");
 				bodyMessage = (BodyMessage)m.get("body");
+				System.out.println(m);
 
 				switch (clientConnectionState) {
 				
 				case CONNECTING:
 				case CONNECTED:
-					System.out.println("connected from client");
+					//System.out.println("connected from client");
 					checkMessageType(bodyMessage);
 					break;
 				case DISCONNECTING:
 				case DISCONNECTED:
-					System.out.println("disconnected from client");
+					//System.out.println("disconnected from client");
 					
 					isRunning = false;
 					break;
@@ -142,6 +144,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			ClientConnectionState connectionState = ClientConnectionState.CONNECTED;
 			//Player specifies the card to 
 			mBodyMessage = new BodyMessage(this.clientID, MessageType.CRD, mGameServer.getCard(1));
+			
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);
 			sendMessage(mMessage);
@@ -165,7 +168,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	public synchronized void sendMessage(Object mGameSendDataObject) {
 
 		try {
-			if (mObjectOutputStream != null) {
+			if (mObjectOutputStream != null && mGameSendDataObject != null) {
 				System.out.println("Sending message from Server");
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
@@ -187,7 +190,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		try {
 			if (mObjectInputStream != null) {
 				message = mObjectInputStream.readObject();
-				//System.out.println(mGameReveiceDataObject);
+				System.out.println(message);
+			
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Adding Error Handling

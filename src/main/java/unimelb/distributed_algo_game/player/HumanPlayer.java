@@ -61,22 +61,22 @@ public class HumanPlayer extends Player {
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
-		
+		/*
 		gameClient.setPlayer(this);
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
 		gameClientThread.start();
-		
+		*/
 		this.setGameState(GameState.PLAY);
 		while(this.getGameState() == GameState.PLAY) {
 			if (this.isDealer()) {
 				//TODO do dealer stuff here, checking connection, updating stuff
-				System.out.println("dealer/node0 is playing game");
+				//System.out.println("dealer/node0 is playing game");
 				//Card card = this.getCard(1);
 				//gameServer.sendCard(card, 1);
 			} else {
 				//TODO do client stuff here, checking connection, updating stuff
-				System.out.println("client is playing game");
+				//System.out.println("client is playing game");
 			
 				
 			}
