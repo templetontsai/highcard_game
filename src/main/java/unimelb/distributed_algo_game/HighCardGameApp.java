@@ -30,7 +30,7 @@ public class HighCardGameApp {
 	 */
 	public static void main(String[] args) {
 	    if (args.length > 0) {
-	    	runGame(new Integer(args[0]));
+	    	runGame(new Integer(args[0]).intValue());
 		}
 
 	}
