@@ -62,7 +62,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 	/**
 	 * Gets the single instance of GameServer.
 	 *
-	 * @return single instance of GameServer
 	 */
 	public static GameServer getInstance() {
 		if (instance == null) {
@@ -72,10 +71,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 	
 	/**
-	 * Sets the player.
-	 *
-	 * @param mPlayer
-	 *            the new player
+	 * Sets the reference to the player that is acting as the server 
 	 */
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
@@ -91,42 +87,36 @@ public final class GameServer implements Runnable, NetworkInterface {
 	/**
 	 * Sets the id.
 	 *
-	 * @param id
-	 *            the new id
 	 */
 	public void setId(int id) {
 		this.id = id;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
+	/**
+	 * Runs the main thread of the game server
 	 */
 	public void run() {
 		
-		
+		//This runs if the player is the dealer/server
 		if (mPlayer.isDealer()) {
 			
 			try {
 				runLeaderState();
 			} catch (IOException ioe) {
-				// TODO Adding error handling
+				//Display the details of the exception error
 				ioe.printStackTrace();
 
 			} finally {
-
+				
 				System.out.println("Connection Closed");
 			}
 
-			
-			
-			
+        //This runs if the player is a client	
 		} else {
 			try {
 				runSlaveState();
 			} catch (IOException ioe) {
-				// TODO Adding error handling
+				//Display the details of the exception error
 				ioe.printStackTrace();
 
 			} finally {
@@ -138,20 +128,27 @@ public final class GameServer implements Runnable, NetworkInterface {
 		
 	}
 	
+	/**
+	 * This method is responsible for sending and receiving messages from the clients including
+	 * managing the thread pool of clients
+	 */
 	private void runLeaderState() throws IOException {
-		
+		//Only runs if the socket is open
 		if (mServerSocket != null) {
 			System.out.println("Server Start, Waiting....");
 			synchronized (mLock) {
+				//Only runs if the server is in a connected state
 				while (mConnectionState == ServerConnectionState.CONNECTED) {
 
+					//Listen for messages from clients and add them to the thread pool
 					mSocket = mServerSocket.accept();
 					//System.out.println("dd");
 					PlayerClientThread t = new PlayerClientThread(mSocket, 1, this);
 					mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
 					t.start();
+					
 				}
-
+				//Close server port once the server is no longer running
 				mServerSocket.close();
 			}
 		}
@@ -160,6 +157,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	}
 	
+	/**
+	 * This runs when the server isn't the main dealer of the game and is a slave 
+	 * to another server
+	 */
 	private void runSlaveState() throws IOException {
 		//TODO slavestate for a cue to work
 		/*
@@ -183,10 +184,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 		}*/
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see unimelb.distributed_algo_game.network.NetworkInterface#connect()
+	/**
+	 * Initializes the server socket and connection state of the server
 	 */
 	public synchronized boolean connect() {
 
@@ -203,23 +202,30 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see unimelb.distributed_algo_game.network.NetworkInterface#disconnect()
+	/**
+	 * Disconnects the server from the clients by changing the server state
 	 */
 	public synchronized void disconnect() {
 		mConnectionState = ServerConnectionState.DISCONNECTED;
 	}
 	
+	/**
+	 * Sends a message to all the clients in the thread pool
+	 */
 	public void broadcastToClients(Object object) {
 		mPlayerClientManager.notifyAllClients(object, mConnectionState, MessageType.BCT);
 	}
 	
+	/**
+	 *This methods sends a card from the deck to the player
+	 */
 	public void sendCard(Card card, int id) {
 		mPlayerClientManager.sendMessageToClient(card, id, mConnectionState, MessageType.CRD);
 	}
 	
+	/**
+	 * This retrieves a card from the dealer's card deck
+	 */
 	public synchronized Card getCard(int index){
 		return mPlayer.getCard(index);
 	}

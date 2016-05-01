@@ -37,6 +37,9 @@ public final class PlayerClientManager {
 		
 	}
 	
+	/**
+	 * This sets the player acting as the server of this client manager
+	 */
 	public void setPlayer(Player mPlayer) {
 		this.mPlayer = mPlayer;
 	}
@@ -74,6 +77,9 @@ public final class PlayerClientManager {
 		}
 	}
 
+	/**
+	 * This method sends a message to a client in the thread pool
+	 */
 	public void sendMessageToClient(Object message, int clientID, ServerConnectionState mConnectionState,
 			MessageType messageType) {
 		// System.out.println("Message: "+message+" ID: "+clientID);
@@ -85,6 +91,4 @@ public final class PlayerClientManager {
 			playerClientList.get(clientID).sendMessage(mMessage);
 		}
 	}
-	
-
 }

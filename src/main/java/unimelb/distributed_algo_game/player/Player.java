@@ -36,10 +36,13 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	/** The id. */
 	private int id = -1;
 	
+	/** The boolean of whether the player is a dealer or not. */
 	private boolean isDealer = false;
 	
+	/** The game state of the player. */
 	private GameState gameState = null;
 	
+	/** This is the deck of the dealer. */
 	private Deck mDeck = null;
 
 
@@ -126,6 +129,10 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 		System.out.println("You selected " + selectedCard.getCardRank() + "," + selectedCard.getPattern());
 	}
 
+	/**
+	 * This sets the player as the dealer of the game.
+	 * @param isDealer
+	 */
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
 		// Create card deck for the game and shuffle
@@ -133,10 +140,19 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 		mDeck.shuffle();
 	}
 	
+	/**
+	 * Returns the boolean of whether the player is a dealer or not.
+	 * @return
+	 */
 	public boolean isDealer() {
 		return this.isDealer;
 	}
 	
+	/**
+	 * Returns the card from the deck at the given index.
+	 * @param cardIndex
+	 * @return
+	 */
 	public Card getCard(int cardIndex) {
 		Card card = null;
 		if(this.isDealer)
@@ -149,18 +165,24 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 		return card;
 	}
 	
+	/**
+	 * Returns the game state of the player.
+	 * @return
+	 */
 	public GameState getGameState() {
 		return gameState;
 	}
 
+	/**
+	 * Sets the game state of the player.
+	 * @param gameState
+	 */
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see unimelb.distributed_algo_game.player.NetworkObserver#update()
+	/**
+	 * Runs an update
 	 */
 	public abstract void update();
 

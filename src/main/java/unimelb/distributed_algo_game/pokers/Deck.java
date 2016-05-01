@@ -73,7 +73,11 @@ public final class Deck {
 		deck = temp;
 	}
 
-
+	/**
+	 * Returns a card from the deck at the given index.
+	 * @param cardIndex
+	 * @return
+	 */
 	public Card getCard(int cardIndex) {
 		
 			Card card = deck.get(cardIndex);

@@ -50,10 +50,8 @@ public class HumanPlayer extends Player {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
+	/**
+	 * Runs the main thread of the human player
 	 */
 	public void run() {
 		
@@ -86,10 +84,8 @@ public class HumanPlayer extends Player {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see unimelb.distributed_algo_game.player.Player#update()
+	/**
+	 * Runs an update
 	 */
 	@Override
 	public void update() {
