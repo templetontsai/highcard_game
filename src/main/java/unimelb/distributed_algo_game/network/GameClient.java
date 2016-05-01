@@ -173,33 +173,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 				break;
 			default:
 				System.out.println("Uknown State");
-				break;
-		//Read the JSON message from the client to determine the action to take
-		JSONObject m = new JSONObject();
-		String body = "";
-
-		switch (clientConnectionState) {
-
-		case CONNECTING:
-		case CONNECTED:
-			//Ensure that the server is still running the game
-			if (serverConnectionState != null) {
-				switch (serverConnectionState) {
-
-				//Acknowledgement that the server is still alive
-				case ACK:
-					System.out.println(((String) m.get("body")));
-					body = "Ack from Server";
-					// mMessage.put("header",
-					// clientConnectionState);
-					// mMessage.put("body", body);
-					// sendMessage(mMessage);
-					break;
->>>>>>> 60bf7b1fa6b2b53e0c34ea2282ea4f5bc8fb755c
-
 			}
 		}
-
+		
 	}
 	
 	private void checkMessageType(BodyMessage mBodyMessage) {
