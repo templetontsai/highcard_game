@@ -191,6 +191,9 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
+				//TODO object has to be reset, otherwise the client won't receive any new reference of object. 
+				//     However, this might cause issue if the packet is lost in between communication
+				mObjectOutputStream.reset();
 			}
 		} catch (IOException ioe) {
 			// Print out the details of the exception error

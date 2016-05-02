@@ -22,8 +22,7 @@ public abstract class Card implements Serializable {
 	/** The card pattern. */
 	private CardPattern cardPattern = null;
 
-	private int cRank = 0, cPattern = 0;
-
+	
 	/**
 	 * Instantiates a new card.
 	 *
@@ -35,7 +34,7 @@ public abstract class Card implements Serializable {
 	public Card(CardRank cardRank, CardPattern cardPattern) {
 		this.cardRank = cardRank;
 		this.cardPattern = cardPattern;
-		setPatternRank();
+		
 	}
 
 	/**
@@ -143,10 +142,9 @@ public abstract class Card implements Serializable {
 	 * Show card.
 	 */
 	public void showCard() {
-		this.cardPattern = getPattern();
-		this.cardRank = getCardRank();
-		//System.out.println(this.cardPattern + "," + this.cardRank);
-		System.out.println("Rank = " + this.cRank + "Pattern = " + this.cPattern);
+	
+		System.out.println(this.cardPattern + "," + this.cardRank);
+		
 	}
 
 	/**
@@ -196,9 +194,6 @@ public abstract class Card implements Serializable {
 		return cardRank.getCode() + cardPattern.getCode();
 	}
 
-	private void setPatternRank() {
-		this.cRank = cardRank.getCode();
-		this.cPattern = cardPattern.getCode();
-	}
+
 
 }
