@@ -32,6 +32,7 @@ public class HighCardGameApp {
 	    if (args.length > 0) {
 	    	runGame(new Integer(args[0]).intValue());
 		}
+	    
 
 	}
 	
@@ -47,6 +48,7 @@ public class HighCardGameApp {
 			p.setDealer(true);
 			Thread t = new Thread(p);
 			t.start();
+			t.setName("Human Player");
 			//Initialize game token for mutex
 			Token gameToken = new Token();
 			//Initialize queue for mutex control
@@ -54,6 +56,7 @@ public class HighCardGameApp {
 		} else {
 			Player p = new AIPlayer("AI 1", id);
 			Thread t = new Thread(p);
+			t.setName("AI Player Thread");
 			t.start();
 		}
 		
