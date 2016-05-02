@@ -172,6 +172,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
 			break;
+		default:
+			System.out.println("Uknown Message Type");
 
 		}
 	}

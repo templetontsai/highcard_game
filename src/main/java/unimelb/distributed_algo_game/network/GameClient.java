@@ -159,8 +159,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 			switch (clientConnectionState) {
 
 			case CONNECTING:
-
-				break;
 			case CONNECTED:
 
 				checkMessageType(bodyMessage);
@@ -194,6 +192,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
 			break;
+		default:
+			System.out.println("Uknown Message Type");
 
 		}
 	}
