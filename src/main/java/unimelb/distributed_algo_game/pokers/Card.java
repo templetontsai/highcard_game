@@ -153,21 +153,6 @@ public abstract class Card implements Serializable {
 	 * @return the pattern
 	 */
 	public CardPattern getPattern() {
-		switch (cPattern) {
-		case 0:
-			cardPattern = CardPattern.Hearts;
-			break;
-		case 1:
-			cardPattern = CardPattern.Diamonds;
-			break;
-		case 2:
-			cardPattern = CardPattern.Clubs;
-			break;
-		case 3:
-			cardPattern = CardPattern.Spades;
-			break;
-		}
-
 		return cardPattern;
 	}
 
@@ -178,7 +163,6 @@ public abstract class Card implements Serializable {
 	 */
 	public CardRank getCardRank() {
 		for (CardRank cardRank : CardRank.values()) {
-			if(this.cRank == cardRank.getCode())
 				this.cardRank = cardRank;
 		}
 		
