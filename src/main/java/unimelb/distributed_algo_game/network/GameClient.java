@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.json.simple.JSONObject;
 
+import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
@@ -62,12 +63,15 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
 
+	private int nodeID = -1;
+
 	/**
 	 * Instantiates a new game client.
 	 */
 	protected GameClient() {
 		mLock = new Object();
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
+
 	}
 
 	/**
@@ -91,6 +95,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
+			nodeID = this.mPlayer.getID();
 		} else {
 			System.out.println("Player can't be null");
 			throw new NullPointerException();
@@ -154,9 +159,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 		JSONObject mMessage = (JSONObject) receiveMessage();
 
 		if (mMessage != null) {
-			clientConnectionState = (ClientConnectionState) mMessage.get("header");
+			ClientConnectionState connectionState = (ClientConnectionState) mMessage.get("header");
 			BodyMessage bodyMessage = (BodyMessage) mMessage.get("body");
-			switch (clientConnectionState) {
+			switch (connectionState) {
+
+			case ACK:
 
 			case CONNECTING:
 			case CONNECTED:
@@ -177,13 +184,33 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	private void checkMessageType(BodyMessage mBodyMessage) {
+		JSONObject mMessage = new JSONObject();
 		MessageType messageType = mBodyMessage.getMessageType();
 		switch (messageType) {
 		case ACK:
-			System.out.println(mBodyMessage.getMessage());
+			ACKCode ackCode = (ACKCode) mBodyMessage.getMessage();
+			switch (ackCode) {
+			case NODE_ID_RECEIVED:
+				System.out.println("ACK Message received from leader node" + mBodyMessage.getNodeID());
+				this.clientConnectionState = ClientConnectionState.CONNECTED;
+				break;
+			case CARD_RECEIVED:
+				break;
+			default:
+				System.out.println("Uknown ACK code");
+
+			}
+
 			break;
 		case CRD:
+			// TODO update this on GUI when GUI is ready
+			System.out.println("The card you get is ");
 			((Card) mBodyMessage.getMessage()).showCard();
+			// Notify the dealer the card has been received
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", new BodyMessage(nodeID, MessageType.ACK, ACKCode.CARD_RECEIVED));
+			
+			sendMessage(mMessage);
 			
 			break;
 		case BCT:
@@ -214,7 +241,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 				// Acknowledgement that the server is still alive
 				case ACK:
 
-					mBodyMessage = new BodyMessage(1, MessageType.CRD, "get card request");
+					mBodyMessage = new BodyMessage(nodeID, MessageType.CRD, "get card request");
 					mMessage.put("header", clientConnectionState);
 					mMessage.put("body", mBodyMessage);
 					sendMessage(mMessage);
@@ -247,7 +274,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		try {
 
 			mSocket = new Socket("localhost", NetworkInterface.PORT);
-			clientConnectionState = ClientConnectionState.CONNECTING;
+			clientConnectionState = ClientConnectionState.INIT;
 
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -263,18 +290,24 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * server and be removed from the server thread pool
 	 */
 	public void disconnect() {
-		clientConnectionState = ClientConnectionState.DISCONNECTING;
+		clientConnectionState = ClientConnectionState.DISCONNECTED;
 	}
 
 	/**
 	 * This method sends a generic message object to the game server
 	 */
-	public synchronized void sendMessage(Object mGameSendDataObject) {
+	public void sendMessage(Object mGameSendDataObject) {
 
 		try {
+			
 			if (mObjectOutputStream != null) {
+				
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
+				mObjectOutputStream.reset();
+				
+			} else {
+				System.out.println("mObjectOutputStream is null");
 			}
 		} catch (IOException ioe) {
 			// TODO Adding Error Handling
@@ -305,7 +338,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			// Print the details of the exception error
 			ioe.printStackTrace();
 		}
-		
+
 		return message;
 
 	}
@@ -336,11 +369,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	public void play() {
 
-		if (true) {
+		if (this.clientConnectionState == ClientConnectionState.INIT) {
 
 			JSONObject mMessage = new JSONObject();
 
-			BodyMessage bodyMessage = new BodyMessage(1, MessageType.CRD, "request a card");
+			BodyMessage bodyMessage = new BodyMessage(this.nodeID, MessageType.CON, "init");
+
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessage(mMessage);
+
+		} else {
+			JSONObject mMessage = new JSONObject();
+
+			BodyMessage bodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, "request a card");
 
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);

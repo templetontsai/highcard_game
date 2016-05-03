@@ -61,6 +61,7 @@ public class AIPlayer extends Player {
 		gameClient.setPlayer(this);
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
+		gameClientThread.setName("AI Player Socket Thread");
 		gameClientThread.start();
 		
 		this.setGameState(GameState.PLAY);
@@ -74,6 +75,12 @@ public class AIPlayer extends Player {
 				//TODO do client stuff here, checking connection, updating stuff
 				//System.out.println("client is playing game");
 				gameClient.play();
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 				
 			}

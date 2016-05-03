@@ -8,15 +8,37 @@ import java.io.Serializable;
  *This class is generic type to carry JSON data in messages
  */
 public class BodyMessage implements Serializable{
-	private int clientID;
+	private int nodeID;
 	private MessageType messageType;
 	private Object message;
 	
+	public enum ACKCode {
+		NODE_ID_RECEIVED(0),
+		CARD_RECEIVED(1);
+		/** The code. */
+		private int code;
+
+		
+		private ACKCode(int c) {
+			code = c;
+		}
+
+		/**
+		 * Gets the code.
+		 *
+		 * @return the code
+		 */
+		public int getCode() {
+			return code;
+		}
+	}
+	
 	public enum MessageType {
-		ACK(0),
-		BCT(1),
-		CRD(2),
-		DSC(3);
+		CON(0),
+		ACK(1),
+		BCT(2),
+		CRD(3),
+		DSC(4);
 		
 		/** The code. */
 		private int code;
@@ -39,8 +61,8 @@ public class BodyMessage implements Serializable{
 	/**
 	 * Main constructor for this class
 	 */
-	public BodyMessage(int clientID, MessageType messageType, Object message){
-		this.clientID = clientID;
+	public BodyMessage(int nodeID, MessageType messageType, Object message){
+		this.nodeID = nodeID;
 		this.messageType = messageType;
 		this.message = message;
 	}
@@ -48,7 +70,7 @@ public class BodyMessage implements Serializable{
 	/**
 	 * Returns the client ID
 	 */
-	public int getClientID(){ return clientID; }
+	public int getNodeID(){ return nodeID; }
 	
 	/**
 	 * Returns the message type
@@ -61,10 +83,10 @@ public class BodyMessage implements Serializable{
 	public Object getMessage(){ return message; }
 	
 	/**
-	 * Sets the client ID
+	 * Sets the Node ID
 	 */
-	public void setClientID(int clientID){
-		this.clientID = clientID;
+	public void setNodeID(int nodeID){
+		this.nodeID = nodeID;
 	}
 	
 	/**

@@ -27,7 +27,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private static GameServer instance = null;
 
 	/** The id. */
-	private int id = -1;
+	private int nodeID = -1;
 
 	/** The m player. */
 	private Player mPlayer = null;
@@ -76,6 +76,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
+			nodeID = this.mPlayer.getID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
 		} else {
 			System.out.println("Player can't be null");
@@ -88,8 +89,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * Sets the id.
 	 *
 	 */
-	public void setId(int id) {
-		this.id = id;
+	public void setId(int nodeID) {
+		this.nodeID = nodeID;
 	}
 
 	/**
@@ -142,10 +143,20 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 					//Listen for messages from clients and add them to the thread pool
 					mSocket = mServerSocket.accept();
-					//System.out.println("dd");
-					PlayerClientThread t = new PlayerClientThread(mSocket, 1, this);
-					mPlayerClientManager.addClient(new Integer(1),t);//Communicate to know player id first
+					
+					PlayerClientThread t = new PlayerClientThread(mSocket, this);
+					t.setName("GameServer Socket Thread");
 					t.start();
+					//Wait till we get a vaild nodeID from the connection and then add to the manager's list
+					while(t.getClientNodeID() == -1)
+						;
+					
+					mPlayerClientManager.addClient(t.getClientNodeID(),t);
+					
+					if(mPlayerClientManager.isPlay()) {
+						broadcastToClients("Broadcast winner");
+					}
+					
 					
 				}
 				//Close server port once the server is no longer running
@@ -213,14 +224,14 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * Sends a message to all the clients in the thread pool
 	 */
 	public void broadcastToClients(Object object) {
-		mPlayerClientManager.notifyAllClients(object, mConnectionState, MessageType.BCT);
+		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT);
 	}
 	
 	/**
 	 *This methods sends a card from the deck to the player
 	 */
 	public void sendCard(Card card, int id) {
-		mPlayerClientManager.sendMessageToClient(card, id, mConnectionState, MessageType.CRD);
+		mPlayerClientManager.sendMessageToClient(card, id, ClientConnectionState.CONNECTED, MessageType.CRD);
 	}
 	
 	/**
@@ -229,6 +240,11 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public synchronized Card getCard(int index){
 		return mPlayer.getCard(index);
 	}
+	
+	public int getID(){
+		return nodeID;
+	}
+	
 	
 
 }

@@ -11,9 +11,9 @@ import java.net.Socket;
 
 import org.json.simple.JSONObject;
 
+import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
-import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -26,11 +26,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/** The m socket. */
 	private Socket mSocket = null;
 
-	/** The client id. */
-	private int clientID = -1;
-
-	/** The m game reveice data object. */
-	private Object mGameReveiceDataObject = null;
+	/** The server node id. */
+	private int nodeID = -1;
 
 	/** The m object output stream. */
 	private ObjectOutputStream mObjectOutputStream = null;
@@ -41,9 +38,6 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/** The m lock. */
 	private Object mLock = null;
 
-	/** The connection state. */
-	private ServerConnectionState serverConnectionState = null;
-
 	/** The JSON body message */
 	private JSONObject mMessage = null;
 
@@ -53,6 +47,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/** The game server object */
 	private GameServer mGameServer = null;
 
+	private int clientNodeID = -1;
+
 	/**
 	 * Instantiates a new player client thread.
 	 *
@@ -61,14 +57,13 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @param clientID
 	 *            the client id
 	 */
-	public PlayerClientThread(Socket mSocket, int clientID, GameServer mGameServer) {
+	public PlayerClientThread(Socket mSocket, GameServer mGameServer) {
 		if (mSocket != null) {
 			this.mSocket = mSocket;
 		} else
 			throw new NullPointerException();
-		this.clientID = clientID;
+		this.nodeID = mGameServer.getID();
 		mLock = new Object();
-		serverConnectionState = ServerConnectionState.DISCONNECTED;
 		mMessage = new JSONObject();
 		this.mGameServer = mGameServer;
 	}
@@ -107,6 +102,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 				switch (clientConnectionState) {
 
 				// Process the message based on the connection state
+				case INIT:
+				case ACK:
 				case CONNECTING:
 				case CONNECTED:
 					// System.out.println("connected from client");
@@ -146,20 +143,49 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @param mBodyMessage
 	 */
 	private void checkMessageType(BodyMessage mBodyMessage) {
+		ClientConnectionState connectionState;
 		MessageType messagType = mBodyMessage.getMessageType();
 		Object message = mBodyMessage.getMessage();
+		
 		switch (messagType) {
+		case CON:
+			
+			synchronized (mLock) {
+				clientNodeID = mBodyMessage.getNodeID();
+			}
+			connectionState = ClientConnectionState.CONNECTED;
+			// Player specifies the card to
+			mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
+
+			mMessage.put("header", connectionState);
+			mMessage.put("body", mBodyMessage);
+			sendMessage(mMessage);
+
+			break;
 		// Used to acknowledge the server is still alive
 		case ACK:
-			//System.out.println(mBodyMessage.getMessage());
+			ACKCode ackCode = (ACKCode)message;
+			
+			switch (ackCode) {
+			case NODE_ID_RECEIVED:
+				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
+				break;
+			case CARD_RECEIVED:
+				System.out.println("CARD_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
+			
+				break;
+			default:
+				System.out.println("Uknown ACK code");
+
+			}
 			break;
 		// Used to send a card to the client after receiving a request message
 		case CRD:
-			
-			ClientConnectionState connectionState = ClientConnectionState.CONNECTED;
+			System.out.println(message);
+			connectionState = ClientConnectionState.CONNECTED;
 			// Player specifies the card to
-			mBodyMessage = new BodyMessage(this.clientID, MessageType.CRD, mGameServer.getCard(1));
-
+			mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, mGameServer.getCard(1));
+			
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);
 			sendMessage(mMessage);
@@ -184,15 +210,17 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	 * @param mGameSendDataObject
 	 *            the m game send data object
 	 */
-	public synchronized void sendMessage(Object mGameSendDataObject) {
+	public void sendMessage(Object mGameSendDataObject) {
 
 		try {
 			if (mObjectOutputStream != null && mGameSendDataObject != null) {
 
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
-				//TODO object has to be reset, otherwise the client won't receive any new reference of object. 
-				//     However, this might cause issue if the packet is lost in between communication
+				// TODO object has to be reset, otherwise the client won't
+				// receive any new reference of object.
+				// However, this might cause issue if the packet is lost in
+				// between communication
 				mObjectOutputStream.reset();
 			}
 		} catch (IOException ioe) {
@@ -205,7 +233,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	/**
 	 * Receive message from the client.
 	 */
-	public synchronized Object receiveMessage() {
+	public Object receiveMessage() {
 
 		Object message = null;
 
@@ -228,6 +256,14 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 		return message;
 
+	}
+
+	public synchronized int getClientNodeID() {
+		int id = -1;
+		synchronized (mLock) {
+			id = clientNodeID;
+		}
+		return id;
 	}
 
 	/**

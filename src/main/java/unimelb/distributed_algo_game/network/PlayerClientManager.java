@@ -5,13 +5,11 @@ package unimelb.distributed_algo_game.network;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.swing.text.html.HTMLDocument.Iterator;
 
 import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
+import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
 import unimelb.distributed_algo_game.player.Player;
 
@@ -26,6 +24,8 @@ public final class PlayerClientManager {
 	/** The m player. */
 	private Player mPlayer = null;
 
+	private boolean isPlay = false;
+
 	/**
 	 * Instantiates a new player client manager.
 	 *
@@ -34,9 +34,9 @@ public final class PlayerClientManager {
 	 */
 	public PlayerClientManager(int playerClientNum) {
 		playerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
-		
+
 	}
-	
+
 	/**
 	 * This sets the player acting as the server of this client manager
 	 */
@@ -45,8 +45,8 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Adds the client.
-	 *l
+	 * Adds the client. l
+	 * 
 	 * @param clientThread
 	 *            the client thread
 	 */
@@ -67,10 +67,10 @@ public final class PlayerClientManager {
 	/**
 	 * Notify all clients.
 	 */
-	public void notifyAllClients(Object object, ServerConnectionState mConnectionState, MessageType messageType) {
+	public void notifyAllClients(Object object, ClientConnectionState mConnectionState, MessageType messageType) {
 		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = new BodyMessage(t.getKey(), messageType, object);
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getID(), messageType, object);
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
 			t.getValue().sendMessage(mMessage);
@@ -80,15 +80,20 @@ public final class PlayerClientManager {
 	/**
 	 * This method sends a message to a client in the thread pool
 	 */
-	public void sendMessageToClient(Object message, int clientID, ServerConnectionState mConnectionState,
+	public void sendMessageToClient(Object message, int clientID, ClientConnectionState mConnectionState,
 			MessageType messageType) {
-		// System.out.println("Message: "+message+" ID: "+clientID);
+
 		if (playerClientList.size() > 0) {
 			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = new BodyMessage(clientID, messageType, message);
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getID(), messageType, message);
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
 			playerClientList.get(clientID).sendMessage(mMessage);
 		}
 	}
+
+	public boolean isPlay() {
+		return isPlay;
+	}
+
 }
