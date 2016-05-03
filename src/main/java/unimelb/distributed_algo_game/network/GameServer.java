@@ -145,7 +145,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mSocket = mServerSocket.accept();
 
 					PlayerClientThread t = new PlayerClientThread(mSocket, this);
-					
+					//Block the new connection to join in the middle of the game
 					if (mPlayerClientManager.isLockRound()) {
 						t.setClientStatus(true);
 					}

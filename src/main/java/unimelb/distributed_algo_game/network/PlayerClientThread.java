@@ -153,10 +153,10 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		switch (messagType) {
 		case CON:
 			//if the game is started already, don't respond to the message
-			if(!isClientLockRound) {
-				synchronized (mLock) {
-					clientNodeID = mBodyMessage.getNodeID();
-				}
+			if(!getClientStatus()) {
+				
+				clientNodeID = mBodyMessage.getNodeID();
+				
 				connectionState = ClientConnectionState.CONNECTED;
 				// Player specifies the card to
 				mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
@@ -269,7 +269,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 
 	}
 
-	public synchronized int getClientNodeID() {
+	public int getClientNodeID() {
 		int id = -1;
 		synchronized (mLock) {
 			id = clientNodeID;
@@ -279,7 +279,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	public synchronized boolean getClientStatus() {
 		return isClientLockRound;
 	}
-	public synchronized boolean setClientStatus(boolean isClientLockRound) {
+	public synchronized void setClientStatus(boolean isClientLockRound) {
 		this.isClientLockRound = isClientLockRound;
 	}
 	/**

@@ -109,7 +109,7 @@ public final class PlayerClientManager {
 		}
 	}
 
-	public synchornized boolean isLockRound() {
+	public synchronized boolean isLockRound() {
 		for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
 			this.isLockRound = entry.getValue().getClientStatus();
 		}
@@ -131,6 +131,9 @@ public final class PlayerClientManager {
 			// Dealer draw a card
 			updatePlayerCard(mPlayer.getID(), mPlayer.getCard(1));
 			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);
+			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
+				entry.getValue().setClientStatus(false);
+			}
 		}
 	}
 
