@@ -20,8 +20,8 @@ public final class Spades extends Card {
 	 * @param cardPattern
 	 *            the card pattern
 	 */
-	public Spades(CardRank cardRank, CardPattern cardPattern) {
-		super(cardRank, cardPattern);
+	public Spades(CardRank cardRank) {
+		super(cardRank, CardPattern.Spades);
 	}
 
 }

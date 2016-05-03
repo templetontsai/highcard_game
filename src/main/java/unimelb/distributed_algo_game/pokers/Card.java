@@ -32,6 +32,7 @@ public abstract class Card implements Serializable {
 	 *            the card pattern
 	 */
 	public Card(CardRank cardRank, CardPattern cardPattern) {
+		System.out.println(cardRank);
 		this.cardRank = cardRank;
 		this.cardPattern = cardPattern;
 		
@@ -97,8 +98,8 @@ public abstract class Card implements Serializable {
 		Seven(7),
 		/** The Eight. */
 		Eight(8),
-		/** The Night. */
-		Night(9),
+		/** The Nine. */
+		Nine(9),
 		/** The Ten. */
 		Ten(10),
 		/** The Jack. */
@@ -162,11 +163,8 @@ public abstract class Card implements Serializable {
 	 * @return the card rank
 	 */
 	public CardRank getCardRank() {
-		for (CardRank cardRank : CardRank.values()) {
-				this.cardRank = cardRank;
-		}
 		
-		return cardRank;
+		return this.cardRank;
 	}
 
 	/**

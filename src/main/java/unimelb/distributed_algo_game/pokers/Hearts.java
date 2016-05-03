@@ -26,8 +26,8 @@ public final class Hearts extends Card {
 	 * @param cardPattern
 	 *            the card pattern
 	 */
-	public Hearts(CardRank cardRank, CardPattern cardPattern) {
-		super(cardRank, cardPattern);
+	public Hearts(CardRank cardRank) {
+		super(cardRank, CardPattern.Hearts);
 	}
 
 }

@@ -18,8 +18,8 @@ public final class Diamonds extends Card {
 	 * @param cardPattern
 	 *            the card pattern
 	 */
-	public Diamonds(CardRank cardRank, CardPattern cardPattern) {
-		super(cardRank, cardPattern);
+	public Diamonds(CardRank cardRank) {
+		super(cardRank, CardPattern.Diamonds);
 	}
 
 }

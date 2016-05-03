@@ -4,6 +4,7 @@
 package unimelb.distributed_algo_game.pokers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import unimelb.distributed_algo_game.pokers.Card.CardPattern;
 import unimelb.distributed_algo_game.pokers.Card.CardRank;
@@ -53,11 +54,17 @@ public final class Deck {
 	 */
 	private void init() {
 		for (CardRank cardRank : CardRank.values()) {
-			deck.add(new Clubs(cardRank, CardPattern.Clubs));
-			deck.add(new Hearts(cardRank, CardPattern.Hearts));
-			deck.add(new Diamonds(cardRank, CardPattern.Diamonds));
-			deck.add(new Spades(cardRank, CardPattern.Spades));
+			deck.add(new Clubs(cardRank));
+			deck.add(new Hearts(cardRank));
+			deck.add(new Diamonds(cardRank));
+			deck.add(new Spades(cardRank));
 		}
+
+		
+		for(Card c : deck) {
+			System.out.println(c.getPattern() + "," + c.getCardRank());
+		}
+		
 
 	}
 
@@ -65,13 +72,7 @@ public final class Deck {
 	 * This method reorders the cards in the deck in a random order.
 	 */
 	public void shuffle() {
-		ArrayList<Card> temp = new ArrayList<Card>();
-		while (!deck.isEmpty()) {
-			int index = (int) (Math.random() * deck.size());
-			temp.add(deck.get(index));
-			deck.remove(index);
-		}
-		deck = temp;
+		Collections.shuffle(deck);
 	}
 
 	/**
@@ -94,7 +95,7 @@ public final class Deck {
 			deck.remove(cardIndex - 1);
 		}
 	
-
+		
 		return card;
 	}
 
@@ -123,10 +124,10 @@ public final class Deck {
 	private void resetDeck() {
 		deck.clear();
 		for (CardRank cardRank : CardRank.values()) {
-			deck.add(new Clubs(cardRank, CardPattern.Clubs));
-			deck.add(new Hearts(cardRank, CardPattern.Hearts));
-			deck.add(new Diamonds(cardRank, CardPattern.Diamonds));
-			deck.add(new Spades(cardRank, CardPattern.Spades));
+			deck.add(new Clubs(cardRank));
+			deck.add(new Hearts(cardRank));
+			deck.add(new Diamonds(cardRank));
+			deck.add(new Spades(cardRank));
 		}
 	}
 
