@@ -109,12 +109,12 @@ public final class PlayerClientManager {
 		}
 	}
 
-	private boolean isLockRound() {
+	public synchornized boolean isLockRound() {
 		for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
-			isLockRound = entry.getValue().getClientStatus();
+			this.isLockRound = entry.getValue().getClientStatus();
 		}
 
-		return isLockRound;
+		return this.isLockRound;
 	}
 
 	public void updatePlayerCard(int nodeID, Card c) {

@@ -152,18 +152,21 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		
 		switch (messagType) {
 		case CON:
-			
-			synchronized (mLock) {
-				clientNodeID = mBodyMessage.getNodeID();
+			//if the game is started already, don't respond to the message
+			if(!isClientLockRound) {
+				synchronized (mLock) {
+					clientNodeID = mBodyMessage.getNodeID();
+				}
+				connectionState = ClientConnectionState.CONNECTED;
+				// Player specifies the card to
+				mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
+
+				mMessage.put("header", connectionState);
+				mMessage.put("body", mBodyMessage);
+				sendMessage(mMessage);
+
 			}
-			connectionState = ClientConnectionState.CONNECTED;
-			// Player specifies the card to
-			mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
-
-			mMessage.put("header", connectionState);
-			mMessage.put("body", mBodyMessage);
-			sendMessage(mMessage);
-
+			
 			break;
 		// Used to acknowledge the server is still alive
 		case ACK:
@@ -275,6 +278,9 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	}
 	public synchronized boolean getClientStatus() {
 		return isClientLockRound;
+	}
+	public synchronized boolean setClientStatus(boolean isClientLockRound) {
+		this.isClientLockRound = isClientLockRound;
 	}
 	/**
 	 * Used to send an update message

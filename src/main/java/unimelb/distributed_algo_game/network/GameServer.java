@@ -145,6 +145,11 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mSocket = mServerSocket.accept();
 
 					PlayerClientThread t = new PlayerClientThread(mSocket, this);
+					
+					if (mPlayerClientManager.isLockRound()) {
+						t.setClientStatus(true);
+					}
+					
 					t.setName("GameServer Socket Thread");
 					t.start();
 					// Wait till we get a vaild nodeID from the connection and
