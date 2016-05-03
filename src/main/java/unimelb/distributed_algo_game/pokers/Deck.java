@@ -60,12 +60,6 @@ public final class Deck {
 			deck.add(new Spades(cardRank));
 		}
 
-		
-		for(Card c : deck) {
-			System.out.println(c.getPattern() + "," + c.getCardRank());
-		}
-		
-
 	}
 
 	/**
