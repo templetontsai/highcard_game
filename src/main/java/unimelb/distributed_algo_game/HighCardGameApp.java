@@ -9,11 +9,11 @@ import java.util.Scanner;
 
 import unimelb.distributed_algo_game.network.GameClient;
 import unimelb.distributed_algo_game.network.GameServer;
+import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Deck;
-import unimelb.distributed_algo_game.pokers.Util;
 import unimelb.distributed_algo_game.token.Token;
 
 // TODO: Auto-generated Javadoc

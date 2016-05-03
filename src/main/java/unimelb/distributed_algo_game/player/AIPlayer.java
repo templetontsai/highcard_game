@@ -47,6 +47,12 @@ public class AIPlayer extends Player {
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 	}
+	
+	public AIPlayer(int id) {
+		super("AI", id, GameState.NONE, new PlayerScore(id));
+		gameClient = GameClient.getInstance();
+		gameServer = GameServer.getInstance();
+	}
 
 	/**
 	 * Runs the main thread of the AI player
@@ -76,7 +82,7 @@ public class AIPlayer extends Player {
 				//System.out.println("client is playing game");
 				gameClient.play();
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

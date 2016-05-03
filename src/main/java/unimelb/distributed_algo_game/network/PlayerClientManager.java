@@ -3,6 +3,7 @@
  */
 package unimelb.distributed_algo_game.network;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,8 +11,10 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
-import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
+import unimelb.distributed_algo_game.network.utils.Utils;
+import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -26,6 +29,10 @@ public final class PlayerClientManager {
 
 	private boolean isPlay = false;
 
+	private boolean isLockRound = false;
+
+	private ArrayList<Player> playerList = null;
+
 	/**
 	 * Instantiates a new player client manager.
 	 *
@@ -34,6 +41,7 @@ public final class PlayerClientManager {
 	 */
 	public PlayerClientManager(int playerClientNum) {
 		playerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
+		playerList = new ArrayList<Player>();
 
 	}
 
@@ -42,16 +50,21 @@ public final class PlayerClientManager {
 	 */
 	public void setPlayer(Player mPlayer) {
 		this.mPlayer = mPlayer;
+		playerList.add(mPlayer);
 	}
 
 	/**
-	 * Adds the client. l
+	 * Adds the client.
 	 * 
 	 * @param clientThread
 	 *            the client thread
 	 */
 	public void addClient(int clientID, PlayerClientThread clientThread) {
 		playerClientList.put(clientID, clientThread);
+	}
+
+	public void addPlayer(int clientID) {
+		playerList.add(new AIPlayer(clientID));
 	}
 
 	/**
@@ -62,6 +75,10 @@ public final class PlayerClientManager {
 	 */
 	public void removeClient(int clientThread) {
 		playerClientList.remove(clientThread);
+	}
+
+	public void removePlayer(int nodeID) {
+		playerClientList.remove(nodeID);
 	}
 
 	/**
@@ -92,8 +109,29 @@ public final class PlayerClientManager {
 		}
 	}
 
-	public boolean isPlay() {
-		return isPlay;
+	private boolean isLockRound() {
+		for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
+			isLockRound = entry.getValue().getClientStatus();
+		}
+
+		return isLockRound;
+	}
+
+	public void updatePlayerCard(int nodeID, Card c) {
+		for (Player p : playerList) {
+			if (p.getID() == nodeID) {
+				p.selectFromDeck(c);
+				System.out.println("node: " + nodeID + ", " + c.getPattern() + ", " + c.getCardRank());
+			}
+		}
+	}
+
+	public void checkPlayerStatus() {
+		if (isLockRound()) {
+			// Dealer draw a card
+			updatePlayerCard(mPlayer.getID(), mPlayer.getCard(1));
+			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);
+		}
 	}
 
 }

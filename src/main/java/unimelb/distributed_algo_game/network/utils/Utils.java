@@ -1,7 +1,7 @@
 /*
  * 
  */
-package unimelb.distributed_algo_game.pokers;
+package unimelb.distributed_algo_game.network.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +17,7 @@ import unimelb.distributed_algo_game.player.PlayerScore;
  * @author Ting-Ying Tsai This class is responsible for comparing the cards
  *         selected by the users and determines the winner
  */
-public class Util {
+public class Utils {
 
 	/**
 	 * This method returns the winner of the match and updates the winner's
@@ -29,7 +29,7 @@ public class Util {
 	 */
 	public static String compareRank(ArrayList<Player> players) {
 		// Initializes the variables
-		String matchDetails = players.get(0).getName() + " drew " + players.get(0).getSelectedCard().getCardRank() + " "
+		String matchDetails = "node" + players.get(0).getID() + " drew " + players.get(0).getSelectedCard().getCardRank() + " "
 				+ players.get(0).getSelectedCard().getPattern();
 		int winningScore = 0;
 		int playerID = 0;
@@ -45,13 +45,13 @@ public class Util {
 				matchDraw = true;
 			}
 			if (i > 0)
-				sb.append(", " + players.get(i).getName() + " drew " + players.get(i).getSelectedCard().getCardRank()
+				sb.append(", node" + players.get(i).getID() + " drew " + players.get(i).getSelectedCard().getCardRank()
 						+ " " + players.get(i).getSelectedCard().getPattern());
 		}
 		String winner = "";
 		// Ensures to check if there is a draw and awards no point in that case
 		if (!matchDraw) {
-			winner = players.get(playerID).getName() + " has won the match. " + sb.toString();
+			winner = players.get(playerID).getID() + " has won the match. " + sb.toString();
 			players.get(playerID).updateScore();
 		} else {
 			winner = "The match was declared a draw. " + sb.toString();

@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -48,6 +49,8 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 	private GameServer mGameServer = null;
 
 	private int clientNodeID = -1;
+	
+	private boolean isClientLockRound;
 
 	/**
 	 * Instantiates a new player client thread.
@@ -171,7 +174,9 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
 				break;
 			case CARD_RECEIVED:
-				System.out.println("CARD_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
+				//System.out.println("CARD_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
+				isClientLockRound = true;
+				mGameServer.checkPlayerStatus();
 			
 				break;
 			default:
@@ -181,10 +186,12 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 			break;
 		// Used to send a card to the client after receiving a request message
 		case CRD:
-			System.out.println(message);
+			
 			connectionState = ClientConnectionState.CONNECTED;
 			// Player specifies the card to
-			mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, mGameServer.getCard(1));
+			Card c = mGameServer.getCard(1);
+			mGameServer.updatePlayerCard(mBodyMessage.getNodeID(), c);
+			mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
 			
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);
@@ -193,6 +200,7 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		// Used to send send a broadcast message
 		case BCT:
 			System.out.println(mBodyMessage.getMessage());
+			isClientLockRound = false;
 			break;
 		// Used to send a disconnect message
 		case DSC:
@@ -265,7 +273,9 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		}
 		return id;
 	}
-
+	public synchronized boolean getClientStatus() {
+		return isClientLockRound;
+	}
 	/**
 	 * Used to send an update message
 	 */
