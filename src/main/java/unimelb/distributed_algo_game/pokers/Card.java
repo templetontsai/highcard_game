@@ -32,7 +32,6 @@ public abstract class Card implements Serializable {
 	 *            the card pattern
 	 */
 	public Card(CardRank cardRank, CardPattern cardPattern) {
-		System.out.println(cardRank);
 		this.cardRank = cardRank;
 		this.cardPattern = cardPattern;
 		
