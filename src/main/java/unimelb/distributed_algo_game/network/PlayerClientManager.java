@@ -31,7 +31,7 @@ public final class PlayerClientManager {
 
 	private boolean isLockRound = false;
 
-	private ArrayList<Player> playerList = null;
+	private Map<Integer, Player> playerList = null;
 
 	/**
 	 * Instantiates a new player client manager.
@@ -41,7 +41,7 @@ public final class PlayerClientManager {
 	 */
 	public PlayerClientManager(int playerClientNum) {
 		playerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
-		playerList = new ArrayList<Player>();
+		playerList = new HashMap<Integer, Player>();
 
 	}
 
@@ -50,7 +50,6 @@ public final class PlayerClientManager {
 	 */
 	public void setPlayer(Player mPlayer) {
 		this.mPlayer = mPlayer;
-		playerList.add(mPlayer);
 	}
 
 	/**
@@ -59,12 +58,12 @@ public final class PlayerClientManager {
 	 * @param clientThread
 	 *            the client thread
 	 */
-	public void addClient(int clientID, PlayerClientThread clientThread) {
+	public synchronized void addClient(int clientID, PlayerClientThread clientThread) {
 		playerClientList.put(clientID, clientThread);
 	}
 
-	public void addPlayer(int clientID) {
-		playerList.add(new AIPlayer(clientID));
+	public synchronized void addPlayer(int clientID) {
+		playerList.put(clientID, new AIPlayer(clientID));
 	}
 
 	/**
@@ -73,18 +72,18 @@ public final class PlayerClientManager {
 	 * @param clientThread
 	 *            the client thread
 	 */
-	public void removeClient(int clientThread) {
+	public synchronized void removeClient(int clientThread) {
 		playerClientList.remove(clientThread);
 	}
 
-	public void removePlayer(int nodeID) {
-		playerClientList.remove(nodeID);
+	public synchronized void removePlayer(int nodeID) {
+		playerList.remove(nodeID);
 	}
 
 	/**
 	 * Notify all clients.
 	 */
-	public void notifyAllClients(Object object, ClientConnectionState mConnectionState, MessageType messageType) {
+	public synchronized void notifyAllClients(Object object, ClientConnectionState mConnectionState, MessageType messageType) {
 		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = new BodyMessage(mPlayer.getID(), messageType, object);
@@ -97,7 +96,7 @@ public final class PlayerClientManager {
 	/**
 	 * This method sends a message to a client in the thread pool
 	 */
-	public void sendMessageToClient(Object message, int clientID, ClientConnectionState mConnectionState,
+	public synchronized void sendMessageToClient(Object message, int clientID, ClientConnectionState mConnectionState,
 			MessageType messageType) {
 
 		if (playerClientList.size() > 0) {
@@ -110,24 +109,30 @@ public final class PlayerClientManager {
 	}
 
 	public synchronized boolean isLockRound() {
-		for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
-			this.isLockRound = entry.getValue().getClientStatus();
-		}
-
-		return this.isLockRound;
-	}
-
-	public void updatePlayerCard(int nodeID, Card c) {
-		for (Player p : playerList) {
-			if (p.getID() == nodeID) {
-				p.selectFromDeck(c);
-				System.out.println("node: " + nodeID + ", " + c.getPattern() + ", " + c.getCardRank());
+		if(playerClientList.size() >= 1) {
+			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
+				this.isLockRound = entry.getValue().getClientStatus();
 			}
+
+			
+		} else {
+			
+			this.isLockRound =  false;
 		}
+		
+		return this.isLockRound;
+		
 	}
 
-	public void checkPlayerStatus() {
-		if (isLockRound()) {
+	public synchronized void updatePlayerCard(int nodeID, Card c) {
+		Player p = playerList.get(nodeID);
+		p.selectFromDeck(c);
+		System.out.println("node: " + nodeID + ", " + c.getPattern() + ", " + c.getCardRank());
+	
+	}
+
+	public synchronized void checkPlayerStatus() {
+		if (isLockRound() && playerList.size() >= 2) {
 			// Dealer draw a card
 			updatePlayerCard(mPlayer.getID(), mPlayer.getCard(1));
 			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);

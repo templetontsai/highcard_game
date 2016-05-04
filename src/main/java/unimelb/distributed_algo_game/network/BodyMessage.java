@@ -14,7 +14,8 @@ public class BodyMessage implements Serializable{
 	
 	public enum ACKCode {
 		NODE_ID_RECEIVED(0),
-		CARD_RECEIVED(1);
+		CARD_RECEIVED(1),
+		STILL_ALIVE(2);
 		/** The code. */
 		private int code;
 

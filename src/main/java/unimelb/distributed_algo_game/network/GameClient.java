@@ -10,11 +10,14 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
+import unimelb.distributed_algo_game.network.PlayerClientThread.StillAliveTimerTask;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
@@ -193,6 +196,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 			case NODE_ID_RECEIVED:
 				System.out.println("ACK Message received from leader node" + mBodyMessage.getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
+				//Start the still alive timer beacon to the leader
+				 Timer timer = new Timer();
+				 timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 			case CARD_RECEIVED:
 				break;
@@ -223,6 +229,25 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println("Uknown Message Type");
 
 		}
+	}
+	
+	private void sendStillAliveMessage() {
+		JSONObject mMessage = new JSONObject();
+		BodyMessage mBodyMessage = new BodyMessage(nodeID, MessageType.ACK, ACKCode.STILL_ALIVE);
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", mBodyMessage);
+		sendMessage(mMessage);
+	}
+	
+	final class StillAliveTimerTask extends TimerTask {
+
+		@Override
+		public void run() {
+			
+			sendStillAliveMessage();
+
+		}
+
 	}
 
 	/** Runs the game client as the leader of the game */
@@ -311,6 +336,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 			}
 		} catch (IOException ioe) {
 			// TODO Adding Error Handling
+			isRunning = false;
+			System.out.println("Leader has gone haywire");
 			ioe.printStackTrace();
 		}
 
@@ -336,6 +363,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 			e.printStackTrace();
 		} catch (IOException ioe) {
 			// Print the details of the exception error
+			isRunning = false;
+			System.out.println("Leader has gone haywire");
 			ioe.printStackTrace();
 		}
 

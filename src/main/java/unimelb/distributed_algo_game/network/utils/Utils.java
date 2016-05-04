@@ -6,6 +6,7 @@ package unimelb.distributed_algo_game.network.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.player.PlayerScore;
@@ -29,8 +30,8 @@ public class Utils {
 	 */
 	public static String compareRank(ArrayList<Player> players) {
 		// Initializes the variables
-		String matchDetails = "node" + players.get(0).getID() + " drew " + players.get(0).getSelectedCard().getCardRank() + " "
-				+ players.get(0).getSelectedCard().getPattern();
+		String matchDetails = "node" + players.get(0).getID() + " drew "
+				+ players.get(0).getSelectedCard().getCardRank() + " " + players.get(0).getSelectedCard().getPattern();
 		int winningScore = 0;
 		int playerID = 0;
 		boolean matchDraw = false;
@@ -46,6 +47,42 @@ public class Utils {
 			}
 			if (i > 0)
 				sb.append(", node" + players.get(i).getID() + " drew " + players.get(i).getSelectedCard().getCardRank()
+						+ " " + players.get(i).getSelectedCard().getPattern());
+		}
+		String winner = "";
+		// Ensures to check if there is a draw and awards no point in that case
+		if (!matchDraw) {
+			winner = players.get(playerID).getID() + " has won the match. " + sb.toString();
+			players.get(playerID).updateScore();
+		} else {
+			winner = "The match was declared a draw. " + sb.toString();
+		}
+		return winner;
+	}
+
+	public static synchronized String compareRank(Map<Integer, Player> players) {
+
+		// Initializes the variables
+		String matchDetails = "node" + players.get(0).getID() + " drew "
+				+ players.get(0).getSelectedCard().getCardRank() + " " + players.get(0).getSelectedCard().getPattern();
+		int winningScore = 0;
+		int playerID = 0;
+		boolean matchDraw = false;
+		StringBuilder sb = new StringBuilder(matchDetails);
+		int i = 0;
+		// Iterates through the players and picks the highest score to determine
+		// the winner
+		for(Map.Entry<Integer, Player> p:players.entrySet())
+		{
+			i = p.getValue().getID();
+			if (p.getValue().getSelectedCard().getCardRank().getCode() > winningScore) {
+				winningScore = p.getValue().getSelectedCard().getCardRank().getCode();
+				playerID = i;
+			} else if (p.getValue().getSelectedCard().getCardRank().getCode() == winningScore) {
+				matchDraw = true;
+			}
+			if (i > 0)
+				sb.append(", node" + players.get(i).getID() + " drew " + p.getValue().getSelectedCard().getCardRank()
 						+ " " + players.get(i).getSelectedCard().getPattern());
 		}
 		String winner = "";

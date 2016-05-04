@@ -16,6 +16,8 @@ public interface NetworkInterface {
 
 	/** The Constant GameServerName. */
 	public static final String GameServerName = "HighCard Game";
+	//ms
+	public static final int STILL_ALIVE_TIME_OUT = 1000;
 
 	/**
 	 * The Enum ServerConnectionState.
