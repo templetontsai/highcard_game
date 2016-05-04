@@ -4,16 +4,11 @@
 package unimelb.distributed_algo_game;
 
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
 
-import unimelb.distributed_algo_game.network.GameClient;
-import unimelb.distributed_algo_game.network.GameServer;
-import unimelb.distributed_algo_game.network.utils.Utils;
+import unimelb.distributed_algo_game.network.gui.MainGameFrameGUI;
 import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
-import unimelb.distributed_algo_game.pokers.Deck;
 import unimelb.distributed_algo_game.token.Token;
 
 // TODO: Auto-generated Javadoc
@@ -29,6 +24,9 @@ public class HighCardGameApp {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
+		
+		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game");
+		
 	    if (args.length > 0) {
 	    	runGame(new Integer(args[0]).intValue());
 		}
