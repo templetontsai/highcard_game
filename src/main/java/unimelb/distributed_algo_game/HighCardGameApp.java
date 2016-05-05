@@ -25,7 +25,7 @@ public class HighCardGameApp {
 	 */
 	public static void main(String[] args) {
 		
-		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game");
+		
 		
 	    if (args.length > 0) {
 	    	runGame(new Integer(args[0]).intValue());
@@ -40,17 +40,9 @@ public class HighCardGameApp {
 	public static void runGame(int id){
 		
 		if(id == 0) {
-			System.out.println("Dealer/Node0 Starts the game");		
-			// Initialize players
-			Player p = new HumanPlayer("Dealer", id);
-			p.setDealer(true);
-			Thread t = new Thread(p);
-			t.start();
-			t.setName("Human Player");
-			//Initialize game token for mutex
-			Token gameToken = new Token();
-			//Initialize queue for mutex control
-			ArrayList<Player> tokenRequests = new ArrayList<Player>();
+			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game");
+			mainGui.setNodeID(id);
+
 		} else {
 			Player p = new AIPlayer("AI 1", id);
 			Thread t = new Thread(p);

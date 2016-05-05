@@ -10,16 +10,21 @@ import java.awt.event.ActionEvent;
 
 public class MainGameFrameGUI extends JFrame{
 	private MainGamePanel mainPanel;
+	private MainGameLoginDealerPanel mainLoginPanel;
 	public MainGameFrameGUI(String name) {
 		super(name);
 		init();
 	}
 	
 	private void init() {
-		mainPanel = new MainGamePanel();
-		this.setContentPane(mainPanel);
-		this.pack();
+		mainLoginPanel = new MainGameLoginDealerPanel();
+		this.setContentPane(mainLoginPanel);
+		this.setSize(500, 500);
 		this.setVisible(true);
+	}
+	
+	public void setNodeID(int nodeID) {
+		mainLoginPanel.setNodeID(nodeID);
 	}
 	
 	
