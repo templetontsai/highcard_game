@@ -25,7 +25,7 @@ import unimelb.distributed_algo_game.pokers.Card;
  *
  * @author Ting-Ying Tsai
  */
-public class PlayerClientThread extends Thread implements ClientNetworkObserver {
+public class PlayerClientThread extends Thread {
 
 	/** The m socket. */
 	private Socket mSocket = null;
@@ -325,11 +325,5 @@ public class PlayerClientThread extends Thread implements ClientNetworkObserver 
 		this.isClientLockRound = isClientLockRound;
 	}
 
-	/**
-	 * Used to send an update message
-	 */
-	public void update() {
-
-	}
 
 }
