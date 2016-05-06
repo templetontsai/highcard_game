@@ -75,8 +75,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** Maintains reference to the current server node ID */
 	private int serverNodeID = 0;
 
+
 	/** Maintains logical ring reference to next node */
 	private int nextNode = -1;
+
 
 	private int nodeID = -1;
 
@@ -119,6 +121,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	}
 
+
 	/**
 	 * Sets the next logical neighbor of this node for creating a logical ring
 	 */
@@ -133,6 +136,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			throw new NullPointerException();
 		}
 	}
+
 
 	/*
 	 * Runs the thread for the game client
