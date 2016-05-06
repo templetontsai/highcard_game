@@ -197,7 +197,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 			ACKCode ackCode = (ACKCode) mBodyMessage.getMessage();
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
-				//System.out.println("ACK Message received from leader node" + mBodyMessage.getNodeID());
 				System.out.println("ACK Message received from leader node" + mBodyMessage.getGamePlayerInfo().getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
 				// Start the still alive timer beacon to the leader
@@ -218,7 +217,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 			((Card) mBodyMessage.getMessage()).showCard();
 			// Notify the dealer the card has been received
 			mMessage.put("header", ClientConnectionState.CONNECTED);
-			//mMessage.put("body", new BodyMessage(nodeID, MessageType.ACK, ACKCode.CARD_RECEIVED));
 			mMessage.put("body", new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CARD_RECEIVED));
 
 			sendMessage(mMessage);
@@ -238,8 +236,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
-		// BodyMessage mBodyMessage = new BodyMessage(nodeID, MessageType.ACK,
-		// ACKCode.STILL_ALIVE);
 		BodyMessage mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK,
 				ACKCode.STILL_ALIVE);
 		mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -274,7 +270,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 				// Acknowledgement that the server is still alive
 				case ACK:
 					
-					//mBodyMessage = new BodyMessage(nodeID, MessageType.CRD, "get card request");
 					mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "get card request");
 					mMessage.put("header", clientConnectionState);
 					mMessage.put("body", mBodyMessage);
@@ -410,9 +405,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 		if (this.clientConnectionState == ClientConnectionState.INIT) {
 
 			JSONObject mMessage = new JSONObject();
-
-			// BodyMessage bodyMessage = new BodyMessage(this.nodeID,
-			// MessageType.CON, "init");
 			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CON, "init");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
@@ -421,8 +413,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		} else {
 			JSONObject mMessage = new JSONObject();
-			
-			//BodyMessage bodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, "request a card");
 			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "request a card");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);

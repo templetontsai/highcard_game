@@ -76,7 +76,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 			this.mPlayer = mPlayer;
 			nodeID = this.mPlayer.getGamePlayerInfo().getNodeID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
-			//mPlayerClientManager.addPlayer(nodeID);
 			mPlayerClientManager.addPlayer(mPlayer.getGamePlayerInfo());
 
 		} else {
@@ -84,14 +83,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 			throw new NullPointerException();
 		}
 
-	}
-
-	/**
-	 * Sets the id.
-	 *
-	 */
-	public void setId(int nodeID) {
-		this.nodeID = nodeID;
 	}
 
 	/**
@@ -251,8 +242,5 @@ public final class GameServer implements Runnable, NetworkInterface {
 		
 	}
 
-	public int getID() {
-		return nodeID;
-	}
 
 }

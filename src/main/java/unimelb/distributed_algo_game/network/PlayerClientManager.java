@@ -63,7 +63,6 @@ public final class PlayerClientManager {
 	}
 
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
-		//playerList.put(clientID, new AIPlayer(clientID));
 		playerList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
 	}
 

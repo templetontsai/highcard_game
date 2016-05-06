@@ -31,9 +31,6 @@ public class PlayerClientThread extends Thread {
 	/** The m socket. */
 	private Socket mSocket = null;
 
-	/** The server node id. */
-	private int nodeID = -1;
-
 	/** The m object output stream. */
 	private ObjectOutputStream mObjectOutputStream = null;
 
@@ -75,7 +72,7 @@ public class PlayerClientThread extends Thread {
 			this.mSocket = mSocket;
 		} else
 			throw new NullPointerException();
-		this.nodeID = mGameServer.getID();
+
 		mLock = new Object();
 		mMessage = new JSONObject();
 		this.mGameServer = mGameServer;
@@ -283,7 +280,7 @@ public class PlayerClientThread extends Thread {
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
 			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
-			System.out.println("Connection lost in sendMessage, node: " + this.nodeID);
+			System.out.println("Connection lost in sendMessage, node: " + this.mGameDealerInfo.getNodeID());
 			isRunning = false;
 			ioe.printStackTrace();
 		}
@@ -312,7 +309,7 @@ public class PlayerClientThread extends Thread {
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
 			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
-			System.out.println("Connection lost in receiveMessage, node: " + this.nodeID);
+			System.out.println("Connection lost in receiveMessage, node: " + this.mGameDealerInfo.getNodeID());
 			isRunning = false;
 			//ioe.printStackTrace();
 		}
