@@ -74,6 +74,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 	
 	/**Maintains reference to the current server node ID*/
 	private int serverNodeID = 0;
+	
+	/**Maintains logical ring reference to next node*/
+	private int nextNode = -1;
 
 	private int nodeID = -1;
 
@@ -114,6 +117,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 			throw new NullPointerException();
 		}
 
+	}
+	
+	/**
+	 * Sets the next logical neighbor of this node for creating a logical ring
+	 */
+	public void setNextNode(){
+		if (mPlayer != null) {
+			if((nodeID+1)==configFileReader.totalNodes)
+				nextNode = 1;
+			else
+				nextNode = nodeID + 1;
+		} else {
+			System.out.println("Player can't be null");
+			throw new NullPointerException();
+		}
 	}
 
 	/*
