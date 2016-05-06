@@ -4,15 +4,13 @@
 package unimelb.distributed_algo_game.network;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.json.simple.JSONObject;
+import javax.swing.JPanel;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.network.utils.Utils;
+import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
@@ -47,6 +45,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	/** The m player client manager. */
 	private PlayerClientManager mPlayerClientManager;
+	
+	private MainGameLoginDealerPanel mPanel;
 
 	/**
 	 * Instantiates a new game server.
@@ -151,6 +151,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
+					mPanel.updatePlayerList(t.getClientNodeID());
 
 				}
 				// Close server port once the server is no longer running
@@ -240,6 +241,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayerClientManager.removeClient(nodeID);
 		mPlayerClientManager.removePlayer(nodeID);
 		
+	}
+	
+	public void setPanel(MainGameLoginDealerPanel panel) {
+		this.mPanel = panel;
 	}
 
 

@@ -87,8 +87,7 @@ public class AIPlayer extends Player {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				
+
 			}
 
 		}

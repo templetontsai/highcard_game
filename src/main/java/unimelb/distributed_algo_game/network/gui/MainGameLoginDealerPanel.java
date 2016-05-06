@@ -18,9 +18,12 @@ import unimelb.distributed_algo_game.token.Token;
 public class MainGameLoginDealerPanel extends JPanel {
 	private JTextField ipTextField;
 	private JTextField portTextField;
+	private JTextArea textArea;
 	private int nodeID = -1;
+	private MainGameLoginDealerPanel self;
 
 	public MainGameLoginDealerPanel() {
+		self = this;
 		setLayout(null);
 
 		ipTextField = new JTextField();
@@ -52,7 +55,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 					System.out.println("Dealer/Node0 Starts the game");
 					String gamePlayerInfo[] = {Integer.toString(nodeID), ipAddress, port};
 					// Initialize players
-					Player p = new HumanPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo));
+					Player p = new HumanPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo), self);
 					p.setDealer(true);
 					Thread t = new Thread(p);
 					t.start();
@@ -68,7 +71,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 		btnStart.setBounds(153, 214, 117, 25);
 		add(btnStart);
 
-		JTextArea textArea = new JTextArea();
+		textArea = new JTextArea();
 		textArea.setBounds(304, 96, 122, 143);
 		add(textArea);
 
@@ -77,6 +80,10 @@ public class MainGameLoginDealerPanel extends JPanel {
 		add(lblPlayerList);
 	}
 
+	public void updatePlayerList(int nodeID) {
+		textArea.append("Node" + nodeID + "is joined");
+	}
+	
 	public void setNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}
