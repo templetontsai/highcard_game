@@ -132,7 +132,8 @@ public final class PlayerClientManager {
 	}
 
 	public synchronized void checkPlayerStatus() {
-		if (isLockRound() && playerList.size() >= 2) {
+		//Trigger the play panel here and to have the fixed size of the player
+		if (isLockRound() && playerList.size() == 3) {
 			// Dealer draw a card
 			updatePlayerCard(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer.getCard(1));
 			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);

@@ -81,7 +81,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 	}
 
 	public void updatePlayerList(int nodeID) {
-		textArea.append("Node" + nodeID + "is joined");
+		textArea.append("Node" + nodeID + " is joined\n");
 	}
 	
 	public void setNodeID(int nodeID) {
