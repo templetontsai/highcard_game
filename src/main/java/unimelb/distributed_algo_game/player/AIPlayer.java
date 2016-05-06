@@ -42,14 +42,14 @@ public class AIPlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public AIPlayer(String name, int id) {
-		super(name, id, GameState.NONE, new PlayerScore(id));
+	public AIPlayer(String name, GamePlayerInfo gamePlayerInfo) {
+		super(name, gamePlayerInfo, GameState.NONE);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 	}
 	
-	public AIPlayer(int id) {
-		super("AI", id, GameState.NONE, new PlayerScore(id));
+	public AIPlayer(GamePlayerInfo gamePlayerInfo) {
+		super("AI", gamePlayerInfo, GameState.NONE);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 	}

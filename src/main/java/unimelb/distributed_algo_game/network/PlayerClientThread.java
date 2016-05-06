@@ -15,8 +15,9 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.network.GameClient.StillAliveTimerTask;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.player.GamePlayerInfo;
+import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
@@ -56,6 +57,10 @@ public class PlayerClientThread extends Thread {
 	private boolean isClientLockRound;
 
 	private boolean isClientStillAvle = false;
+	
+	private GamePlayerInfo mGameDealerInfo = null;
+	
+	private GamePlayerInfo mGameClientInfo = null;
 
 	/**
 	 * Instantiates a new player client thread.
@@ -65,7 +70,7 @@ public class PlayerClientThread extends Thread {
 	 * @param clientID
 	 *            the client id
 	 */
-	public PlayerClientThread(Socket mSocket, GameServer mGameServer) {
+	public PlayerClientThread(Socket mSocket, GameServer mGameServer, GamePlayerInfo mGameDealerInfo) {
 		if (mSocket != null) {
 			this.mSocket = mSocket;
 		} else
@@ -74,7 +79,10 @@ public class PlayerClientThread extends Thread {
 		mLock = new Object();
 		mMessage = new JSONObject();
 		this.mGameServer = mGameServer;
+		this.mGameDealerInfo = mGameDealerInfo;
 	}
+	
+
 
 	/**
 	 * Runs the main method of the client thread
@@ -169,22 +177,24 @@ public class PlayerClientThread extends Thread {
 	 * 
 	 * @param mBodyMessage
 	 */
-	private void checkMessageType(BodyMessage mBodyMessage) {
+	private synchronized void checkMessageType(BodyMessage mBodyMessage) {
 		ClientConnectionState connectionState;
 		MessageType messagType = mBodyMessage.getMessageType();
 		Object message = mBodyMessage.getMessage();
+		
 
 		switch (messagType) {
 		case CON:
 			// if the game is started already, don't respond to the message
 			if (!getClientStatus()) {
 
-				clientNodeID = mBodyMessage.getNodeID();
-
+				//clientNodeID = mBodyMessage.getNodeID();
+				this.mGameClientInfo = mBodyMessage.getGamePlayerInfo();
+				clientNodeID = this.mGameClientInfo.getNodeID();
 				connectionState = ClientConnectionState.CONNECTED;
 				// Player specifies the card to
-				mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
-
+				//mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
+				mBodyMessage = new BodyMessage(mGameDealerInfo.getNodeID(), MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
 				mMessage.put("header", connectionState);
 				mMessage.put("body", mBodyMessage);
 				sendMessage(mMessage);
@@ -214,7 +224,7 @@ public class PlayerClientThread extends Thread {
 				synchronized (mLock) {
 					isClientStillAvle = true;
 				}
-				System.out.println("Node: " + this.clientNodeID + " is still playing");
+				System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
 				break;
 			default:
 				System.out.println("Uknown ACK code");
@@ -228,7 +238,8 @@ public class PlayerClientThread extends Thread {
 			// Player specifies the card to
 			Card c = mGameServer.getCard(1);
 			mGameServer.updatePlayerCard(mBodyMessage.getNodeID(), c);
-			mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
+			//mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
+			mBodyMessage = new BodyMessage(mGameDealerInfo.getNodeID(), MessageType.CRD, c);
 
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);
@@ -270,7 +281,7 @@ public class PlayerClientThread extends Thread {
 			}
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
-			mGameServer.removeClient(this.clientNodeID);
+			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in sendMessage, node: " + this.nodeID);
 			isRunning = false;
 			ioe.printStackTrace();
@@ -299,7 +310,7 @@ public class PlayerClientThread extends Thread {
 			e.printStackTrace();
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
-			mGameServer.removeClient(this.clientNodeID);
+			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in receiveMessage, node: " + this.nodeID);
 			isRunning = false;
 			//ioe.printStackTrace();
@@ -309,12 +320,8 @@ public class PlayerClientThread extends Thread {
 
 	}
 
-	public int getClientNodeID() {
-		int id = -1;
-		synchronized (mLock) {
-			id = clientNodeID;
-		}
-		return id;
+	public synchronized int getClientNodeID() {
+		return mGameClientInfo.getNodeID();
 	}
 
 	public synchronized boolean getClientStatus() {
@@ -323,6 +330,10 @@ public class PlayerClientThread extends Thread {
 
 	public synchronized void setClientStatus(boolean isClientLockRound) {
 		this.isClientLockRound = isClientLockRound;
+	}
+	
+	public synchronized GamePlayerInfo getClientGamePlayerInfo() {
+		return this.mGameClientInfo;
 	}
 
 

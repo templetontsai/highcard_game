@@ -44,6 +44,7 @@ public class HighCardGameApp {
 			mainGui.setNodeID(id);
 
 		} else {
+			
 			Player p = new AIPlayer("AI 1", id);
 			Thread t = new Thread(p);
 			t.setName("AI Player Thread");

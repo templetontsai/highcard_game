@@ -103,6 +103,7 @@ public class Utils {
 	 *            the players
 	 * @return the leader board
 	 */
+	/*
 	public static String getLeaderBoard(ArrayList<Player> players) {
 		String leaderboard = "";
 		ArrayList<PlayerScore> scoreBoard = new ArrayList<PlayerScore>();
@@ -121,5 +122,5 @@ public class Utils {
 			sb.append(j + ". Player " + scoreBoard.get(i).getPlayerID() + " - " + scoreBoard.get(i).getScore() + " \n");
 		}
 		return sb.toString();
-	}
+	}*/
 }

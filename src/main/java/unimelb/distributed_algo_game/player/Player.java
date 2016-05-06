@@ -44,8 +44,16 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	
 	/** This is the deck of the dealer. */
 	private Deck mDeck = null;
+	
+	private GamePlayerInfo mGamePlayerInfo = null;
 
 
+	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState) {
+		this.name = name;
+		this.mGamePlayerInfo = gamePlayerInfo;
+		this.playerScore = playerScore;
+		this.gameState = gameState;
+	}
 
 	/**
 	 * Method to initialize the player name, id and state.
@@ -59,9 +67,9 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	 * @param playerScore
 	 *            the player score
 	 */
-	public Player(String name, int id, GameState gameState, PlayerScore playerScore) {
+	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState, PlayerScore playerScore) {
 		this.name = name;
-		this.id = id;
+		this.mGamePlayerInfo = gamePlayerInfo;
 		this.playerScore = playerScore;
 		this.gameState = gameState;
 	}
@@ -92,14 +100,9 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	public Card getSelectedCard() {
 		return selectedCard;
 	}
-
-	/**
-	 * This method returns a player score object.
-	 *
-	 * @return the player score
-	 */
-	public PlayerScore getPlayerScore() {
-		return playerScore;
+	
+	public int getPlayerScore() {
+		return playerScore.getScore();
 	}
 
 	/**
@@ -179,6 +182,10 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	 */
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
+	}	
+	
+	public GamePlayerInfo getGamePlayerInfo() {
+		return this.mGamePlayerInfo;
 	}
 
 	/**

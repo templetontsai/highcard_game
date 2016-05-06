@@ -2,6 +2,8 @@ package unimelb.distributed_algo_game.network;
 
 import java.io.Serializable;
 
+import unimelb.distributed_algo_game.player.GamePlayerInfo;
+
 /**
  * 
  * @author Lupiya
@@ -9,6 +11,7 @@ import java.io.Serializable;
  */
 public class BodyMessage implements Serializable{
 	private int nodeID;
+	private GamePlayerInfo mGamePlayerInfo;
 	private MessageType messageType;
 	private Object message;
 	
@@ -68,6 +71,12 @@ public class BodyMessage implements Serializable{
 		this.message = message;
 	}
 	
+	public BodyMessage(GamePlayerInfo gamePlayerInfo, MessageType messageType, Object message){
+		this.mGamePlayerInfo = gamePlayerInfo;
+		this.messageType = messageType;
+		this.message = message;
+	}
+	
 	/**
 	 * Returns the client ID
 	 */
@@ -102,5 +111,9 @@ public class BodyMessage implements Serializable{
 	 */
 	public void setMessage(Object message){
 		this.message = message;
+	}
+	
+	public GamePlayerInfo getGamePlayerInfo() {
+		return this.mGamePlayerInfo;
 	}
 }

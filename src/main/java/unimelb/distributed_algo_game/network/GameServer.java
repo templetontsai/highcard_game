@@ -85,7 +85,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 			this.mPlayer = mPlayer;
 			nodeID = this.mPlayer.getID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
-			mPlayerClientManager.addPlayer(nodeID);
+			//mPlayerClientManager.addPlayer(nodeID);
+			mPlayerClientManager.addPlayer(mPlayer.getGamePlayerInfo());
 
 		} else {
 			System.out.println("Player can't be null");
@@ -154,7 +155,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// thread pool
 					mSocket = mServerSocket.accept();
 					System.out.println("a client connected");
-					PlayerClientThread t = new PlayerClientThread(mSocket, this);
+					PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
 					//Block the new connection to join in the middle of the game
 					if (mPlayerClientManager.isLockRound()) {
 						t.setClientStatus(true);
@@ -166,7 +167,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// then add to the manager's list
 					while (t.getClientNodeID() == -1)
 						;
-					mPlayerClientManager.addPlayer(t.getClientNodeID());
+					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 
 				}

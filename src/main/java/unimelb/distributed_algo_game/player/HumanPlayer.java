@@ -43,8 +43,8 @@ public class HumanPlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public HumanPlayer(String name, int id) {
-		super(name, id, GameState.NONE, new PlayerScore(id));
+	public HumanPlayer(String name, GamePlayerInfo gamePlayerInfo) {
+		super(name, gamePlayerInfo, GameState.NONE, new PlayerScore());
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 

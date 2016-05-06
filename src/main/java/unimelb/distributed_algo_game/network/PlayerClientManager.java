@@ -3,7 +3,6 @@
  */
 package unimelb.distributed_algo_game.network;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.player.AIPlayer;
+import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
@@ -62,8 +62,9 @@ public final class PlayerClientManager {
 		playerClientList.put(clientID, clientThread);
 	}
 
-	public synchronized void addPlayer(int clientID) {
-		playerList.put(clientID, new AIPlayer(clientID));
+	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
+		//playerList.put(clientID, new AIPlayer(clientID));
+		playerList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
 	}
 
 	/**

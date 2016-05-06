@@ -1,18 +1,19 @@
 package unimelb.distributed_algo_game.network.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.token.Token;
-
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.awt.event.ActionEvent;
 
 public class MainGameLoginDealerPanel extends JPanel {
 	private JTextField ipTextField;
@@ -49,9 +50,9 @@ public class MainGameLoginDealerPanel extends JPanel {
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
 					System.out.println("Dealer/Node0 Starts the game");
-
+					String gamePlayerInfo[] = {Integer.toString(nodeID), ipAddress, port};
 					// Initialize players
-					Player p = new HumanPlayer("Dealer", nodeID);
+					Player p = new HumanPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo));
 					p.setDealer(true);
 					Thread t = new Thread(p);
 					t.start();
