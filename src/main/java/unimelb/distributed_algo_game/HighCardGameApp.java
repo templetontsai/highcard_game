@@ -40,15 +40,16 @@ public class HighCardGameApp {
 	public static void runGame(int id){
 		
 		if(id == 0) {
-			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game");
+			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
 			mainGui.setNodeID(id);
 
 		} else {
 			
-			Player p = new AIPlayer("AI 1", id);
-			Thread t = new Thread(p);
-			t.setName("AI Player Thread");
-			t.start();
+
+			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
+			mainGui.setClientNodeID(id);
+			
+
 		}
 		
 		
