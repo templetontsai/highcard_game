@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 
 import org.json.simple.JSONObject;
 
@@ -48,12 +47,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	/** The m player client manager. */
 	private PlayerClientManager mPlayerClientManager;
-	
-	/** The configuration file with addresses and ports**/
-	private FileReaderWriter configFileReader;
-	
-	/** Maintains the list of the server addresses **/
-	private List<String> serverDetails;
 
 	/**
 	 * Instantiates a new game server.
@@ -62,8 +55,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mLock = new Object();
 		mConnectionState = ServerConnectionState.DISCONNECTED;
 		mPlayerClientManager = new PlayerClientManager(10);
-		configFileReader = new FileReaderWriter();
-		configFileReader.readConfig();
 	}
 
 	/**
@@ -207,9 +198,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 		try {
 
-			serverDetails = configFileReader.getClientDetails(mPlayer.getID());
-			int port =  Integer.parseInt(serverDetails.get(1));
-			mServerSocket = new ServerSocket(port);
+			mServerSocket = new ServerSocket(NetworkInterface.PORT);
 			mConnectionState = ServerConnectionState.CONNECTED;
 
 		} catch (IOException ioe) {

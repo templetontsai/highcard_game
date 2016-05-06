@@ -66,20 +66,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
 
-	/** The configuration file with addresses and ports **/
-	private FileReaderWriter configFileReader;
-
-	/** Maintains list of server addresses */
-	private List<String> serverDetails;
-
-	/** Maintains reference to the current server node ID */
-	private int serverNodeID = 0;
-
-
-	/** Maintains logical ring reference to next node */
-	private int nextNode = -1;
-
-
 	private int nodeID = -1;
 
 	/**
@@ -88,8 +74,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	protected GameClient() {
 		mLock = new Object();
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
-		configFileReader = new FileReaderWriter();
-		configFileReader.readConfig();
+
 	}
 
 	/**
@@ -122,20 +107,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 
-	/**
-	 * Sets the next logical neighbor of this node for creating a logical ring
-	 */
-	public void setNextNode() {
-		if (mPlayer != null) {
-			if ((nodeID + 1) == configFileReader.totalNodes)
-				nextNode = 1;
-			else
-				nextNode = nodeID + 1;
-		} else {
-			System.out.println("Player can't be null");
-			throw new NullPointerException();
-		}
-	}
+
 
 
 	/*
@@ -335,9 +307,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public boolean connect() {
 
 		try {
-			serverDetails = configFileReader.getClientDetails(serverNodeID);
-			String hostName = serverDetails.get(0);
-			int port = Integer.parseInt(serverDetails.get(1));
+
 			mSocket = new Socket("localhost", NetworkInterface.PORT);
 			clientConnectionState = ClientConnectionState.INIT;
 
