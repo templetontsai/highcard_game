@@ -147,7 +147,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 		}
 
 		public void updateLog(DocumentEvent e, String action) {
-			Document doc = (Document) e.getDocument();
+			
 			playerCount++;
 			if (playerCount == 3) {
 				System.out.println("button visible");
