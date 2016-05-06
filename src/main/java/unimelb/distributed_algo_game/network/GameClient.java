@@ -65,20 +65,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
-	
-	/** The configuration file with addresses and ports**/
-	private FileReaderWriter configFileReader;
-	
-	/**Maintains list of server addresses */
-	private List<String> serverDetails;
-	
-	/**Maintains reference to the current server node ID*/
-	private int serverNodeID = 0;
-	
-	/**Maintains logical ring reference to next node*/
-	private int nextNode = -1;
 
-	private int nodeID = -1;
 
 	/**
 	 * Instantiates a new game client.
@@ -86,8 +73,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	protected GameClient() {
 		mLock = new Object();
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
-		configFileReader = new FileReaderWriter();
-		configFileReader.readConfig();
+
 	}
 
 	/**
@@ -111,28 +97,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
-			nodeID = this.mPlayer.getID();
+			
 		} else {
 			System.out.println("Player can't be null");
 			throw new NullPointerException();
 		}
 
 	}
-	
-	/**
-	 * Sets the next logical neighbor of this node for creating a logical ring
-	 */
-	public void setNextNode(){
-		if (mPlayer != null) {
-			if((nodeID+1)==configFileReader.totalNodes)
-				nextNode = 1;
-			else
-				nextNode = nodeID + 1;
-		} else {
-			System.out.println("Player can't be null");
-			throw new NullPointerException();
-		}
-	}
+
+
+
+
 
 	/*
 	 * Runs the thread for the game client
@@ -222,11 +197,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			ACKCode ackCode = (ACKCode) mBodyMessage.getMessage();
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
-				System.out.println("ACK Message received from leader node" + mBodyMessage.getNodeID());
+				System.out.println("ACK Message received from leader node" + mBodyMessage.getGamePlayerInfo().getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
-				//Start the still alive timer beacon to the leader
-				 Timer timer = new Timer();
-				 timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
+				// Start the still alive timer beacon to the leader
+				Timer timer = new Timer();
+				timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 			case CARD_RECEIVED:
 				break;
@@ -242,10 +217,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 			((Card) mBodyMessage.getMessage()).showCard();
 			// Notify the dealer the card has been received
 			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", new BodyMessage(nodeID, MessageType.ACK, ACKCode.CARD_RECEIVED));
-			
+			mMessage.put("body", new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CARD_RECEIVED));
+
 			sendMessage(mMessage);
-			
+
 			break;
 		case BCT:
 			System.out.println(mBodyMessage.getMessage());
@@ -258,20 +233,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		}
 	}
-	
+
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
-		BodyMessage mBodyMessage = new BodyMessage(nodeID, MessageType.ACK, ACKCode.STILL_ALIVE);
+		BodyMessage mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK,
+				ACKCode.STILL_ALIVE);
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", mBodyMessage);
 		sendMessage(mMessage);
 	}
-	
+
 	final class StillAliveTimerTask extends TimerTask {
 
 		@Override
 		public void run() {
-			
+
 			sendStillAliveMessage();
 
 		}
@@ -293,8 +269,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 				switch (serverConnectionState) {
 				// Acknowledgement that the server is still alive
 				case ACK:
-
-					mBodyMessage = new BodyMessage(nodeID, MessageType.CRD, "get card request");
+					
+					mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "get card request");
 					mMessage.put("header", clientConnectionState);
 					mMessage.put("body", mBodyMessage);
 					sendMessage(mMessage);
@@ -325,9 +301,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public boolean connect() {
 
 		try {
-		    serverDetails = configFileReader.getClientDetails(serverNodeID);
-			String hostName = serverDetails.get(0);
-			int port =  Integer.parseInt(serverDetails.get(1));
+
 			mSocket = new Socket("localhost", NetworkInterface.PORT);
 			clientConnectionState = ClientConnectionState.INIT;
 
@@ -354,13 +328,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public void sendMessage(Object mGameSendDataObject) {
 
 		try {
-			
+
 			if (mObjectOutputStream != null) {
-				
+
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
 				mObjectOutputStream.reset();
-				
+
 			} else {
 				System.out.println("mObjectOutputStream is null");
 			}
@@ -431,9 +405,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		if (this.clientConnectionState == ClientConnectionState.INIT) {
 
 			JSONObject mMessage = new JSONObject();
-
-			BodyMessage bodyMessage = new BodyMessage(this.nodeID, MessageType.CON, "init");
-
+			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CON, "init");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 
@@ -441,9 +413,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		} else {
 			JSONObject mMessage = new JSONObject();
-
-			BodyMessage bodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, "request a card");
-
+			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "request a card");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 

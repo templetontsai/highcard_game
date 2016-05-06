@@ -18,6 +18,9 @@ public class PlayerScore {
 	/** The score. */
 	private int score = 0;
 
+	public PlayerScore() {
+		
+	}
 	/**
 	 * Constructor for the class that initializes the object.
 	 *

@@ -5,7 +5,7 @@ package unimelb.distributed_algo_game.player;
 
 import unimelb.distributed_algo_game.network.GameClient;
 import unimelb.distributed_algo_game.network.GameServer;
-import unimelb.distributed_algo_game.pokers.Card;
+import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
 import unimelb.distributed_algo_game.state.GameState;
 
 
@@ -33,6 +33,8 @@ public class HumanPlayer extends Player {
 
 	/** The game server thread. */
 	private Thread gameServerThread = null;
+	
+	private MainGameLoginDealerPanel mPanel = null;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -43,10 +45,11 @@ public class HumanPlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public HumanPlayer(String name, int id) {
-		super(name, id, GameState.NONE, new PlayerScore(id));
+	public HumanPlayer(String name, GamePlayerInfo gamePlayerInfo, MainGameLoginDealerPanel panel) {
+		super(name, gamePlayerInfo, GameState.NONE, new PlayerScore());
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
+		this.mPanel = panel;
 
 	}
 
@@ -56,6 +59,7 @@ public class HumanPlayer extends Player {
 	public void run() {
 		
 		gameServer.setPlayer(this);
+		gameServer.setPanel(mPanel);
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();

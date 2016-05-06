@@ -1,14 +1,23 @@
 package unimelb.distributed_algo_game.network.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
+import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.token.Token;
+
 
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -25,15 +34,25 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
+
 public class MainGameLoginDealerPanel extends JPanel {
 	private JTextField ipTextField;
 	private JTextField portTextField;
+	private JTextArea textArea;
 	private int nodeID = -1;
-	JTextArea textArea;
-	JButton btnPlay;
+
+	
+	private JButton btnPlay;
+	private MainGameLoginDealerPanel self;
 	private static int playerCount = 0;
 
 	public MainGameLoginDealerPanel(MainGameFrameGUI mainGameFrameGUI) {
+
+	
+
+	
+		self = this;
+
 		setLayout(null);
 
 		ipTextField = new JTextField();
@@ -63,9 +82,9 @@ public class MainGameLoginDealerPanel extends JPanel {
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
 					System.out.println("Dealer/Node0 Starts the game");
-
+					String gamePlayerInfo[] = {Integer.toString(nodeID), ipAddress, port};
 					// Initialize players
-					Player p = new HumanPlayer("Dealer", nodeID);
+					Player p = new HumanPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo), self);
 					p.setDealer(true);
 					Thread t = new Thread(p);
 					t.start();
@@ -80,6 +99,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 		});
 		btnStart.setBounds(153, 214, 117, 25);
 		add(btnStart);
+
 
 		btnPlay = new JButton("Play");
 		btnPlay.addActionListener(new ActionListener() {
@@ -105,6 +125,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 		add(btnPlay);
 		btnPlay.setVisible(false);
 
+
 		textArea = new JTextArea();
 		textArea.setBounds(304, 96, 122, 143);
 		add(textArea);
@@ -116,6 +137,10 @@ public class MainGameLoginDealerPanel extends JPanel {
 		add(lblPlayerList);
 	}
 
+	public void updatePlayerList(int nodeID) {
+		textArea.append("Node" + nodeID + "is joined");
+	}
+	
 	public void setNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}

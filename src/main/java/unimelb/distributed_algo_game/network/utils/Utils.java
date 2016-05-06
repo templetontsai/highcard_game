@@ -30,7 +30,7 @@ public class Utils {
 	 */
 	public static String compareRank(ArrayList<Player> players) {
 		// Initializes the variables
-		String matchDetails = "node" + players.get(0).getID() + " drew "
+		String matchDetails = "node" + players.get(0).getGamePlayerInfo().getNodeID() + " drew "
 				+ players.get(0).getSelectedCard().getCardRank() + " " + players.get(0).getSelectedCard().getPattern();
 		int winningScore = 0;
 		int playerID = 0;
@@ -46,13 +46,13 @@ public class Utils {
 				matchDraw = true;
 			}
 			if (i > 0)
-				sb.append(", node" + players.get(i).getID() + " drew " + players.get(i).getSelectedCard().getCardRank()
+				sb.append(", node" + players.get(i).getGamePlayerInfo().getNodeID() + " drew " + players.get(i).getSelectedCard().getCardRank()
 						+ " " + players.get(i).getSelectedCard().getPattern());
 		}
 		String winner = "";
 		// Ensures to check if there is a draw and awards no point in that case
 		if (!matchDraw) {
-			winner = players.get(playerID).getID() + " has won the match. " + sb.toString();
+			winner = players.get(playerID).getGamePlayerInfo().getNodeID() + " has won the match. " + sb.toString();
 			players.get(playerID).updateScore();
 		} else {
 			winner = "The match was declared a draw. " + sb.toString();
@@ -63,7 +63,7 @@ public class Utils {
 	public static synchronized String compareRank(Map<Integer, Player> players) {
 
 		// Initializes the variables
-		String matchDetails = "node" + players.get(0).getID() + " drew "
+		String matchDetails = "node" + players.get(0).getGamePlayerInfo().getNodeID() + " drew "
 				+ players.get(0).getSelectedCard().getCardRank() + " " + players.get(0).getSelectedCard().getPattern();
 		int winningScore = 0;
 		int playerID = 0;
@@ -74,7 +74,9 @@ public class Utils {
 		// the winner
 		for(Map.Entry<Integer, Player> p:players.entrySet())
 		{
-			i = p.getValue().getID();
+			i = p.getValue().getGamePlayerInfo().getNodeID();
+			
+
 			if (p.getValue().getSelectedCard().getCardRank().getCode() > winningScore) {
 				winningScore = p.getValue().getSelectedCard().getCardRank().getCode();
 				playerID = i;
@@ -82,13 +84,13 @@ public class Utils {
 				matchDraw = true;
 			}
 			if (i > 0)
-				sb.append(", node" + players.get(i).getID() + " drew " + p.getValue().getSelectedCard().getCardRank()
+				sb.append(", node" + players.get(i).getGamePlayerInfo().getNodeID() + " drew " + p.getValue().getSelectedCard().getCardRank()
 						+ " " + players.get(i).getSelectedCard().getPattern());
 		}
 		String winner = "";
 		// Ensures to check if there is a draw and awards no point in that case
 		if (!matchDraw) {
-			winner = players.get(playerID).getID() + " has won the match. " + sb.toString();
+			winner = players.get(playerID).getGamePlayerInfo().getNodeID() + " has won the match. " + sb.toString();
 			players.get(playerID).updateScore();
 		} else {
 			winner = "The match was declared a draw. " + sb.toString();
@@ -103,6 +105,7 @@ public class Utils {
 	 *            the players
 	 * @return the leader board
 	 */
+	/*
 	public static String getLeaderBoard(ArrayList<Player> players) {
 		String leaderboard = "";
 		ArrayList<PlayerScore> scoreBoard = new ArrayList<PlayerScore>();
@@ -121,5 +124,5 @@ public class Utils {
 			sb.append(j + ". Player " + scoreBoard.get(i).getPlayerID() + " - " + scoreBoard.get(i).getScore() + " \n");
 		}
 		return sb.toString();
-	}
+	}*/
 }

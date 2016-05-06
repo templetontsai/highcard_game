@@ -41,12 +41,8 @@ public class HighCardGameApp {
 		
 		if(id == 0) {
 			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
-			mainGui.setNodeID(id);
-
 		} else {
-			
 			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
-			mainGui.setClientNodeID(id);
 			
 		}
 		

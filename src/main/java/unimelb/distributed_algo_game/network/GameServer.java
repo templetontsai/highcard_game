@@ -4,16 +4,13 @@
 package unimelb.distributed_algo_game.network;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 
-import org.json.simple.JSONObject;
+import javax.swing.JPanel;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.network.utils.Utils;
+import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
@@ -49,11 +46,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	/** The m player client manager. */
 	private PlayerClientManager mPlayerClientManager;
 	
-	/** The configuration file with addresses and ports**/
-	private FileReaderWriter configFileReader;
-	
-	/** Maintains the list of the server addresses **/
-	private List<String> serverDetails;
+	private MainGameLoginDealerPanel mPanel;
 
 	/**
 	 * Instantiates a new game server.
@@ -62,8 +55,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mLock = new Object();
 		mConnectionState = ServerConnectionState.DISCONNECTED;
 		mPlayerClientManager = new PlayerClientManager(10);
-		configFileReader = new FileReaderWriter();
-		configFileReader.readConfig();
 	}
 
 	/**
@@ -83,23 +74,15 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
-			nodeID = this.mPlayer.getID();
+			nodeID = this.mPlayer.getGamePlayerInfo().getNodeID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
-			mPlayerClientManager.addPlayer(nodeID);
+			mPlayerClientManager.addPlayer(mPlayer.getGamePlayerInfo());
 
 		} else {
 			System.out.println("Player can't be null");
 			throw new NullPointerException();
 		}
 
-	}
-
-	/**
-	 * Sets the id.
-	 *
-	 */
-	public void setId(int nodeID) {
-		this.nodeID = nodeID;
 	}
 
 	/**
@@ -154,7 +137,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// thread pool
 					mSocket = mServerSocket.accept();
 					System.out.println("a client connected");
-					PlayerClientThread t = new PlayerClientThread(mSocket, this);
+					PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
 					//Block the new connection to join in the middle of the game
 					if (mPlayerClientManager.isLockRound()) {
 						t.setClientStatus(true);
@@ -166,8 +149,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// then add to the manager's list
 					while (t.getClientNodeID() == -1)
 						;
-					mPlayerClientManager.addPlayer(t.getClientNodeID());
+					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
+					mPanel.updatePlayerList(t.getClientNodeID());
 
 				}
 				// Close server port once the server is no longer running
@@ -206,9 +190,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 		try {
 
-			serverDetails = configFileReader.getClientDetails(mPlayer.getID());
-			int port =  Integer.parseInt(serverDetails.get(1));
-			mServerSocket = new ServerSocket(port);
+			mServerSocket = new ServerSocket(NetworkInterface.PORT);
 			mConnectionState = ServerConnectionState.CONNECTED;
 
 		} catch (IOException ioe) {
@@ -260,9 +242,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayerClientManager.removePlayer(nodeID);
 		
 	}
-
-	public int getID() {
-		return nodeID;
+	
+	public void setPanel(MainGameLoginDealerPanel panel) {
+		this.mPanel = panel;
 	}
+
 
 }
