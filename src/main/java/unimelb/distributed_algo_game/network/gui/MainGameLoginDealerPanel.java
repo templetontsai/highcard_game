@@ -1,5 +1,11 @@
 package unimelb.distributed_algo_game.network.gui;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -18,39 +24,18 @@ import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.token.Token;
 
-
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
-import java.awt.event.ActionListener;
-import java.net.URL;
-import java.util.ArrayList;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-
-
 public class MainGameLoginDealerPanel extends JPanel {
 	private JTextField ipTextField;
 	private JTextField portTextField;
 	private JTextArea textArea;
 	private int nodeID = -1;
 
-	
 	private JButton btnPlay;
 	private MainGameLoginDealerPanel self;
 	private static int playerCount = 0;
 
-	public MainGameLoginDealerPanel(MainGameFrameGUI mainGameFrameGUI) {
+	public MainGameLoginDealerPanel(final MainGameFrameGUI mainGameFrameGUI) {
 
-	
-
-	
 		self = this;
 
 		setLayout(null);
@@ -82,7 +67,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
 					System.out.println("Dealer/Node0 Starts the game");
-					String gamePlayerInfo[] = {Integer.toString(nodeID), ipAddress, port};
+					String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
 					// Initialize players
 					Player p = new HumanPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo), self);
 					p.setDealer(true);
@@ -100,7 +85,6 @@ public class MainGameLoginDealerPanel extends JPanel {
 		btnStart.setBounds(153, 214, 117, 25);
 		add(btnStart);
 
-
 		btnPlay = new JButton("Play");
 		btnPlay.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent action) {
@@ -110,21 +94,20 @@ public class MainGameLoginDealerPanel extends JPanel {
 				mainGameFrameGUI.getContentPane().removeAll();
 
 				CardPanel board = new CardPanel();
-				//add(board, BorderLayout.CENTER);
+				// add(board, BorderLayout.CENTER);
 
 				mainGameFrameGUI.setContentPane(board);// Adding to
-																// content pane,
-																// not to Frame
+														// content pane,
+														// not to Frame
 				mainGameFrameGUI.setSize(500, 500);
 				mainGameFrameGUI.setVisible(true);
 				repaint();
-				//mainGameFrameGUI.printAll(getGraphics());
+				// mainGameFrameGUI.printAll(getGraphics());
 			}
 		});
 		btnPlay.setBounds(153, 290, 117, 25);
 		add(btnPlay);
 		btnPlay.setVisible(false);
-
 
 		textArea = new JTextArea();
 		textArea.setBounds(304, 96, 122, 143);
@@ -140,7 +123,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 	public void updatePlayerList(int nodeID) {
 		textArea.append("Node" + nodeID + " is joined\n");
 	}
-	
+
 	public void setNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}
@@ -204,32 +187,36 @@ public class MainGameLoginDealerPanel extends JPanel {
 		 */
 		private void loadImage() {
 			ClassLoader cl = MainGameLoginDealerPanel.class.getClassLoader();
-			//URL imageURL = cl.getResource("/main/java/unimelb/distributed_algo_game/network/gui/cards.png");
-			//if (imageURL != null)
-				cardImages = Toolkit.getDefaultToolkit().createImage("src/main/java/unimelb/distributed_algo_game/network/gui/cards.png");
+			// URL imageURL =
+			// cl.getResource("/main/java/unimelb/distributed_algo_game/network/gui/cards.png");
+			// if (imageURL != null)
+			cardImages = Toolkit.getDefaultToolkit()
+					.createImage("src/main/java/unimelb/distributed_algo_game/network/gui/cards.png");
 		}
-		 public void paintComponent(Graphics g) {
-	         super.paintComponent(g);
-	         if (cardImages == null) {
-	            g.drawString("Error: Can't get card images!", 10,30);
-	            return;
-	         }
-	         g.setFont(bigFont);
-	         g.drawImage(cardImages,109,15,188,138,158,492,237,615,this);
-	        
-	      }
-		 
-		  public void drawCard(Graphics g, int card, int x, int y) {
-		         int cx;    // x-coord of upper left corner of the card inside cardsImage
-		         int cy;    // y-coord of upper left corner of the card inside cardsImage
-		        
-		            cy = 4*123;   // coords for a face-down card.
-		            cx = 2*79;
-		            System.out.println("I am here");
-		         g.drawImage(cardImages,15, 15 ,250,250,this);
-		      }
-		 
-		 
+
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			if (cardImages == null) {
+				g.drawString("Error: Can't get card images!", 10, 30);
+				return;
+			}
+			g.setFont(bigFont);
+			g.drawImage(cardImages, 109, 15, 188, 138, 158, 492, 237, 615, this);
+
+		}
+
+		public void drawCard(Graphics g, int card, int x, int y) {
+			int cx; // x-coord of upper left corner of the card inside
+					// cardsImage
+			int cy; // y-coord of upper left corner of the card inside
+					// cardsImage
+
+			cy = 4 * 123; // coords for a face-down card.
+			cx = 2 * 79;
+			System.out.println("I am here");
+			g.drawImage(cardImages, 15, 15, 250, 250, this);
+		}
+
 		public void actionPerformed(ActionEvent evt) {
 			String command = evt.getActionCommand();
 			if (command.equals("Higher"))
