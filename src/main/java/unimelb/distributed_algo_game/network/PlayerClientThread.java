@@ -80,6 +80,7 @@ public class PlayerClientThread extends Thread {
 		mMessage = new JSONObject();
 		this.mGameServer = mGameServer;
 		this.mGameDealerInfo = mGameDealerInfo;
+		this.mGameClientInfo = new GamePlayerInfo();
 	}
 	
 
@@ -194,7 +195,7 @@ public class PlayerClientThread extends Thread {
 				connectionState = ClientConnectionState.CONNECTED;
 				// Player specifies the card to
 				//mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
-				mBodyMessage = new BodyMessage(mGameDealerInfo.getNodeID(), MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
+				mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
 				mMessage.put("header", connectionState);
 				mMessage.put("body", mBodyMessage);
 				sendMessage(mMessage);
@@ -237,9 +238,9 @@ public class PlayerClientThread extends Thread {
 			connectionState = ClientConnectionState.CONNECTED;
 			// Player specifies the card to
 			Card c = mGameServer.getCard(1);
-			mGameServer.updatePlayerCard(mBodyMessage.getNodeID(), c);
+			mGameServer.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
 			//mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
-			mBodyMessage = new BodyMessage(mGameDealerInfo.getNodeID(), MessageType.CRD, c);
+			mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.CRD, c);
 
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);

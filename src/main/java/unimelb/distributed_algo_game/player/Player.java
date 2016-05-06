@@ -51,7 +51,7 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState) {
 		this.name = name;
 		this.mGamePlayerInfo = gamePlayerInfo;
-		this.playerScore = playerScore;
+		this.playerScore = new PlayerScore();
 		this.gameState = gameState;
 	}
 
@@ -83,14 +83,6 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 		return this.name;
 	}
 
-	/**
-	 * Returns the player ID.
-	 *
-	 * @return the id
-	 */
-	public int getID() {
-		return this.id;
-	}
 
 	/**
 	 * Returns the card user selected from the deck.

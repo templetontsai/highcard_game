@@ -74,7 +74,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
-			nodeID = this.mPlayer.getID();
+			nodeID = this.mPlayer.getGamePlayerInfo().getNodeID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
 			//mPlayerClientManager.addPlayer(nodeID);
 			mPlayerClientManager.addPlayer(mPlayer.getGamePlayerInfo());

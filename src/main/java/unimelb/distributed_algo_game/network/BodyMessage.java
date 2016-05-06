@@ -92,12 +92,6 @@ public class BodyMessage implements Serializable{
 	 */
 	public Object getMessage(){ return message; }
 	
-	/**
-	 * Sets the Node ID
-	 */
-	public void setNodeID(int nodeID){
-		this.nodeID = nodeID;
-	}
 	
 	/**
 	 * Sets the message type

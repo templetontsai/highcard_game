@@ -87,7 +87,7 @@ public final class PlayerClientManager {
 	public synchronized void notifyAllClients(Object object, ClientConnectionState mConnectionState, MessageType messageType) {
 		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = new BodyMessage(mPlayer.getID(), messageType, object);
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, object);
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
 			t.getValue().sendMessage(mMessage);
@@ -102,7 +102,7 @@ public final class PlayerClientManager {
 
 		if (playerClientList.size() > 0) {
 			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = new BodyMessage(mPlayer.getID(), messageType, message);
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo().getNodeID(), messageType, message);
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
 			playerClientList.get(clientID).sendMessage(mMessage);
@@ -135,7 +135,7 @@ public final class PlayerClientManager {
 	public synchronized void checkPlayerStatus() {
 		if (isLockRound() && playerList.size() >= 2) {
 			// Dealer draw a card
-			updatePlayerCard(mPlayer.getID(), mPlayer.getCard(1));
+			updatePlayerCard(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer.getCard(1));
 			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);
 			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
 				entry.getValue().setClientStatus(false);

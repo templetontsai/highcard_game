@@ -66,7 +66,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
 
-	private int nodeID = -1;
 
 	/**
 	 * Instantiates a new game client.
@@ -98,7 +97,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
-			nodeID = this.mPlayer.getID();
+			
 		} else {
 			System.out.println("Player can't be null");
 			throw new NullPointerException();
