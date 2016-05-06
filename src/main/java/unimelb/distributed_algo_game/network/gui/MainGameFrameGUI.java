@@ -20,8 +20,10 @@ public class MainGameFrameGUI extends JFrame {
 
 	public void init(int nodeID) {
 		if (nodeID == 0) {
-			mainLoginPanel = new MainGameLoginDealerPanel();
+
+			mainLoginPanel = new MainGameLoginDealerPanel(this);
 			mainLoginPanel.setNodeID(nodeID);
+
 			this.setContentPane(mainLoginPanel);
 			this.setSize(500, 500);
 			this.setVisible(true);
