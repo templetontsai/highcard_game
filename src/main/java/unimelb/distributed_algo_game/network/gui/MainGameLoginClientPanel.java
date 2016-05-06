@@ -1,19 +1,16 @@
 package unimelb.distributed_algo_game.network.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import unimelb.distributed_algo_game.player.AIPlayer;
-import unimelb.distributed_algo_game.player.HumanPlayer;
+import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
-import unimelb.distributed_algo_game.token.Token;
-
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.awt.event.ActionEvent;
 
 public class MainGameLoginClientPanel extends JPanel {
 	private JTextField nodeField;
@@ -56,18 +53,20 @@ public class MainGameLoginClientPanel extends JPanel {
 			public void actionPerformed(ActionEvent action) {
 				// TODO get ip and port from textfield and set init server
 				// socket
-				String nodeID = nodeField.getText();
-				setClientNodeID(Integer.parseInt(nodeID));
+				
+				
 				String ipAddress = ipTextField.getText();
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
+					String gamePlayerInfo[] = {Integer.toString(nodeID), ipAddress, port};
 					System.out.println("Client"+nodeID+" sending connection to dealer");
 
-					Player p = new AIPlayer("AI 1", Integer.parseInt(nodeID));
+					Player p = new AIPlayer("AI", new GamePlayerInfo(gamePlayerInfo));
 					Thread t = new Thread(p);
 					t.setName("AI Player Thread");
 					t.start();
 				}
+
 
 			}
 		});
