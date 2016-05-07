@@ -55,8 +55,8 @@ public final class Deck {
 	private void init() {
 		for (CardRank cardRank : CardRank.values()) {
 			deck.add(new Clubs(cardRank));
-			deck.add(new Hearts(cardRank));
 			deck.add(new Diamonds(cardRank));
+			deck.add(new Hearts(cardRank));
 			deck.add(new Spades(cardRank));
 		}
 

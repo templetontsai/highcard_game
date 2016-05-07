@@ -17,11 +17,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
 
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.token.Token;
 
 public class MainGameLoginDealerPanel extends JPanel {
@@ -33,7 +33,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 	private JButton btnPlay;
 	private MainGameLoginDealerPanel self;
 	private static int playerCount = 0;
-
+	Card c;
 	public MainGameLoginDealerPanel(final MainGameFrameGUI mainGameFrameGUI) {
 
 		self = this;
@@ -63,6 +63,9 @@ public class MainGameLoginDealerPanel extends JPanel {
 			public void actionPerformed(ActionEvent action) {
 				// TODO get ip and port from textfield and set init server
 				// socket
+				textArea.append("arjun \n");
+				textArea.append("arjun \n");
+				textArea.append("arjun \n");
 				String ipAddress = ipTextField.getText();
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
@@ -95,13 +98,21 @@ public class MainGameLoginDealerPanel extends JPanel {
 
 				CardPanel board = new CardPanel();
 				// add(board, BorderLayout.CENTER);
-
+				Player p=new HumanPlayer("arjun", new GamePlayerInfo(), self);
+				p.setDealer(true);
+				
+				 c=p.getCard(4);
+				 System.out.println(c.getPattern());
+				 System.out.println(c.getPattern().getCode());
+				 
 				mainGameFrameGUI.setContentPane(board);// Adding to
 														// content pane,
 														// not to Frame
 				mainGameFrameGUI.setSize(500, 500);
 				mainGameFrameGUI.setVisible(true);
-				repaint();
+				mainGameFrameGUI.invalidate();
+				mainGameFrameGUI.validate();
+			 
 				// mainGameFrameGUI.printAll(getGraphics());
 			}
 		});
@@ -201,21 +212,43 @@ public class MainGameLoginDealerPanel extends JPanel {
 				return;
 			}
 			g.setFont(bigFont);
-			g.drawImage(cardImages, 109, 15, 188, 138, 158, 492, 237, 615, this);
+			//g.drawImage(cardImages, 0, 0, 79, 123, 158, 492, 237, 615, this);
+			drawCard(g, null, 0, 0);
+			drawCard(g, null, 79, 0);
+			drawCard(g, c, 158, 0);
 
 		}
+		public void drawCard(Graphics g, Card card, int x, int y) {
+	         int cx;    // x-coord of upper left corner of the card inside cardsImage
+	         int cy;    // y-coord of upper left corner of the card inside cardsImage
+	         if (card == null) {
+	            cy = 4*123;   // coords for a face-down card.
+	            cx = 2*79;
+	         }
+	         else {
+	            cx = (card.getPattern().getCode()-1)*79;
+	           System.out.println(card.getPattern().getCode());
+	           System.out.println(card.getPattern());
+	            switch (card.getPattern()) {
+	            case Clubs:    
+	               cy = 0; 
+	               break;
+	            case Diamonds: 
+	               cy = 123; 
+	               break;
+	            case Hearts:   
+	               cy = 2*123; 
+	               break;
+	            default:  // spades   
+	               cy = 3*123; 
+	               break;
+	            }
+	         }
+	         System.out.println("we got" +" "+x+","+y+","+(x+79)+","+(y+123)+","+cx+","+cy+","+(cx+79)+","+(cy+123));
+	        // g.drawImage(cardImages,15, 15 ,250,250,this);
+	         g.drawImage(cardImages,x,y,x+79,y+123,cx,cy,cx+79,cy+123,this);
+	      }
 
-		public void drawCard(Graphics g, int card, int x, int y) {
-			int cx; // x-coord of upper left corner of the card inside
-					// cardsImage
-			int cy; // y-coord of upper left corner of the card inside
-					// cardsImage
-
-			cy = 4 * 123; // coords for a face-down card.
-			cx = 2 * 79;
-			System.out.println("I am here");
-			g.drawImage(cardImages, 15, 15, 250, 250, this);
-		}
 
 		public void actionPerformed(ActionEvent evt) {
 			String command = evt.getActionCommand();

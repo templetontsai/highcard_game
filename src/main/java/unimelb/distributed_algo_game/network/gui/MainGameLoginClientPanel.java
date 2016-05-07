@@ -47,7 +47,12 @@ public class MainGameLoginClientPanel extends JPanel {
 		JLabel lblNewLabel_1 = new JLabel("Client Port");
 		lblNewLabel_1.setBounds(12, 111, 123, 15);
 		add(lblNewLabel_1);
-
+		
+		JButton btnPlay = new JButton("Play");
+		btnPlay.setBounds(153, 214, 117, 25);
+		add(btnPlay);
+		btnPlay.setVisible(false);
+		
 		JButton btnStart = new JButton("Connect");
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent action) {
@@ -65,6 +70,8 @@ public class MainGameLoginClientPanel extends JPanel {
 					Thread t = new Thread(p);
 					t.setName("AI Player Thread");
 					t.start();
+					btnStart.setVisible(false);
+					btnPlay.setVisible(true);
 				}
 
 
@@ -72,7 +79,16 @@ public class MainGameLoginClientPanel extends JPanel {
 		});
 		btnStart.setBounds(153, 214, 117, 25);
 		add(btnStart);
+		
+		btnPlay.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent action) {
+				// TODO get ip and port from textfield and set init server
+				// socket
 
+
+			}
+		});
+		
 	}
 
 	public void setClientNodeID(int nodeID) {
