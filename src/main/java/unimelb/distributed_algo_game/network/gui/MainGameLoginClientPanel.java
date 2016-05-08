@@ -16,6 +16,12 @@ public class MainGameLoginClientPanel extends JPanel {
 	private JTextField nodeField;
 	private JTextField ipTextField;
 	private JTextField portTextField;
+	private JLabel lblNewLabel_0;
+	private JLabel lblNewLabel;
+	private JLabel lblNewLabel_1;
+	private JButton btnPlay;
+	private JButton btnStart;
+	
 	private int nodeID;
 
 	public MainGameLoginClientPanel() {
@@ -36,24 +42,24 @@ public class MainGameLoginClientPanel extends JPanel {
 		add(portTextField);
 		portTextField.setColumns(10);
 
-		JLabel lblNewLabel_0 = new JLabel("NODE ID");
+		lblNewLabel_0 = new JLabel("NODE ID");
 		lblNewLabel_0.setBounds(12, 54, 181, 15);
 		add(lblNewLabel_0);
 		
-		JLabel lblNewLabel = new JLabel("Client IP Address");
+		lblNewLabel = new JLabel("Client IP Address");
 		lblNewLabel.setBounds(12, 81, 181, 15);
 		add(lblNewLabel);
 
-		JLabel lblNewLabel_1 = new JLabel("Client Port");
+		lblNewLabel_1 = new JLabel("Client Port");
 		lblNewLabel_1.setBounds(12, 111, 123, 15);
 		add(lblNewLabel_1);
 		
-		JButton btnPlay = new JButton("Play");
+		btnPlay = new JButton("Play");
 		btnPlay.setBounds(153, 214, 117, 25);
 		add(btnPlay);
 		btnPlay.setVisible(false);
 		
-		JButton btnStart = new JButton("Connect");
+		btnStart = new JButton("Connect");
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent action) {
 				// TODO get ip and port from textfield and set init server
