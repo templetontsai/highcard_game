@@ -42,7 +42,8 @@ public class BodyMessage implements Serializable{
 		ACK(1),
 		BCT(2),
 		CRD(3),
-		DSC(4);
+		DSC(4),
+		LST(5);
 		
 		/** The code. */
 		private int code;

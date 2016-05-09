@@ -107,7 +107,23 @@ public final class PlayerClientManager {
 			playerClientList.get(clientID).sendMessage(mMessage);
 		}
 	}
-
+	
+	/**
+	 * Sends the current client list to the client's server port
+	 * @param mConnectionState
+	 * @param messageType
+	 */
+	public synchronized void sendClientList(ClientConnectionState mConnectionState, MessageType messageType){
+		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
+			JSONObject mMessage = new JSONObject();
+			
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, getPlayersSockets());
+			mMessage.put("header", mConnectionState);
+			mMessage.put("body", bodyMessage);
+			t.getValue().sendMessage(mMessage);
+		}
+	}
+	
 	public synchronized boolean isLockRound() {
 		if(playerClientList.size() >= 1) {
 			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
@@ -122,6 +138,19 @@ public final class PlayerClientManager {
 		
 		return this.isLockRound;
 		
+	}
+	
+	/**
+	 * Generates list of current clients and their socket details
+	 * @return
+	 */
+	public String getPlayersSockets(){
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
+			GamePlayerInfo playerInfo = t.getValue().getClientGamePlayerInfo();
+			sb.append(playerInfo.getNodeID()+":"+playerInfo.getIPAddress()+":"+playerInfo.getPort()+"\n");
+		}
+		return sb.toString();
 	}
 
 	public synchronized void updatePlayerCard(int nodeID, Card c) {

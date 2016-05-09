@@ -15,6 +15,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
+import unimelb.distributed_algo_game.network.GameClient.StillAliveTimerTask;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
@@ -153,7 +154,10 @@ public class PlayerClientThread extends Thread {
 		}
 	}
 
-	
+	/**
+	 * This receives a still alive message from the client
+	 *
+	 */
 	final class StillAliveTimerTask extends TimerTask {
 
 		@Override
@@ -168,6 +172,28 @@ public class PlayerClientThread extends Thread {
 			}
 		}
 
+	}
+	/**
+	 * Sends timed still alive messages to the client
+	 *
+	 */
+	final class ServerStillAliveTimerTask extends TimerTask{
+		@Override
+		public void run(){
+			sendStillAliveMessage();
+		}
+	}
+	
+	/**
+	 * Sends still alive message to the client
+	 */
+	private void sendStillAliveMessage() {
+		JSONObject mMessage = new JSONObject();
+		BodyMessage mBodyMessage = new BodyMessage(this.mGameDealerInfo, MessageType.ACK,
+				ACKCode.STILL_ALIVE);
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", mBodyMessage);
+		sendMessage(mMessage);
 	}
 	/**
 	 * This method checks the type of JSON body message and carries out the
@@ -210,6 +236,8 @@ public class PlayerClientThread extends Thread {
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
 				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
+				Timer timer = new Timer();
+				timer.scheduleAtFixedRate(new ServerStillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 			case CARD_RECEIVED:
 				// System.out.println("CARD_RECEIVED ACK Message received from
@@ -286,7 +314,14 @@ public class PlayerClientThread extends Thread {
 		}
 
 	}
-
+	
+	/**
+	 * This sends the client list to the client's server
+	 */
+	public void sendServerMessage(Object mGameSendDataObject){
+		
+	}
+	
 	/**
 	 * Receive message from the client.
 	 */

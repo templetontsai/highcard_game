@@ -69,6 +69,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 				String ipAddress = ipTextField.getText();
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
+					System.out.println(ipAddress+"-"+port);
 					System.out.println("Dealer/Node0 Starts the game");
 					String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
 					// Initialize players

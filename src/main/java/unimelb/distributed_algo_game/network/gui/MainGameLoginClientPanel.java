@@ -79,8 +79,6 @@ public class MainGameLoginClientPanel extends JPanel {
 					btnStart.setVisible(false);
 					btnPlay.setVisible(true);
 				}
-
-
 			}
 		});
 		btnStart.setBounds(153, 214, 117, 25);
@@ -90,8 +88,7 @@ public class MainGameLoginClientPanel extends JPanel {
 			public void actionPerformed(ActionEvent action) {
 				// TODO get ip and port from textfield and set init server
 				// socket
-
-
+				
 			}
 		});
 		

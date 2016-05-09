@@ -181,6 +181,38 @@ public final class GameServer implements Runnable, NetworkInterface {
 		 * 
 		 * mServerSocket.close(); } }
 		 */
+		// Only runs if the socket is open
+				if (mServerSocket != null) {
+					System.out.println("Server Start, Waiting....");
+					synchronized (mLock) {
+						// Only runs if the server is in a connected state
+						while (mConnectionState == ServerConnectionState.CONNECTED) {
+
+							// Listen for messages from clients and add them to the
+							// thread pool
+							mSocket = mServerSocket.accept();
+							System.out.println("a client connected");
+							PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
+							//Block the new connection to join in the middle of the game
+							if (mPlayerClientManager.isLockRound()) {
+								t.setClientStatus(true);
+							}
+							
+							t.setName("GameServer Socket Thread");
+							t.start();
+							// Wait till we get a vaild nodeID from the connection and
+							// then add to the manager's list
+							while (t.getClientNodeID() == -1)
+								;
+							mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
+							mPlayerClientManager.addClient(t.getClientNodeID(), t);
+							mPanel.updatePlayerList(t.getClientNodeID());
+
+						}
+						// Close server port once the server is no longer running
+						mServerSocket.close();
+					}
+				}
 	}
 
 	/**
@@ -213,6 +245,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	public void broadcastToClients(Object object) {
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT);
+	}
+	
+	/**
+	 * Sends a player list to the other client server sockets
+	 */
+	public void broadcastPlayerList(){
+		mPlayerClientManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
 	}
 
 	/**
