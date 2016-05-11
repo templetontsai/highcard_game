@@ -42,8 +42,8 @@ public class AIPlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public AIPlayer(String name, GamePlayerInfo gamePlayerInfo) {
-		super(name, gamePlayerInfo, GameState.NONE);
+	public AIPlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo) {
+		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 	}
@@ -65,6 +65,7 @@ public class AIPlayer extends Player {
 		gameServerThread.start();*/
 		
 		gameClient.setPlayer(this);
+		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
 		gameClientThread.setName("AI Player Socket Thread");

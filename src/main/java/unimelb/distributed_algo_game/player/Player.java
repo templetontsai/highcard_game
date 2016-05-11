@@ -47,12 +47,21 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	
 	private GamePlayerInfo mGamePlayerInfo = null;
 
+	private GamePlayerInfo mGameServerInfo = null;
 
 	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState) {
 		this.name = name;
 		this.mGamePlayerInfo = gamePlayerInfo;
 		this.playerScore = new PlayerScore();
 		this.gameState = gameState;
+	}
+	
+	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState, GamePlayerInfo gameServerInfo) {
+		this.name = name;
+		this.mGamePlayerInfo = gamePlayerInfo;
+		this.playerScore = new PlayerScore();
+		this.gameState = gameState;
+		this.mGameServerInfo = gameServerInfo;
 	}
 
 	/**
@@ -178,6 +187,14 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	
 	public GamePlayerInfo getGamePlayerInfo() {
 		return this.mGamePlayerInfo;
+	}
+	
+	public void setGameServerInfo(GamePlayerInfo gameServerInfo){
+		this.mGameServerInfo = gameServerInfo;
+	}
+	
+	public GamePlayerInfo getGameServerInfo() {
+		return this.mGameServerInfo;
 	}
 
 	/**

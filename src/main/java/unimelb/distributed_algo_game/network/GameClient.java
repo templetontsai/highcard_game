@@ -65,6 +65,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
+	
+	private int serverPort;
+	
+	private String serverIPAddress;
 
 
 	/**
@@ -302,7 +306,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		try {
 
-			mSocket = new Socket("localhost", NetworkInterface.PORT);
+			mSocket = new Socket(serverIPAddress, serverPort);
 			clientConnectionState = ClientConnectionState.INIT;
 
 		} catch (IOException ioe) {
@@ -420,6 +424,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			sendMessage(mMessage);
 		}
 
+	}
+	
+	public void setServerDetails(){
+		serverPort = Integer.parseInt(mPlayer.getGameServerInfo().getPort());
+		serverIPAddress = mPlayer.getGameServerInfo().getIPAddress();
 	}
 
 }

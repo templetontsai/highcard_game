@@ -221,8 +221,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public synchronized boolean connect() {
 
 		try {
-
-			mServerSocket = new ServerSocket(NetworkInterface.PORT);
+			int port = Integer.parseInt(mPlayer.getGamePlayerInfo().getPort());
+			mServerSocket = new ServerSocket(port);
 			mConnectionState = ServerConnectionState.CONNECTED;
 
 		} catch (IOException ioe) {

@@ -15,10 +15,10 @@ import unimelb.distributed_algo_game.player.Player;
 public class MainGameLoginClientPanel extends JPanel {
 	private JTextField nodeField;
 	private JTextField ipTextField;
-	private JTextField portTextField;
+	private JTextField portTextField, serverIPTextField, serverPortTextField;
 	private JLabel lblNewLabel_0;
 	private JLabel lblNewLabel;
-	private JLabel lblNewLabel_1;
+	private JLabel lblNewLabel_1, serverIPLabel, serverPortLabel;
 	private JButton btnPlay;
 	private JButton btnStart;
 	
@@ -41,6 +41,16 @@ public class MainGameLoginClientPanel extends JPanel {
 		portTextField.setBounds(153, 113, 114, 19);
 		add(portTextField);
 		portTextField.setColumns(10);
+		
+		serverIPTextField = new JTextField();
+		serverIPTextField.setBounds(153, 142, 114, 19);
+		add(serverIPTextField);
+		serverIPTextField.setColumns(10);
+		
+		serverPortTextField = new JTextField();
+		serverPortTextField.setBounds(153, 172, 114, 19);
+		add(serverPortTextField);
+		serverPortTextField.setColumns(10);
 
 		lblNewLabel_0 = new JLabel("NODE ID");
 		lblNewLabel_0.setBounds(12, 54, 181, 15);
@@ -54,6 +64,14 @@ public class MainGameLoginClientPanel extends JPanel {
 		lblNewLabel_1.setBounds(12, 111, 123, 15);
 		add(lblNewLabel_1);
 		
+		serverIPLabel = new JLabel("Server IP Address");
+		serverIPLabel.setBounds(12, 141, 123, 15);
+		add(serverIPLabel);
+		
+		serverPortLabel = new JLabel("Server Port");
+		serverPortLabel.setBounds(12, 171, 123, 15);
+		add(serverPortLabel);
+		
 		btnPlay = new JButton("Play");
 		btnPlay.setBounds(153, 214, 117, 25);
 		add(btnPlay);
@@ -64,15 +82,17 @@ public class MainGameLoginClientPanel extends JPanel {
 			public void actionPerformed(ActionEvent action) {
 				// TODO get ip and port from textfield and set init server
 				// socket
-				
-				
+
 				String ipAddress = ipTextField.getText();
 				String port = portTextField.getText();
-				if (!ipAddress.equals("") && !port.equals("")) {
+				String serverIPAddress = serverIPTextField.getText();
+				String serverPort = serverPortTextField.getText();
+				if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
 					String gamePlayerInfo[] = {Integer.toString(nodeID), ipAddress, port};
+					String gameServerInfo[] = {"0", serverIPAddress, serverPort};
 					System.out.println("Client"+nodeID+" sending connection to dealer");
 
-					Player p = new AIPlayer("AI", new GamePlayerInfo(gamePlayerInfo));
+					Player p = new AIPlayer("AI", new GamePlayerInfo(gamePlayerInfo), new GamePlayerInfo(gameServerInfo));
 					Thread t = new Thread(p);
 					t.setName("AI Player Thread");
 					t.start();
