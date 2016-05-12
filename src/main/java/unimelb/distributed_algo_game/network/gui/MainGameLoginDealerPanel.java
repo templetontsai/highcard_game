@@ -63,9 +63,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 			public void actionPerformed(ActionEvent action) {
 				// TODO get ip and port from textfield and set init server
 				// socket
-				textArea.append("arjun \n");
-				textArea.append("arjun \n");
-				textArea.append("arjun \n");
+
 				String ipAddress = ipTextField.getText();
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
