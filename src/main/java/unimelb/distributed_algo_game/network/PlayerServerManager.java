@@ -1,5 +1,6 @@
 package unimelb.distributed_algo_game.network;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
 import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
@@ -27,6 +29,8 @@ public class PlayerServerManager {
 	private Map<Integer, Player> playerList = null;
 	
 	private Map<Integer, Player> nodeList = null;
+	
+	private Map<Integer, String[]> serverList = null;
 
 	/**
 	 * Instantiates a new player client manager.
@@ -37,7 +41,7 @@ public class PlayerServerManager {
 	public PlayerServerManager(int playerClientNum) {
 		playerClientServerList = new HashMap<Integer, PlayerServerThread>(playerClientNum);
 		playerList = new HashMap<Integer, Player>();
-
+		serverList = new HashMap<Integer, String[]>();
 	}
 
 	/**
@@ -166,6 +170,42 @@ public class PlayerServerManager {
 			sb.append(playerInfo.getNodeID()+":"+playerInfo.getIPAddress()+":"+playerInfo.getPort()+"\n");
 		}
 		return sb.toString();
+	}
+	
+	public void updateServerList(ArrayList<String> serverArrayList){
+		
+		this.serverList.clear();
+		
+		for(int i = 0; i < serverArrayList.size(); i++){
+			String[] details = serverArrayList.get(i).split(":");
+			String[] serverInfo = {details[0], details[1], details[2]};
+			serverList.put(new Integer(details[0]), serverInfo);
+		}
+		//System.out.println("New server list size is "+serverList.size());
+	}
+	
+	/**
+	 * Returns the next logical member in the ring
+	 * @return
+	 */
+	public GamePlayerInfo getNextNeighbor(){
+		GamePlayerInfo myNeighbor = null;
+		
+		int clientID = mPlayer.getGamePlayerInfo().getNodeID();
+		boolean nextFound = false;
+		int i = 0;
+		for (Map.Entry<Integer, String[]> t : serverList.entrySet()) {
+			//System.out.println(t.getValue()+"-"+t.getKey()+"-"+clientID);
+			if(i==0)
+				myNeighbor = new GamePlayerInfo(t.getValue());
+			
+			if(!nextFound && clientID<t.getKey()){
+				myNeighbor = new GamePlayerInfo(t.getValue());
+				nextFound = true;
+			}
+			i++;
+		}
+		return myNeighbor;
 	}
 
 }

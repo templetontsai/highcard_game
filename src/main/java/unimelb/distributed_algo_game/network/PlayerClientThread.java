@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -169,10 +170,17 @@ public class PlayerClientThread extends Thread {
 				mGameServer.removeClient(clientNodeID);
 				isRunning = false;
 				//System.out.println("Node:" + clientNodeID + " has left the game");
-				
+				if(!mGameServer.getIsLeader()){
+					System.out.println("It's morphin time!");
+					startElection();
+				}
 			}
 		}
 
+	}
+	
+	public void startElection(){
+		mGameServer.startElection();
 	}
 	
 	/**
@@ -271,12 +279,16 @@ public class PlayerClientThread extends Thread {
 			System.out.println(mBodyMessage.getMessage());
 			break;
 		case LST:
-			System.out.println(mBodyMessage.getMessage());
+			System.out.println("Received client list: "+mBodyMessage.getMessage());
+			updateClientList(mBodyMessage);
 			break;
 		case ELE:
+			System.out.println("Received election message from "+mGameClientInfo.getNodeID());
+			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
 			sendElectionMessage(mBodyMessage);
 			break;
 		case COD:
+			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
 			setNewCoordinator(mBodyMessage);
 			break;
 		default:
@@ -286,25 +298,54 @@ public class PlayerClientThread extends Thread {
 	}
  
 	
+	public void updateClientList(BodyMessage mBodyMessage){
+		
+		String clients = (String)mBodyMessage.getMessage();
+		String[] clientList = clients.split("\n");
+		ArrayList<String> gameClients = new ArrayList();
+		
+		for(int i=0; i < clientList.length; i++){
+			String[] clientDetails = clientList[i].split(":");
+			//Only maintain list of clients not yourself
+			if(!clientDetails[0].equals(Integer.toString(mGameDealerInfo.getNodeID()))){
+			    System.out.println(clientDetails[0]+"-"+mGameDealerInfo.getNodeID());
+				gameClients.add(clientList[i]);
+			}
+		}
+		System.out.println("Total added clients: "+gameClients.size());
+		mGameServer.updateServerList(gameClients);
+	}
+	
 	/**
 	 * This sends an election message to the node's neighbor SC
 	 * @param mBodyMessage
 	 */
     public void sendElectionMessage(BodyMessage mBodyMessage){
     	int messageNodeID = Integer.parseInt((String)mBodyMessage.getMessage());
-		if(messageNodeID > this.mGameClientInfo.getNodeID()){
+    	//System.out.println("My ID is "+mGameDealerInfo.getNodeID()+" and other is "+messageNodeID);
+		if(messageNodeID > this.mGameDealerInfo.getNodeID()){
 			//Send message to the next node without changing it
-		}else if(messageNodeID < this.mGameClientInfo.getNodeID()){
+			//System.out.println(mGameDealerInfo.getNodeID()+" cannot be the new dealer");
+		}else if(messageNodeID < this.mGameDealerInfo.getNodeID()){
 			//Replace the node ID in the message with own
-			mBodyMessage.setMessage(mGameClientInfo.getStringNodeID());
-		}else if(messageNodeID == this.mGameClientInfo.getNodeID()){
+			//System.out.println("I will become the new dealer "+this.mGameDealerInfo.getNodeID());
+			mBodyMessage.setMessage(mGameDealerInfo.getStringNodeID());
+
+		}else if(messageNodeID == this.mGameDealerInfo.getNodeID()){
 			//This means i have received my election message and I am the new coordinator
 			mGameServer.setPlayerDealer();
 			mBodyMessage.setMessageType(MessageType.COD);
-			mBodyMessage.setMessage(mGameDealerInfo.getPlayerDetails());
+			mBodyMessage.setMessage(mGameDealerInfo);
+			System.out.println("Hell ya I'm in charge now ");
 		}
 		
-		sendMessage(mBodyMessage);
+		JSONObject mMessage = new JSONObject();
+		BodyMessage bodyMessage = mBodyMessage;
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", bodyMessage);
+
+		sendMessage(mMessage);
+		
 	}
     
     /**
@@ -312,13 +353,20 @@ public class PlayerClientThread extends Thread {
      * @param mBodyMessage
      */
     public void setNewCoordinator(BodyMessage mBodyMessage){
-		if(mBodyMessage.getNodeID() != this.mGameClientInfo.getNodeID()){
-			String message = (String)mBodyMessage.getMessage();
-			String[] details = message.split(",");
-			String gameServerInfo[] = {details[0], details[1], details[2]};
-			mGameServer.setGameServerLeader(new GamePlayerInfo(gameServerInfo));
+
+    	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
+    	System.out.println("The new dealer is node "+newDealer.getNodeID()+" Game Server is "+mGameServer);
+		if(newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()){
+			mGameServer.setGameServerLeader(newDealer);
 			
-			sendMessage(mBodyMessage);
+			System.out.println("The new dealer is "+newDealer.getNodeID());
+			
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mBodyMessage.setMessageType(MessageType.COD);
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+			sendMessage(mMessage);
 		}
 	}
 	/**

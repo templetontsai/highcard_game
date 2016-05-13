@@ -6,6 +6,7 @@ package unimelb.distributed_algo_game.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
@@ -167,6 +168,15 @@ public final class GameServer implements Runnable, NetworkInterface {
 					t2.setName("GameServer Client Socket Thread");
 					t2.connect();
 					t2.start();
+
+					try{
+					  Thread.sleep(1000);
+					}catch (InterruptedException e) {
+						// TODO Adding error handling
+						e.printStackTrace();
+					}
+					
+					broadcastPlayerList();
 					
 					//Every time a new player is added, send the current list to all the players
 					
@@ -183,21 +193,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	private void runSlaveState() throws IOException {
 		// TODO slavestate for a cue to work
-		/*
-		 * mObjectOutputStream = new
-		 * ObjectOutputStream(mSocket.getOutputStream()); mObjectInputStream =
-		 * new ObjectInputStream(mSocket.getInputStream()); isRunning = true;
-		 * 
-		 * if (mServerSocket != null) { System.out.println(
-		 * "Server Start, Waiting...."); synchronized (mLock) { while
-		 * (mConnectionState == ServerConnectionState.CONNECTED) {
-		 * 
-		 * mSocket = mServerSocket.accept(); PlayerClientThread t = new
-		 * PlayerClientThread(mSocket, 1); mPlayerClientManager.addClient(new
-		 * Integer(1),t);//Communicate to know player id first t.start(); }
-		 * 
-		 * mServerSocket.close(); } }
-		 */
 		// Only runs if the socket is open
 				if (mServerSocket != null) {
 					System.out.println("Server Slave Start, Waiting....");
@@ -210,10 +205,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 							mSocket = mServerSocket.accept();
 							System.out.println("the server connected");
 							PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
-							//Block the new connection to join in the middle of the game
-							if (mPlayerClientManager.isLockRound()) {
-								t.setClientStatus(true);
-							}
 							
 							t.setName("GameServer Socket Thread");
 							t.start();
@@ -223,8 +214,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 								;
 							mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 							mPlayerClientManager.addClient(t.getClientNodeID(), t);
-
+							System.out.println("Waiting to accept new connections");
 						}
+						System.out.println("Connection closed");
 						// Close server port once the server is no longer running
 						mServerSocket.close();
 					}
@@ -260,6 +252,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * Sends a message to all the clients in the thread pool
 	 */
 	public void broadcastToClients(Object object) {
+		System.out.println("Sending Player List");
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT);
 	}
 	
@@ -269,6 +262,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void broadcastPlayerList(){
 		mPlayerServerManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
 	}
+	
 
 	/**
 	 * This methods sends a card from the deck to the player
@@ -318,5 +312,36 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void setGameServerLeader(GamePlayerInfo gameServerInfo){
 		mPlayer.setGameServerInfo(gameServerInfo);
 	}
+
+	public void updateServerList(ArrayList<String> gameClients) {
+		// TODO Auto-generated method stub
+		mPlayerServerManager.updateServerList(gameClients);
+	}
+	
+	public void startElection(){
+		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
+		PlayerServerThread t = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
+		mPlayerServerManager.addPlayer(nextPlayer);
+		mPlayerServerManager.addClient(nextPlayer.getNodeID(), t);
+		
+		t.setGameClientInfo(nextPlayer);
+		t.setName("GameServer Election Socket Thread");
+		t.connect();
+		t.start();
+
+		try{
+			  Thread.sleep(3000);
+			}catch (InterruptedException e) {
+				// TODO Adding error handling
+				e.printStackTrace();
+			}
+		
+        t.startElection();
+	}
+	
+	public Player getPlayer(){
+		return mPlayer;
+	}
+	
 
 }

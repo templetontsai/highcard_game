@@ -3,6 +3,7 @@
  */
 package unimelb.distributed_algo_game.network;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,8 @@ public final class PlayerClientManager {
 	private Map<Integer, Player> playerList = null;
 	
 	private Map<Integer, Player> nodeList = null;
+	
+	private ArrayList<String> serverList = null;
 
 	/**
 	 * Instantiates a new player client manager.
@@ -182,4 +185,8 @@ public final class PlayerClientManager {
 		nodeList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
 	}
 
+	public void updateServerList(ArrayList<String> serverList){
+		this.serverList.clear();
+		this.serverList = serverList;
+	}
 }

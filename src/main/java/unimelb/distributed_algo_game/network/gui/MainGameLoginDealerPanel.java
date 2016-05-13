@@ -28,7 +28,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 	private JTextField ipTextField;
 	private JTextField portTextField;
 	private JTextArea textArea;
-	private int nodeID = -1;
+	private int nodeID = 0;
 
 	private JButton btnPlay;
 	private MainGameLoginDealerPanel self;
@@ -44,11 +44,13 @@ public class MainGameLoginDealerPanel extends JPanel {
 		ipTextField.setBounds(153, 52, 114, 19);
 		add(ipTextField);
 		ipTextField.setColumns(10);
+		ipTextField.setText("127.0.0.1");
 
 		portTextField = new JTextField();
 		portTextField.setBounds(153, 83, 114, 19);
 		add(portTextField);
 		portTextField.setColumns(10);
+		portTextField.setText("6066");
 
 		JLabel lblNewLabel = new JLabel("Dealer IP Address");
 		lblNewLabel.setBounds(12, 54, 181, 15);
@@ -96,6 +98,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 
 				CardPanel board = new CardPanel();
 				// add(board, BorderLayout.CENTER);
+
 				Player p=new HumanPlayer("arjun", new GamePlayerInfo(), self);
 				p.setDealer(true);
 				

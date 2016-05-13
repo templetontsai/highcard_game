@@ -113,4 +113,8 @@ public class BodyMessage implements Serializable{
 	public GamePlayerInfo getGamePlayerInfo() {
 		return this.mGamePlayerInfo;
 	}
+	
+	public void setGamePlayerInfo(GamePlayerInfo gamePlayerInfo){
+		this.mGamePlayerInfo = gamePlayerInfo;
+	}
 }

@@ -103,5 +103,11 @@ public class AIPlayer extends Player {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public void disconnectClient(){
+		gameClientThread.stop();
+		gameClientThread.destroy();
+		gameClient.disconnect();
+	}
 
 }

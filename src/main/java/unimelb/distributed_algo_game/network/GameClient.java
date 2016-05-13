@@ -69,6 +69,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 	private int serverPort;
 	
 	private String serverIPAddress;
+	
+	private Timer timer = null;
 
 
 	/**
@@ -152,12 +154,15 @@ public final class GameClient implements Runnable, NetworkInterface {
 				mObjectOutputStream.close();
 				mObjectInputStream.close();
 				mSocket.close();
+				timer.cancel();
 			} catch (IOException ioe) {
 				// TODO Adding error handling
 				ioe.printStackTrace();
+				timer.cancel();
 			} catch (InterruptedException e) {
 				// TODO Adding error handling
 				e.printStackTrace();
+				timer.cancel();
 			}
 
 		}
@@ -204,7 +209,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 				System.out.println("ACK Message received from leader node" + mBodyMessage.getGamePlayerInfo().getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
 				// Start the still alive timer beacon to the leader
-				Timer timer = new Timer();
+				timer = new Timer();
 				timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 			case CARD_RECEIVED:
@@ -323,7 +328,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * server and be removed from the server thread pool
 	 */
 	public void disconnect() {
+		System.out.println("Disconnecting from the game");
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
+		isRunning = false;
+		try{
+		   System.out.println("conection closing...");
+		   mObjectOutputStream.close();
+		   mObjectInputStream.close();
+		   mSocket.close();
+		   timer.cancel();
+	    } catch (IOException ioe) {
+		   // TODO Adding error handling
+		   ioe.printStackTrace();
+		   timer.cancel();
+	    }
+		
 	}
 
 	/**
@@ -347,7 +366,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 			isRunning = false;
 			System.out.println("Leader has gone haywire");
 			ioe.printStackTrace();
-		}
+			timer.cancel();
+		} 
 
 	}
 

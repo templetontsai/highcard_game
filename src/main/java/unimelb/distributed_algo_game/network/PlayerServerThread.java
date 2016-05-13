@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -48,20 +49,26 @@ public class PlayerServerThread extends Thread{
 	
 	private GamePlayerInfo mGameServerInfo = null;
 	
+	private ClientConnectionState clientConnectionState = null;
+	
 	private int clientNodeID = -1;
 	
-	public PlayerServerThread(GameServer gameServer, GamePlayerInfo mGameServerInfo){
+	public PlayerServerThread(GameServer mGameServer, GamePlayerInfo mGameServerInfo){
 		
 		mLock = new Object();
 		mMessage = new JSONObject();
 		this.mGameServer = mGameServer;
 		this.mGameServerInfo = mGameServerInfo;
+		this.clientNodeID = mGameServerInfo.getNodeID();
+		this.mGameClientInfo = mGameServerInfo;
+		this.clientConnectionState = ClientConnectionState.DISCONNECTED;
 	}
 	
 	public void connect(){
 		try{
 		    mSocket = new Socket(mGameClientInfo.getIPAddress(), Integer.parseInt(mGameClientInfo.getPort()));
-		    System.out.println("Server details: "+mGameClientInfo.getIPAddress()+" "+mGameClientInfo.getPort());
+		    System.out.println("Server details: "+mGameClientInfo.getIPAddress()+" "+mGameClientInfo.getPort()+"-"+mGameServer);
+		    this.clientConnectionState = ClientConnectionState.INIT;
 		}catch(IOException ioe){
 			System.out.println("Can't reach the client's server");
 			ioe.printStackTrace();
@@ -89,9 +96,9 @@ public class PlayerServerThread extends Thread{
 		
 		JSONObject m;
 		BodyMessage bodyMessage;
-		ClientConnectionState clientConnectionState;
 		
 	    while(isRunning){
+	    	init();
 	    	// Receive JSON message object from server
 	    				m = (JSONObject) receiveMessage();
 
@@ -127,6 +134,22 @@ public class PlayerServerThread extends Thread{
 	    }
 	}
 	
+	public void startElection(){
+		JSONObject mMessage = new JSONObject();
+		BodyMessage mBodyMessage = new BodyMessage(mGameServerInfo.getNodeID(), MessageType.ELE,
+				Integer.toString(mGameServerInfo.getNodeID()));
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", mBodyMessage);
+		boolean isConnectionActive = false;
+		System.out.println("Waiting to send election message");
+		while(!isConnectionActive){
+			if(mObjectOutputStream!=null)
+				isConnectionActive = true;
+		}
+		System.out.println("Sending election message");
+		sendMessage(mMessage);
+	}
+	
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
 		BodyMessage mBodyMessage = new BodyMessage(mGameServerInfo, MessageType.ACK,
@@ -145,6 +168,17 @@ public class PlayerServerThread extends Thread{
 
 		}
 
+	}
+	
+	public void init(){
+		if(this.clientConnectionState == ClientConnectionState.INIT){
+		JSONObject mMessage = new JSONObject();
+		BodyMessage bodyMessage = new BodyMessage(mGameServerInfo, MessageType.CON, "init");
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", bodyMessage);
+
+		sendMessage(mMessage);
+		}
 	}
 	
 	/**
@@ -245,6 +279,7 @@ public class PlayerServerThread extends Thread{
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
 				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
+				connectionState = ClientConnectionState.CONNECTED;
 				break;
 			case CARD_RECEIVED:
 				// System.out.println("CARD_RECEIVED ACK Message received from
@@ -291,9 +326,11 @@ public class PlayerServerThread extends Thread{
 			System.out.println(mBodyMessage.getMessage());
 			break;
 		case ELE:
+			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
 			sendElectionMessage(mBodyMessage);
 			break;
 		case COD:
+			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
 			setNewCoordinator(mBodyMessage);
 			break;
 		default:
@@ -308,19 +345,29 @@ public class PlayerServerThread extends Thread{
 	 */
     public void sendElectionMessage(BodyMessage mBodyMessage){
     	int messageNodeID = Integer.parseInt((String)mBodyMessage.getMessage());
-		if(messageNodeID > this.mGameClientInfo.getNodeID()){
+    	//System.out.println("My ID is "+mGameServerInfo.getNodeID()+" and other is "+messageNodeID);
+		if(messageNodeID > this.mGameServerInfo.getNodeID()){
 			//Send message to the next node without changing it
-		}else if(messageNodeID < this.mGameClientInfo.getNodeID()){
+			//System.out.println(mGameServerInfo.getNodeID()+" cannot be the new dealer");
+		}else if(messageNodeID < this.mGameServerInfo.getNodeID()){
 			//Replace the node ID in the message with own
-			mBodyMessage.setMessage(mGameClientInfo.getStringNodeID());
-		}else if(messageNodeID == this.mGameClientInfo.getNodeID()){
+			mBodyMessage.setMessage(mGameServerInfo.getStringNodeID());
+           // System.out.println("I will become the next dealer "+mGameServerInfo.getStringNodeID());
+			
+		}else if(messageNodeID == this.mGameServerInfo.getNodeID()){
 			//This means i have received my election message and I am the new coordinator
-			mGameServer.setPlayerDealer();
+		    mGameServer.setPlayerDealer();
 			mBodyMessage.setMessageType(MessageType.COD);
-			mBodyMessage.setMessage(mGameServerInfo.getPlayerDetails());
+			mBodyMessage.setMessage(mGameServerInfo);
+			System.out.println("Hell ya I'm in charge now ");
 		}
 		
-		sendMessage(mBodyMessage);
+		JSONObject mMessage = new JSONObject();
+		BodyMessage bodyMessage = mBodyMessage;
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", bodyMessage);
+
+		sendMessage(mMessage);
 	}
     
     /**
@@ -328,13 +375,20 @@ public class PlayerServerThread extends Thread{
      * @param mBodyMessage
      */
     public void setNewCoordinator(BodyMessage mBodyMessage){
-		if(mBodyMessage.getNodeID() != this.mGameClientInfo.getNodeID()){
-			String message = (String)mBodyMessage.getMessage();
-			String[] details = message.split(",");
-			String gameServerInfo[] = {details[0], details[1], details[2]};
-			mGameServer.setGameServerLeader(new GamePlayerInfo(gameServerInfo));
+
+    	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
+    	System.out.println("The new dealer is node "+newDealer.getNodeID()+" Game Server is "+mGameServer);
+		if(newDealer.getNodeID() != this.mGameServerInfo.getNodeID()){
+			mGameServer.setGameServerLeader(newDealer);
 			
-			sendMessage(mBodyMessage);
+			System.out.println("The new dealer is "+newDealer.getNodeID());
+			
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mBodyMessage.setMessageType(MessageType.COD);
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+			sendMessage(mMessage);
 		}
 	}
 	
