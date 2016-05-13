@@ -63,9 +63,6 @@ public class MainGameLoginDealerPanel extends JPanel {
 			public void actionPerformed(ActionEvent action) {
 				// TODO get ip and port from textfield and set init server
 				// socket
-				textArea.append("arjun \n");
-				textArea.append("arjun \n");
-				textArea.append("arjun \n");
 				String ipAddress = ipTextField.getText();
 				String port = portTextField.getText();
 				if (!ipAddress.equals("") && !port.equals("")) {
@@ -115,6 +112,8 @@ public class MainGameLoginDealerPanel extends JPanel {
 				mainGameFrameGUI.validate();
 			 
 				// mainGameFrameGUI.printAll(getGraphics());
+				//Send player list to clients
+				
 			}
 		});
 		btnPlay.setBounds(153, 290, 117, 25);

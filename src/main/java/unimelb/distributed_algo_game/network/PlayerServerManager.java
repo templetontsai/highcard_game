@@ -1,6 +1,3 @@
-/*
- * 
- */
 package unimelb.distributed_algo_game.network;
 
 import java.util.HashMap;
@@ -16,14 +13,10 @@ import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class PlayerClientManager.
- */
-public final class PlayerClientManager {
+public class PlayerServerManager {
 
-	/** The player client list. */
-	private Map<Integer, PlayerClientThread> playerClientList = null;
+	/** The player server client list. */
+	private Map<Integer, PlayerServerThread> playerClientServerList = null;
 	/** The m player. */
 	private Player mPlayer = null;
 
@@ -41,14 +34,14 @@ public final class PlayerClientManager {
 	 * @param playerClientNum
 	 *            the player client num
 	 */
-	public PlayerClientManager(int playerClientNum) {
-		playerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
+	public PlayerServerManager(int playerClientNum) {
+		playerClientServerList = new HashMap<Integer, PlayerServerThread>(playerClientNum);
 		playerList = new HashMap<Integer, Player>();
 
 	}
 
 	/**
-	 * This sets the player acting as the server of this client manager
+	 * This sets the player acting as the server of this client server manager
 	 */
 	public void setPlayer(Player mPlayer) {
 		this.mPlayer = mPlayer;
@@ -60,8 +53,8 @@ public final class PlayerClientManager {
 	 * @param clientThread
 	 *            the client thread
 	 */
-	public synchronized void addClient(int clientID, PlayerClientThread clientThread) {
-		playerClientList.put(clientID, clientThread);
+	public synchronized void addClient(int clientID, PlayerServerThread clientThread) {
+		playerClientServerList.put(clientID, clientThread);
 	}
 
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
@@ -75,7 +68,7 @@ public final class PlayerClientManager {
 	 *            the client thread
 	 */
 	public synchronized void removeClient(int clientThread) {
-		playerClientList.remove(clientThread);
+		playerClientServerList.remove(clientThread);
 	}
 
 	public synchronized void removePlayer(int nodeID) {
@@ -86,7 +79,7 @@ public final class PlayerClientManager {
 	 * Notify all clients.
 	 */
 	public synchronized void notifyAllClients(Object object, ClientConnectionState mConnectionState, MessageType messageType) {
-		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
+		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, object);
 			mMessage.put("header", mConnectionState);
@@ -101,34 +94,38 @@ public final class PlayerClientManager {
 	public synchronized void sendMessageToClient(Object message, int clientID, ClientConnectionState mConnectionState,
 			MessageType messageType) {
 
-		if (playerClientList.size() > 0) {
+		if (playerClientServerList.size() > 0) {
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo().getNodeID(), messageType, message);
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
-			playerClientList.get(clientID).sendMessage(mMessage);
+			playerClientServerList.get(clientID).sendMessage(mMessage);
 		}
 	}
 	
-	/**
-	 * Sends the current client list to the client's server port
-	 * @param mConnectionState
-	 * @param messageType
-	 */
-	public synchronized void sendClientList(ClientConnectionState mConnectionState, MessageType messageType){
-		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
-			JSONObject mMessage = new JSONObject();
-			
-			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, getPlayersSockets());
-			mMessage.put("header", mConnectionState);
-			mMessage.put("body", bodyMessage);
-			t.getValue().sendMessage(mMessage);
+	
+	public synchronized void checkPlayerStatus() {
+		//Trigger the play panel here and to have the fixed size of the player
+		if (isLockRound() && playerList.size() >= 2) {
+			// Dealer draw a card
+			updatePlayerCard(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer.getCard(1));
+			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);
+			for (Map.Entry<Integer, PlayerServerThread> entry : playerClientServerList.entrySet()) {
+				entry.getValue().setClientStatus(false);
+			}
 		}
+	}
+	
+	public synchronized void updatePlayerCard(int nodeID, Card c) {
+		Player p = playerList.get(nodeID);
+		p.selectFromDeck(c);
+		System.out.println("node: " + nodeID + ", " + c.getPattern() + ", " + c.getCardRank());
+	
 	}
 	
 	public synchronized boolean isLockRound() {
-		if(playerClientList.size() >= 1) {
-			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
+		if(playerClientServerList.size() >= 1) {
+			for (Map.Entry<Integer, PlayerServerThread> entry : playerClientServerList.entrySet()) {
 				this.isLockRound = entry.getValue().getClientStatus();
 			}
 
@@ -143,43 +140,32 @@ public final class PlayerClientManager {
 	}
 	
 	/**
+	 * Sends the current client list to the client's server port
+	 * @param mConnectionState
+	 * @param messageType
+	 */
+	public synchronized void sendClientList(ClientConnectionState mConnectionState, MessageType messageType){
+		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
+			JSONObject mMessage = new JSONObject();
+			
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, getPlayersSockets());
+			mMessage.put("header", mConnectionState);
+			mMessage.put("body", bodyMessage);
+			t.getValue().sendMessage(mMessage);
+		}
+	}
+	
+	/**
 	 * Generates list of current clients and their socket details
 	 * @return
 	 */
 	public String getPlayersSockets(){
 		StringBuilder sb = new StringBuilder();
-		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
+		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
 			GamePlayerInfo playerInfo = t.getValue().getClientGamePlayerInfo();
 			sb.append(playerInfo.getNodeID()+":"+playerInfo.getIPAddress()+":"+playerInfo.getPort()+"\n");
 		}
 		return sb.toString();
-	}
-
-	public synchronized void updatePlayerCard(int nodeID, Card c) {
-		Player p = playerList.get(nodeID);
-		p.selectFromDeck(c);
-		System.out.println("node: " + nodeID + ", " + c.getPattern() + ", " + c.getCardRank());
-	
-	}
-
-	public synchronized void checkPlayerStatus() {
-		//Trigger the play panel here and to have the fixed size of the player
-		if (isLockRound() && playerList.size() >= 2) {
-			// Dealer draw a card
-			updatePlayerCard(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer.getCard(1));
-			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);
-			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
-				entry.getValue().setClientStatus(false);
-			}
-		}
-	}
-	
-	/**
-	 * This sets the node list of the client's neighbors
-	 * @param gamePlayerInfo
-	 */
-	public void addNodeToList(GamePlayerInfo gamePlayerInfo){
-		nodeList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
 	}
 
 }

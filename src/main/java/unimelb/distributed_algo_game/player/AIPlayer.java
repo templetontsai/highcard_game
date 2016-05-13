@@ -58,11 +58,11 @@ public class AIPlayer extends Player {
 	 * Runs the main thread of the AI player
 	 */
 	public void run() {
-		/*
+		
 		gameServer.setPlayer(this);
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
-		gameServerThread.start();*/
+		gameServerThread.start();
 		
 		gameClient.setPlayer(this);
 		gameClient.setServerDetails();

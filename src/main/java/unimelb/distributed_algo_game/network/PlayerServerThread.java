@@ -1,6 +1,3 @@
-/*
- * 
- */
 package unimelb.distributed_algo_game.network;
 
 import java.io.EOFException;
@@ -18,174 +15,194 @@ import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.GameClient.StillAliveTimerTask;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
-import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class PlayerClientThread.
- *
- * @author Ting-Ying Tsai
- */
-public class PlayerClientThread extends Thread {
+public class PlayerServerThread extends Thread{
 
 	/** The m socket. */
 	private Socket mSocket = null;
-
+	
 	/** The m object output stream. */
 	private ObjectOutputStream mObjectOutputStream = null;
 
 	/** The m object input stream. */
 	private ObjectInputStream mObjectInputStream = null;
 	
-
+	/** The game server object */
+	private GameServer mGameServer = null;
+	
 	/** The m lock. */
 	private Object mLock = null;
 
 	/** The JSON body message */
 	private JSONObject mMessage = null;
 
-	/** The boolean for running the client thread */
+	/** The boolean for running the client server thread */
 	private boolean isRunning = false;
-
-	/** The game server object */
-	private GameServer mGameServer = null;
-
-	private int clientNodeID = -1;
-
+	
 	private boolean isClientLockRound;
 
-	private boolean isClientStillAvle = false;
+	private boolean isClientStillAlive = false;
+		
+	private GamePlayerInfo mGameClientInfo = null;
 	
-	private GamePlayerInfo mGameDealerInfo = null;
+	private GamePlayerInfo mGameServerInfo = null;
 	
-	private GamePlayerInfo mGameClientInfo = null;	
-
-	/**
-	 * Instantiates a new player client thread.
-	 *
-	 * @param mSocket
-	 *            the m socket
-	 * @param clientID
-	 *            the client id
-	 */
-	public PlayerClientThread(Socket mSocket, GameServer mGameServer, GamePlayerInfo mGameDealerInfo) {
-		if (mSocket != null) {
-			this.mSocket = mSocket;
-		} else
-			throw new NullPointerException();
-
+	private int clientNodeID = -1;
+	
+	public PlayerServerThread(GameServer gameServer, GamePlayerInfo mGameServerInfo){
+		
 		mLock = new Object();
 		mMessage = new JSONObject();
 		this.mGameServer = mGameServer;
-		this.mGameDealerInfo = mGameDealerInfo;
-		this.mGameClientInfo = new GamePlayerInfo();
+		this.mGameServerInfo = mGameServerInfo;
 	}
 	
-
-
+	public void connect(){
+		try{
+		    mSocket = new Socket(mGameClientInfo.getIPAddress(), Integer.parseInt(mGameClientInfo.getPort()));
+		    System.out.println("Server details: "+mGameClientInfo.getIPAddress()+" "+mGameClientInfo.getPort());
+		}catch(IOException ioe){
+			System.out.println("Can't reach the client's server");
+			ioe.printStackTrace();
+			mSocket = null;
+		}
+	}
+	
 	/**
 	 * Runs the main method of the client thread
 	 */
 	public void run() {
-
+		
 		isRunning = true;
-		try {
-			// Receives input and sends message using server socket
-			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
+		try{
 			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
-		} catch (IOException ioe) {
-			ioe.getStackTrace();
+			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
+			System.out.println("Server connection is "+mObjectOutputStream);
+		}catch(IOException ioe){
+			System.out.println("Can't reach the client's server");
+			ioe.printStackTrace();
 		}
-
+		
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);	
+		
 		JSONObject m;
 		BodyMessage bodyMessage;
 		ClientConnectionState clientConnectionState;
+		
+	    while(isRunning){
+	    	// Receive JSON message object from server
+	    				m = (JSONObject) receiveMessage();
 
-		// Main loop to run the client thread
-		while (isRunning) {
+	    				// Only process the message if it's not null
+	    				if (m != null) {
 
-			// Receive JSON message object from server
-			m = (JSONObject) receiveMessage();
+	    					// Get the client connection state and body from the message
+	    					clientConnectionState = (ClientConnectionState) m.get("header");
+	    					bodyMessage = (BodyMessage) m.get("body");
 
-			// Only process the message if it's not null
-			if (m != null) {
+	    					switch (clientConnectionState) {
 
-				// Get the client connection state and body from the message
-				clientConnectionState = (ClientConnectionState) m.get("header");
-				bodyMessage = (BodyMessage) m.get("body");
+	    					// Process the message based on the connection state
+	    					case INIT:
+	    					case ACK:
+	    					case CONNECTING:
+	    					case CONNECTED:
+	    						// System.out.println("connected from client");
+	    						checkMessageType(bodyMessage);
+	    						break;
+	    					case DISCONNECTING:
+	    					case DISCONNECTED:
+	    						// System.out.println("disconnected from client");
 
-				switch (clientConnectionState) {
+	    						isRunning = false;
+	    						break;
+	    					default:
+	    						System.out.println("Uknown State");
+	    						break;
 
-				// Process the message based on the connection state
-				case INIT:
-				case ACK:
-				case CONNECTING:
-				case CONNECTED:
-					// System.out.println("connected from client");
-					checkMessageType(bodyMessage);
-					break;
-				case DISCONNECTING:
-				case DISCONNECTED:
-					// System.out.println("disconnected from client");
-
-					isRunning = false;
-					break;
-				default:
-					System.out.println("Uknown State");
-					break;
-
-				}
-			} else {
-				Timer timer = new Timer();
-				timer.schedule(new StillAliveTimerTask(), NetworkInterface.STILL_ALIVE_TIME_OUT);
-			}
-
-		}
-
-		// Close the input and output streams to the server
-		try {
-			mObjectInputStream.close();
-			mObjectOutputStream.close();
-			mSocket.close();
-			System.out.println("Client closed");
-		} catch (IOException ioe) {
-			// Print out the details of the exception error
-			ioe.printStackTrace();
-		}
-	}
-
-	/**
-	 * This receives a still alive message from the client
-	 *
-	 */
-	final class StillAliveTimerTask extends TimerTask {
-
-		@Override
-		public void run() {
-			
-			synchronized (mLock) {
-				isClientStillAvle = false;
-				mGameServer.removeClient(clientNodeID);
-				isRunning = false;
-				//System.out.println("Node:" + clientNodeID + " has left the game");
-				
-			}
-		}
-
+	    					}
+	    				}
+	    }
 	}
 	
-	/**
-	 * Sends still alive message to the client
-	 */
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
-		BodyMessage mBodyMessage = new BodyMessage(this.mGameDealerInfo, MessageType.ACK,
+		BodyMessage mBodyMessage = new BodyMessage(mGameServerInfo, MessageType.ACK,
 				ACKCode.STILL_ALIVE);
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", mBodyMessage);
 		sendMessage(mMessage);
 	}
+
+	final class StillAliveTimerTask extends TimerTask {
+
+		@Override
+		public void run() {
+
+			sendStillAliveMessage();
+
+		}
+
+	}
+	
+	/**
+	 * This method sends a generic message object to the game server
+	 */
+	public void sendMessage(Object mGameSendDataObject) {
+
+		try {
+
+			if (mObjectOutputStream != null) {
+
+				mObjectOutputStream.writeObject(mGameSendDataObject);
+				mObjectOutputStream.flush();
+				mObjectOutputStream.reset();
+
+			} else {
+				System.out.println("Server output stream is null");
+			}
+		} catch (IOException ioe) {
+			// TODO Adding Error Handling
+			isRunning = false;
+			System.out.println("Leader has gone haywire");
+			ioe.printStackTrace();
+		}
+
+	}
+	
+	/**
+	 * Receive message from the client.
+	 */
+	public Object receiveMessage() {
+
+		Object message = null;
+
+		try {
+
+			if (mObjectInputStream != null) {
+				message = mObjectInputStream.readObject();
+			}
+		} catch (EOFException e) {
+
+			return null;
+
+		} catch (ClassNotFoundException e) {
+			// Print out the details of the exception error
+			e.printStackTrace();
+		} catch (IOException ioe) {
+			// Print out the details of the exception error
+			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
+			System.out.println("Connection lost in receiveMessage, node: " + this.mGameServerInfo.getNodeID());
+			isRunning = false;
+			//ioe.printStackTrace();
+		}
+
+		return message;
+
+	}
+	
 	/**
 	 * This method checks the type of JSON body message and carries out the
 	 * necessary action for each message type
@@ -210,12 +227,12 @@ public class PlayerClientThread extends Thread {
 				connectionState = ClientConnectionState.CONNECTED;
 				// Player specifies the card to
 				//mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
-				mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
+				mBodyMessage = new BodyMessage(mGameServerInfo, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
 				mMessage.put("header", connectionState);
 				mMessage.put("body", mBodyMessage);
 				sendMessage(mMessage);
 				synchronized (mLock) {
-					isClientStillAvle = true;
+					isClientStillAlive = true;
 				}
 
 			}
@@ -238,7 +255,7 @@ public class PlayerClientThread extends Thread {
 				break;
 			case STILL_ALIVE:
 				synchronized (mLock) {
-					isClientStillAvle = true;
+					isClientStillAlive = true;
 				}
 				System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
 				break;
@@ -255,7 +272,7 @@ public class PlayerClientThread extends Thread {
 			Card c = mGameServer.getCard(1);
 			mGameServer.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
 			//mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
-			mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.CRD, c);
+			mBodyMessage = new BodyMessage(mGameServerInfo, MessageType.CRD, c);
 
 			mMessage.put("header", connectionState);
 			mMessage.put("body", mBodyMessage);
@@ -284,7 +301,6 @@ public class PlayerClientThread extends Thread {
 
 		}
 	}
- 
 	
 	/**
 	 * This sends an election message to the node's neighbor SC
@@ -301,7 +317,7 @@ public class PlayerClientThread extends Thread {
 			//This means i have received my election message and I am the new coordinator
 			mGameServer.setPlayerDealer();
 			mBodyMessage.setMessageType(MessageType.COD);
-			mBodyMessage.setMessage(mGameDealerInfo.getPlayerDetails());
+			mBodyMessage.setMessage(mGameServerInfo.getPlayerDetails());
 		}
 		
 		sendMessage(mBodyMessage);
@@ -321,72 +337,15 @@ public class PlayerClientThread extends Thread {
 			sendMessage(mBodyMessage);
 		}
 	}
-	/**
-	 * Sends message to a client.
-	 *
-	 * @param mGameSendDataObject
-	 *            the m game send data object
-	 */
-	public void sendMessage(Object mGameSendDataObject) {
-
-		try {
-			if (mObjectOutputStream != null && mGameSendDataObject != null) {
-
-				mObjectOutputStream.writeObject(mGameSendDataObject);
-				mObjectOutputStream.flush();
-				// TODO object has to be reset, otherwise the client won't
-				// receive any new reference of object.
-				// However, this might cause issue if the packet is lost in
-				// between communication
-				mObjectOutputStream.reset();
-			}
-		} catch (IOException ioe) {
-			// Print out the details of the exception error
-			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
-			System.out.println("Connection lost in sendMessage, node: " + this.mGameDealerInfo.getNodeID());
-			isRunning = false;
-			ioe.printStackTrace();
-		}
-
+	
+	public void setGameClientInfo(GamePlayerInfo gameClientInfo){
+		this.mGameClientInfo = gameClientInfo;
 	}
 	
-	/**
-	 * This sends a message to the next node in the logical ring
-	 */
-	
-	
-	/**
-	 * Receive message from the client.
-	 */
-	public Object receiveMessage() {
-
-		Object message = null;
-
-		try {
-
-			if (mObjectInputStream != null) {
-				message = mObjectInputStream.readObject();
-			}
-		} catch (EOFException e) {
-
-			return null;
-
-		} catch (ClassNotFoundException e) {
-			// Print out the details of the exception error
-			e.printStackTrace();
-		} catch (IOException ioe) {
-			// Print out the details of the exception error
-			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
-			System.out.println("Connection lost in receiveMessage, node: " + this.mGameDealerInfo.getNodeID());
-			isRunning = false;
-			//ioe.printStackTrace();
-		}
-
-		return message;
-
+	public void setGameServerInfo(GamePlayerInfo gameServerInfo){
+		this.mGameServerInfo = gameServerInfo;
 	}
 	
-
 	public synchronized int getClientNodeID() {
 		return mGameClientInfo.getNodeID();
 	}
@@ -402,6 +361,4 @@ public class PlayerClientThread extends Thread {
 	public synchronized GamePlayerInfo getClientGamePlayerInfo() {
 		return this.mGameClientInfo;
 	}
-
-
 }

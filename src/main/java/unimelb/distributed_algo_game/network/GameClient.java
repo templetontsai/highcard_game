@@ -404,6 +404,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	}
 
+	/**
+	 * This plays the game with the server
+	 */
 	public void play() {
 
 		if (this.clientConnectionState == ClientConnectionState.INIT) {
@@ -416,16 +419,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 			sendMessage(mMessage);
 
 		} else {
-			JSONObject mMessage = new JSONObject();
+			/**JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "request a card");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 
-			sendMessage(mMessage);
+			sendMessage(mMessage);**/
 		}
 
 	}
-	
+	/**
+	 * This sets the port and IP address for the server stored in the player object
+	 */
 	public void setServerDetails(){
 		serverPort = Integer.parseInt(mPlayer.getGameServerInfo().getPort());
 		serverIPAddress = mPlayer.getGameServerInfo().getIPAddress();
