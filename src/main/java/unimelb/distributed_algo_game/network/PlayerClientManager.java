@@ -3,7 +3,9 @@
  */
 package unimelb.distributed_algo_game.network;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
@@ -32,6 +34,11 @@ public final class PlayerClientManager {
 	private boolean isLockRound = false;
 
 	private Map<Integer, Player> playerList = null;
+	
+	private List<Integer> playerIDList = null;
+	
+
+	
 
 	/**
 	 * Instantiates a new player client manager.
@@ -42,6 +49,8 @@ public final class PlayerClientManager {
 	public PlayerClientManager(int playerClientNum) {
 		playerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
 		playerList = new HashMap<Integer, Player>();
+		playerIDList = new ArrayList();
+		
 
 	}
 
@@ -63,7 +72,10 @@ public final class PlayerClientManager {
 	}
 
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
+		
 		playerList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
+		playerIDList.add(gamePlayerInfo.getNodeID());
+	
 	}
 
 	/**
@@ -74,10 +86,15 @@ public final class PlayerClientManager {
 	 */
 	public synchronized void removeClient(int clientThread) {
 		playerClientList.remove(clientThread);
+		
 	}
 
 	public synchronized void removePlayer(int nodeID) {
 		playerList.remove(nodeID);
+		for(Integer i : playerIDList) {
+			if(i == nodeID)
+				playerIDList.remove(i);
+		}
 	}
 
 	/**
@@ -118,10 +135,23 @@ public final class PlayerClientManager {
 			JSONObject mMessage = new JSONObject();
 			
 			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, getPlayersSockets());
+			
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
 			t.getValue().sendMessage(mMessage);
 		}
+	}
+	public synchronized void sendPlayerIDList(ClientConnectionState mConnectionState, MessageType messageType){
+		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
+			JSONObject mMessage = new JSONObject();
+			
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, playerIDList);
+			
+			mMessage.put("header", mConnectionState);
+			mMessage.put("body", bodyMessage);
+			t.getValue().sendMessage(mMessage);
+		}
+		
 	}
 	
 	public synchronized boolean isLockRound() {
@@ -165,11 +195,17 @@ public final class PlayerClientManager {
 		if (isLockRound() && playerList.size() >= 2) {
 			// Dealer draw a card
 			updatePlayerCard(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer.getCard(1));
-			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT);
+			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT_RST);
 			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
 				entry.getValue().setClientStatus(false);
 			}
 		}
+	}
+	
+
+	
+	public synchronized List<Integer> getPlayerIDList() {
+		return playerIDList;
 	}
 
 }

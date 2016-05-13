@@ -38,15 +38,17 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private ServerSocket mServerSocket = null;
 
 	/** The m lock. */
-	private Object mLock;
+	private Object mLock = null;
 
 	/** The connection state. */
-	private ServerConnectionState mConnectionState;
+	private ServerConnectionState mConnectionState = null;
 
 	/** The m player client manager. */
-	private PlayerClientManager mPlayerClientManager;
+	private PlayerClientManager mPlayerClientManager = null;
 	
-	private MainGameLoginDealerPanel mPanel;
+	private MainGameLoginDealerPanel mPanel = null;
+	// This number is the total player number but not including node 0 itself
+	private final int GAME_START = 3;
 
 	/**
 	 * Instantiates a new game server.
@@ -73,6 +75,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
+			
 			this.mPlayer = mPlayer;
 			nodeID = this.mPlayer.getGamePlayerInfo().getNodeID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
@@ -126,6 +129,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * clients including managing the thread pool of clients
 	 */
 	private void runLeaderState() throws IOException {
+		
 		// Only runs if the socket is open
 		if (mServerSocket != null) {
 			System.out.println("Server Start, Waiting....");
@@ -152,6 +156,16 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPanel.updatePlayerList(t.getClientNodeID());
+					
+					
+			
+					if(mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
+						//TODO make sure the receiving order is correct
+						System.out.println("Game Start");
+						broadcastPlayerList();
+						broadcastGameReadyToClients(new Boolean(true));
+						mPanel.setButtonEnable(true, mPlayerClientManager.getPlayerIDList());
+					}
 
 				}
 				// Close server port once the server is no longer running
@@ -195,6 +209,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 							PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
 							//Block the new connection to join in the middle of the game
 							if (mPlayerClientManager.isLockRound()) {
+								
 								t.setClientStatus(true);
 							}
 							
@@ -207,6 +222,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 							mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 							mPlayerClientManager.addClient(t.getClientNodeID(), t);
 							mPanel.updatePlayerList(t.getClientNodeID());
+							
+						
 
 						}
 						// Close server port once the server is no longer running
@@ -244,14 +261,18 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * Sends a message to all the clients in the thread pool
 	 */
 	public void broadcastToClients(Object object) {
-		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT);
+		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RST);
+	}
+	
+	public void broadcastGameReadyToClients(Object object) {
+		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RDY);
 	}
 	
 	/**
 	 * Sends a player list to the other client server sockets
 	 */
 	public void broadcastPlayerList(){
-		mPlayerClientManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
+		mPlayerClientManager.sendPlayerIDList(ClientConnectionState.CONNECTED, MessageType.BCT_LST);
 	}
 
 	/**
@@ -285,6 +306,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void setPanel(MainGameLoginDealerPanel panel) {
 		this.mPanel = panel;
 	}
+	
+
 
 
 }

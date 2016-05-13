@@ -3,13 +3,11 @@
  */
 package unimelb.distributed_algo_game.player;
 
-import org.json.simple.JSONObject;
+import javax.swing.JPanel;
 
-import unimelb.distributed_algo_game.network.BodyMessage;
 import unimelb.distributed_algo_game.network.GameClient;
 import unimelb.distributed_algo_game.network.GameServer;
-import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.pokers.Card;
+import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
 import unimelb.distributed_algo_game.state.GameState;
 
 
@@ -32,6 +30,8 @@ public class AIPlayer extends Player {
 
 	/** The game server thread. */
 	private Thread gameServerThread = null;
+	
+	private JPanel mPanel = null;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -42,10 +42,11 @@ public class AIPlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public AIPlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo) {
+	public AIPlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, JPanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
+		this.mPanel = panel;
 	}
 	
 	public AIPlayer(GamePlayerInfo gamePlayerInfo) {
@@ -65,6 +66,7 @@ public class AIPlayer extends Player {
 		gameServerThread.start();*/
 		
 		gameClient.setPlayer(this);
+		gameClient.setPanel((MainGameLoginClientPanel)mPanel);
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
@@ -102,6 +104,10 @@ public class AIPlayer extends Player {
 	public void update() {
 		// TODO Auto-generated method stub
 
+	}
+	
+	public void requestCardFromDealer() {
+		 gameClient.requestCard();
 	}
 
 }

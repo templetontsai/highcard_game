@@ -3,6 +3,7 @@
  */
 package unimelb.distributed_algo_game.pokers;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -15,7 +16,7 @@ import unimelb.distributed_algo_game.pokers.Card.CardRank;
  *
  * @author Ting-Ying Tsai
  */
-public final class Deck {
+public final class Deck implements Serializable{
 
 	/** The instance. */
 	// Initialize the variables for the deck class

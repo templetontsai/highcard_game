@@ -3,13 +3,15 @@
  */
 package unimelb.distributed_algo_game.player;
 
+import java.io.Serializable;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class PlayerScore.
  *
  * @author David This class is responsible for maintaining a player's score
  */
-public class PlayerScore {
+public class PlayerScore implements Serializable{
 
 	/** The player id. */
 	// Initialize the class variables

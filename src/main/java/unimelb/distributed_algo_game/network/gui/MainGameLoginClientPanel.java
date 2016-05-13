@@ -1,7 +1,10 @@
 package unimelb.distributed_algo_game.network.gui;
 
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -11,6 +14,7 @@ import javax.swing.JTextField;
 import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.pokers.Card;
 
 public class MainGameLoginClientPanel extends JPanel {
 	private JTextField nodeField;
@@ -19,19 +23,29 @@ public class MainGameLoginClientPanel extends JPanel {
 	private JLabel lblNewLabel_0;
 	private JLabel lblNewLabel;
 	private JLabel lblNewLabel_1, serverIPLabel, serverPortLabel;
-	private JButton btnPlay;
-	private JButton btnStart;
+	private JButton btnStart = null;
+	private JButton btnPlay = null;
+	private MainGameLoginClientPanel self = null;
+	private PlayButtonActionListerner mPlayButtonActionListerner = null;
+	private StartButtonActionListerner mStartButtonActionListerner = null;
+	private MainGameFrameGUI mMainGameFrameGUI = null;
+	private Card c;
+	private Player p;
+	private List<CardPanel> mPlayerPanelList;
+
 	
+
 	private int nodeID;
 
-	public MainGameLoginClientPanel() {
+	public MainGameLoginClientPanel(MainGameFrameGUI mainGameFrameGUI) {
+		self = this;
 		setLayout(null);
-
+		mMainGameFrameGUI = mainGameFrameGUI;
 		nodeField = new JTextField();
 		nodeField.setBounds(153, 52, 114, 19);
 		add(nodeField);
 		nodeField.setColumns(10);
-		
+
 		ipTextField = new JTextField();
 		ipTextField.setBounds(153, 83, 114, 19);
 		add(ipTextField);
@@ -41,12 +55,12 @@ public class MainGameLoginClientPanel extends JPanel {
 		portTextField.setBounds(153, 113, 114, 19);
 		add(portTextField);
 		portTextField.setColumns(10);
-		
+
 		serverIPTextField = new JTextField();
 		serverIPTextField.setBounds(153, 142, 114, 19);
 		add(serverIPTextField);
 		serverIPTextField.setColumns(10);
-		
+
 		serverPortTextField = new JTextField();
 		serverPortTextField.setBounds(153, 172, 114, 19);
 		add(serverPortTextField);
@@ -55,7 +69,7 @@ public class MainGameLoginClientPanel extends JPanel {
 		lblNewLabel_0 = new JLabel("NODE ID");
 		lblNewLabel_0.setBounds(12, 54, 181, 15);
 		add(lblNewLabel_0);
-		
+
 		lblNewLabel = new JLabel("Client IP Address");
 		lblNewLabel.setBounds(12, 81, 181, 15);
 		add(lblNewLabel);
@@ -63,59 +77,100 @@ public class MainGameLoginClientPanel extends JPanel {
 		lblNewLabel_1 = new JLabel("Client Port");
 		lblNewLabel_1.setBounds(12, 111, 123, 15);
 		add(lblNewLabel_1);
-		
+
 		serverIPLabel = new JLabel("Server IP Address");
 		serverIPLabel.setBounds(12, 141, 123, 15);
 		add(serverIPLabel);
-		
+
 		serverPortLabel = new JLabel("Server Port");
 		serverPortLabel.setBounds(12, 171, 123, 15);
 		add(serverPortLabel);
+
+		mStartButtonActionListerner = new StartButtonActionListerner();
+		mPlayButtonActionListerner = new PlayButtonActionListerner();
+		btnStart = new JButton("Start");
+		btnStart.addActionListener(mStartButtonActionListerner);
+		btnStart.setBounds(12, 225, 117, 25);
+		add(btnStart);
+		btnStart.setVisible(true);
 		
 		btnPlay = new JButton("Play");
-		btnPlay.setBounds(153, 214, 117, 25);
+		btnPlay.addActionListener(mPlayButtonActionListerner);
+		btnPlay.setBounds(153, 225, 117, 25);
 		add(btnPlay);
-		btnPlay.setVisible(false);
-		
-		btnStart = new JButton("Connect");
-		btnStart.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent action) {
-				// TODO get ip and port from textfield and set init server
-				// socket
+		btnPlay.setEnabled(false);
+		mPlayerPanelList = new ArrayList<CardPanel>();
 
-				String ipAddress = ipTextField.getText();
-				String port = portTextField.getText();
-				String serverIPAddress = serverIPTextField.getText();
-				String serverPort = serverPortTextField.getText();
-				if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
-					String gamePlayerInfo[] = {Integer.toString(nodeID), ipAddress, port};
-					String gameServerInfo[] = {"0", serverIPAddress, serverPort};
-					System.out.println("Client"+nodeID+" sending connection to dealer");
+	}
 
-					Player p = new AIPlayer("AI", new GamePlayerInfo(gamePlayerInfo), new GamePlayerInfo(gameServerInfo));
-					Thread t = new Thread(p);
-					t.setName("AI Player Thread");
-					t.start();
-					btnStart.setVisible(false);
-					btnPlay.setVisible(true);
-				}
+	final class StartButtonActionListerner implements ActionListener {
+		public void actionPerformed(ActionEvent action) {
+			// TODO get ip and port from textfield and set init server
+			// socket
+
+			String ipAddress = ipTextField.getText();
+			String port = portTextField.getText();
+			String serverIPAddress = serverIPTextField.getText();
+			String serverPort = serverPortTextField.getText();
+			if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
+				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
+				String gameServerInfo[] = { "0", serverIPAddress, serverPort };
+				System.out.println("Client" + nodeID + " sending connection to dealer");
+
+				p = new AIPlayer("AI", new GamePlayerInfo(gamePlayerInfo), new GamePlayerInfo(gameServerInfo), self);
+				Thread t = new Thread(p);
+				t.setName("AI Player Thread");
+				t.start();
+				btnStart.setEnabled(false);
+
 			}
-		});
-		btnStart.setBounds(153, 214, 117, 25);
-		add(btnStart);
-		
-		btnPlay.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent action) {
-				// TODO get ip and port from textfield and set init server
-				// socket
-				
-			}
-		});
-		
+		}
+
+	}
+
+	final class PlayButtonActionListerner implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO get ip and port from textfield and set init server
+			// socket
+			System.out.println("inside play");
+			
+			mMainGameFrameGUI.getContentPane().removeAll();
+
+			GameTablePanel gmaeTable = new GameTablePanel(mPlayerPanelList);
+			gmaeTable.setDealer(false);
+			add(gmaeTable, BorderLayout.CENTER);
+			
+
+
+			mMainGameFrameGUI.setContentPane(gmaeTable);// Adding to
+													// content pane,
+													// not to Frame
+			mMainGameFrameGUI.setSize(500, 500);
+			mMainGameFrameGUI.setVisible(true);
+			mMainGameFrameGUI.invalidate();
+			mMainGameFrameGUI.validate();
+
+			// mainGameFrameGUI.printAll(getGraphics());
+
+		}
+
 	}
 
 	public void setClientNodeID(int nodeID) {
 		this.nodeID = nodeID;
+	}
+
+	public void setButtonEnable(boolean isEnable, List<Integer> mPlayerIDList) {
+		
+		for (Integer i : mPlayerIDList) {
+			mPlayerPanelList.add(new CardPanel(i));
+		}
+
+
+		btnPlay.setEnabled(isEnable);
+		System.out.println("Player Ready");
 	}
 
 }

@@ -28,7 +28,7 @@ public class MainGameFrameGUI extends JFrame {
 			this.setSize(500, 500);
 			this.setVisible(true);
 		} else if (nodeID > 0) {
-			mainLoginClientPanel = new MainGameLoginClientPanel();
+			mainLoginClientPanel = new MainGameLoginClientPanel(this);
 			mainLoginClientPanel.setClientNodeID(nodeID);
 			this.setContentPane(mainLoginClientPanel);
 			this.setSize(500, 500);

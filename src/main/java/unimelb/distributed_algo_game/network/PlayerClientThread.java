@@ -271,14 +271,11 @@ public class PlayerClientThread extends Thread {
 			mMessage.put("body", mBodyMessage);
 			sendMessage(mMessage);
 			break;
-		// Used to send send a broadcast message
-		case BCT:
-			System.out.println(mBodyMessage.getMessage());
-			isClientLockRound = false;
-			break;
 		// Used to send a disconnect message
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
+			//TODO put this in the right place later on, when it is false the game is no longer locked
+			isClientLockRound = false;
 			break;
 		default:
 			System.out.println("Uknown Message Type");

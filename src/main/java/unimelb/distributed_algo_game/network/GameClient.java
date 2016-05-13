@@ -7,9 +7,11 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,7 +19,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.network.PlayerClientThread.StillAliveTimerTask;
+import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
@@ -65,11 +67,16 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
-	
+
 	private int serverPort;
-	
+
 	private String serverIPAddress;
 
+	private boolean isGameReady = false;
+
+	private MainGameLoginClientPanel mMainGameLoginClientPanel = null;
+
+	private List<Integer> playerIDList = null;
 
 	/**
 	 * Instantiates a new game client.
@@ -77,7 +84,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	protected GameClient() {
 		mLock = new Object();
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
-
+		
 	}
 
 	/**
@@ -101,17 +108,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
-			
+
 		} else {
 			System.out.println("Player can't be null");
 			throw new NullPointerException();
 		}
 
 	}
-
-
-
-
 
 	/*
 	 * Runs the thread for the game client
@@ -201,12 +204,14 @@ public final class GameClient implements Runnable, NetworkInterface {
 			ACKCode ackCode = (ACKCode) mBodyMessage.getMessage();
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
-				System.out.println("ACK Message received from leader node" + mBodyMessage.getGamePlayerInfo().getNodeID());
+				System.out.println(
+						"ACK Message received from leader node" + mBodyMessage.getGamePlayerInfo().getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
 				// Start the still alive timer beacon to the leader
 				Timer timer = new Timer();
 				timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
+
 			case CARD_RECEIVED:
 				break;
 			default:
@@ -221,12 +226,27 @@ public final class GameClient implements Runnable, NetworkInterface {
 			((Card) mBodyMessage.getMessage()).showCard();
 			// Notify the dealer the card has been received
 			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CARD_RECEIVED));
+			mMessage.put("body",
+					new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CARD_RECEIVED));
 
 			sendMessage(mMessage);
 
 			break;
-		case BCT:
+		case BCT_RST:
+			System.out.println(mBodyMessage.getMessage());
+			break;
+		case BCT_RDY:
+			System.out.println("Game is ready to play, start request card from dealer");
+			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
+			System.out.println(mBodyMessage.getMessage());
+			break;
+		case BCT_LST:
+			
+			playerIDList = (List<Integer>) mBodyMessage.getMessage();
+			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + "receives player list");
+			// Receive player list, call gui to draw the players and folded card
+			// on GameTablePanel
+			
 			System.out.println(mBodyMessage.getMessage());
 			break;
 		case DSC:
@@ -273,8 +293,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 				switch (serverConnectionState) {
 				// Acknowledgement that the server is still alive
 				case ACK:
-					
-					mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "get card request");
+
+					mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD,
+							"get card request");
 					mMessage.put("header", clientConnectionState);
 					mMessage.put("body", mBodyMessage);
 					sendMessage(mMessage);
@@ -415,20 +436,29 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			sendMessage(mMessage);
 
-		} else {
-			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "request a card");
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
+		} else if (isGameReady) {
+			mMainGameLoginClientPanel.setButtonEnable(true, playerIDList);
 
-			sendMessage(mMessage);
 		}
 
 	}
-	
-	public void setServerDetails(){
+
+	public void setServerDetails() {
 		serverPort = Integer.parseInt(mPlayer.getGameServerInfo().getPort());
 		serverIPAddress = mPlayer.getGameServerInfo().getIPAddress();
+	}
+
+	public void setPanel(MainGameLoginClientPanel mainGameLoginClientPanel) {
+		this.mMainGameLoginClientPanel = mainGameLoginClientPanel;
+	}
+
+	public void requestCard() {
+		JSONObject mMessage = new JSONObject();
+		BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "request a card");
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", bodyMessage);
+
+		sendMessage(mMessage);
 	}
 
 }
