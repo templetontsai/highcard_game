@@ -51,6 +51,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private PlayerServerManager mPlayerServerManager;
 	
 	private MainGameLoginDealerPanel mPanel;
+	
+	private GameClient mGameClient = null;
 
 	/**
 	 * Instantiates a new game server.
@@ -343,5 +345,24 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return mPlayer;
 	}
 	
+	public void setGameClient(GameClient mGameClient){
+		this.mGameClient = mGameClient;
+	}
+	
+	public void updateServerDetails(){
+		mGameClient.setServerDetails();
+	}
+	
+	public String getServerDetails(){
+		return mGameClient.getServerDetails();
+	}
+	
+	public void disconnectClient(){
+		mGameClient.disconnect();
+	}
+	
+	public void reconnectClient(){
+		mGameClient.connect();
+	}
 
 }

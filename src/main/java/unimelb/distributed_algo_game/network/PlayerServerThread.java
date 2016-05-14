@@ -53,6 +53,8 @@ public class PlayerServerThread extends Thread{
 	
 	private int clientNodeID = -1;
 	
+	private Timer timer = null;
+	
 	public PlayerServerThread(GameServer mGameServer, GamePlayerInfo mGameServerInfo){
 		
 		mLock = new Object();
@@ -91,7 +93,7 @@ public class PlayerServerThread extends Thread{
 			ioe.printStackTrace();
 		}
 		
-		Timer timer = new Timer();
+		timer = new Timer();
 		timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);	
 		
 		JSONObject m;
@@ -202,6 +204,8 @@ public class PlayerServerThread extends Thread{
 			isRunning = false;
 			System.out.println("Leader has gone haywire");
 			ioe.printStackTrace();
+			timer.cancel();
+			
 		}
 
 	}
@@ -377,11 +381,15 @@ public class PlayerServerThread extends Thread{
     public void setNewCoordinator(BodyMessage mBodyMessage){
 
     	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
-    	System.out.println("The new dealer is node "+newDealer.getNodeID()+" Game Server is "+mGameServer);
+    	System.out.println("The new dealer is node "+newDealer.getNodeID());
 		if(newDealer.getNodeID() != this.mGameServerInfo.getNodeID()){
+			System.out.println("New dealer info: "+newDealer.getIPAddress()+":"+newDealer.getPort());
 			mGameServer.setGameServerLeader(newDealer);
 			
-			System.out.println("The new dealer is "+newDealer.getNodeID());
+			mGameServer.updateServerDetails();
+			System.out.println("The new dealer is "+mGameServer.getServerDetails());
+			
+			mGameServer.disconnectClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;

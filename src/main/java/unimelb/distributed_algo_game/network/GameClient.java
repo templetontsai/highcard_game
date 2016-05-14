@@ -455,5 +455,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		serverPort = Integer.parseInt(mPlayer.getGameServerInfo().getPort());
 		serverIPAddress = mPlayer.getGameServerInfo().getIPAddress();
 	}
+	
+	public String getServerDetails(){
+		return mPlayer.getGameServerInfo().getIPAddress()+":"+mPlayer.getGameServerInfo().getPort();
+	}
 
 }

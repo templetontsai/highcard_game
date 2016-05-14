@@ -71,6 +71,8 @@ public class AIPlayer extends Player {
 		gameClientThread.setName("AI Player Socket Thread");
 		gameClientThread.start();
 		
+		gameServer.setGameClient(gameClient);
+		
 		this.setGameState(GameState.PLAY);
 		while(this.getGameState() == GameState.PLAY) {
 			if (this.isDealer()) {

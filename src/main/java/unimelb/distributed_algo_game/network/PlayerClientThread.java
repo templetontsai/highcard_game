@@ -355,11 +355,16 @@ public class PlayerClientThread extends Thread {
     public void setNewCoordinator(BodyMessage mBodyMessage){
 
     	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
-    	System.out.println("The new dealer is node "+newDealer.getNodeID()+" Game Server is "+mGameServer);
+    	System.out.println("The new dealer is node "+newDealer.getNodeID());
 		if(newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()){
+			
+			System.out.println("New dealer info: "+newDealer.getIPAddress()+":"+newDealer.getPort());
 			mGameServer.setGameServerLeader(newDealer);
 			
-			System.out.println("The new dealer is "+newDealer.getNodeID());
+			mGameServer.updateServerDetails();
+			System.out.println("The new dealer is "+mGameServer.getServerDetails());
+			
+			mGameServer.disconnectClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
