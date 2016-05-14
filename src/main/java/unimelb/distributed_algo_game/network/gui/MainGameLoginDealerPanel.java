@@ -22,10 +22,12 @@ import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.token.Token;
 
 public class MainGameLoginDealerPanel extends JPanel {
+
 	private JTextField ipTextField = null;
 	private JTextField portTextField = null;
 	private JTextArea textArea = null;
 	private int nodeID = -1;
+
 
 	private JButton btnStart = null;
 	private JButton btnPlay = null;
@@ -64,6 +66,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 		lblNewLabel_1.setBounds(12, 81, 123, 15);
 		add(lblNewLabel_1);
 
+
 		
 		mStartButtonActionListerner = new StartButtonActionListerner();
 		
@@ -76,6 +79,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 
 	
 	
+
 
 		textArea = new JTextArea();
 		textArea.setBounds(304, 96, 122, 143);

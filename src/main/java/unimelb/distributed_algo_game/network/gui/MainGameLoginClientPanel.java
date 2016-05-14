@@ -48,7 +48,7 @@ public class MainGameLoginClientPanel extends JPanel {
 		ipTextField.setBounds(153, 83, 114, 19);
 		add(ipTextField);
 		ipTextField.setColumns(10);
-
+		
 		portTextField = new JTextField();
 		portTextField.setBounds(153, 113, 114, 19);
 		add(portTextField);
