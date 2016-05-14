@@ -59,11 +59,11 @@ public class AIPlayer extends Player {
 	 * Runs the main thread of the AI player
 	 */
 	public void run() {
-		
+		/*
 		gameServer.setPlayer(this);
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
-		gameServerThread.start();
+		gameServerThread.start();*/
 		
 		gameClient.setPlayer(this);
 		gameClient.setPanel((MainGameLoginClientPanel)mPanel);
@@ -72,8 +72,6 @@ public class AIPlayer extends Player {
 		gameClient.connect();
 		gameClientThread.setName("AI Player Socket Thread");
 		gameClientThread.start();
-		
-		gameServer.setGameClient(gameClient);
 		
 		this.setGameState(GameState.PLAY);
 		while(this.getGameState() == GameState.PLAY) {
@@ -108,15 +106,8 @@ public class AIPlayer extends Player {
 
 	}
 	
-
 	public void requestCardFromDealer() {
 		 gameClient.requestCard();
-	}
-
-	public void disconnectClient(){
-
-		gameClient.disconnect();
-
 	}
 
 }

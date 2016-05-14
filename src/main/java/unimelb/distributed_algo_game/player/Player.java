@@ -185,26 +185,14 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 		this.gameState = gameState;
 	}	
 	
-	/**
-	 * Returns the player connection information
-	 * @return
-	 */
 	public GamePlayerInfo getGamePlayerInfo() {
 		return this.mGamePlayerInfo;
 	}
 	
-	/**
-	 * Sets the server connection information
-	 * @param gameServerInfo
-	 */
 	public void setGameServerInfo(GamePlayerInfo gameServerInfo){
 		this.mGameServerInfo = gameServerInfo;
 	}
 	
-	/**
-	 * Returns the server connection information
-	 * @return
-	 */
 	public GamePlayerInfo getGameServerInfo() {
 		return this.mGameServerInfo;
 	}

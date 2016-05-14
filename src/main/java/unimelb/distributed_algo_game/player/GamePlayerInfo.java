@@ -26,11 +26,4 @@ public class GamePlayerInfo implements Serializable{
 		return new Integer(mGamePlayerInfo[0]);
 	}
 
-	public String getStringNodeID(){
-		return mGamePlayerInfo[0];
-	}
-	
-	public String getPlayerDetails(){
-		return mGamePlayerInfo[0]+","+mGamePlayerInfo[1]+","+mGamePlayerInfo[2];
-	}
 }
