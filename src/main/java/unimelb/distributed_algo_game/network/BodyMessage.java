@@ -61,16 +61,15 @@ public class BodyMessage implements Serializable{
 	public enum MessageType {
 		CON(0),
 		ACK(1),
-		BCT(2),
-		BCT_RST(3),
-		BCT_LST(4),
-		BCT_RDY(5),
-		BCT_CRD(6),
-		CRD(7),
-		DSC(8),
-		LST(9),
-		ELE(10),
-		COD(11);
+		BCT_RST(2),
+		BCT_LST(3),
+		BCT_RDY(4),
+		BCT_CRD(5),
+		CRD(6),
+		DSC(7),
+		LST(8),
+		ELE(9),
+		COD(10);
 
 		
 		/** The code. */
