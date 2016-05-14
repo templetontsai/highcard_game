@@ -159,8 +159,13 @@ public class PlayerClientThread extends Thread {
 			mObjectOutputStream.close();
 
 			mSocket.close();
-			if(timer != null)
+			if(timer != null){
 				timer.cancel();
+				if(!mGameServer.getIsLeader()){
+					System.out.println("It's morphin time!");
+					startElection();
+				}	
+			}
 
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
@@ -332,7 +337,8 @@ public class PlayerClientThread extends Thread {
 				gameClients.add(clientList[i]);
 			}
 		}
-		//System.out.println("Total added clients: "+gameClients.size());
+		System.out.println("My neighbor is: "+gameClients.get(0));
+		System.out.println("Total added clients: "+gameClients.size());
 		mGameServer.updateServerList(gameClients);
 	}
 	

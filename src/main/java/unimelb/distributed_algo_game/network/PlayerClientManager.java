@@ -99,10 +99,10 @@ public final class PlayerClientManager {
 	 */
 	public synchronized void removePlayer(int nodeID) {
 		playerList.remove(nodeID);
-		for (Integer i : playerIDList) {
+	/**	for (Integer i : playerIDList) {
 			if (i == nodeID)
 				playerIDList.remove(i);
-		}
+		}**/
 	}
 
 	/**

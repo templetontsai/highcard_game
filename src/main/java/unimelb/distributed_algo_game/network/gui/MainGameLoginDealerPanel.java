@@ -99,11 +99,11 @@ public class MainGameLoginDealerPanel extends JPanel {
 			// TODO get ip and port from textfield and set init server
 			// socket
 
-			String ipAddress = ipTextField.getText();
-			String port = portTextField.getText();
+			//String ipAddress = ipTextField.getText();
+			//String port = portTextField.getText();
 
-			/*String ipAddress = "localhost";
-			String port = "5000";*/
+			String ipAddress = "localhost";
+			String port = "5000";
 			if (!ipAddress.equals("") && !port.equals("")) {
 				System.out.println(ipAddress + "-" + port);
 				System.out.println("Dealer/Node0 Starts the game");
