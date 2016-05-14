@@ -14,7 +14,11 @@ import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
-
+/**
+ * This class is responsible for managing the threads connected to the other servers
+ * @author Lupiya
+ *
+ */
 public class PlayerServerManager {
 
 	/** The player server client list. */

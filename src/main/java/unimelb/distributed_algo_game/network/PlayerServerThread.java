@@ -18,6 +18,11 @@ import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionSt
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.pokers.Card;
 
+/**
+ * This thread is responsible for managing communication with the other servers
+ * @author Lupiya
+ *
+ */
 public class PlayerServerThread extends Thread{
 
 	/** The m socket. */

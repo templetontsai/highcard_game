@@ -459,10 +459,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 		serverIPAddress = mPlayer.getGameServerInfo().getIPAddress();
 	}
 	
+	/**
+	 * Returns the details of the server the client connects to
+	 * @return
+	 */
 	public String getServerDetails(){
 		return mPlayer.getGameServerInfo().getIPAddress()+":"+mPlayer.getGameServerInfo().getPort();
 	}
 	
+	/**
+	 * Re-establishing a connection with the server
+	 */
 	public void reConnect(){
 		mObjectOutputStream = null;
 		mObjectInputStream = null;
