@@ -8,12 +8,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-<<<<<<< HEAD
+
 import java.util.HashMap;
 import java.util.Map;
-=======
+
 import java.util.ArrayList;
->>>>>>> 3a1999bc20b172939b21ec7c04afb27af9424f30
+
 import java.util.Timer;
 import java.util.TimerTask;
 

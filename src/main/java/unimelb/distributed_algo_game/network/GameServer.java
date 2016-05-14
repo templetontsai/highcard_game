@@ -160,7 +160,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 						t.setClientStatus(true);
 					}
 
-					PlayerServerThread t2 = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
+					
 
 					t.setName("GameServer Socket Thread");
 					t.start();
@@ -172,6 +172,12 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 
+					PlayerServerThread t2 = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
+					t2.setGameClientInfo(t.getClientGamePlayerInfo());
+					t2.setName("GameServer Client Socket Thread");
+					t2.connect();
+					t2.start();
+					
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
@@ -179,6 +185,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 						System.out.println("Game Start");
 						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
 						broadcastPlayerList();
+						broadcastClientList();
 						broadcastGameReadyToClients(new Boolean(true));
 
 					}
@@ -186,19 +193,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerServerManager.addClient(t.getClientNodeID(), t2);
 
-					t2.setGameClientInfo(t.getClientGamePlayerInfo());
-					t2.setName("GameServer Client Socket Thread");
-					t2.connect();
-					t2.start();
+			
 
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Adding error handling
-						e.printStackTrace();
-					}
 
-					broadcastClientList();
+					
 
 					// Every time a new player is added, send the current list
 					// to all the players
