@@ -24,14 +24,18 @@ import unimelb.distributed_algo_game.pokers.Card;
  */
 public final class PlayerClientManager {
 
-	/** The playe client list. */
+	/** The player client list. */
 	private Map<Integer, PlayerClientThread> playerClientList = null;
 	/** The m player. */
 	private Player mPlayer = null;
 
 	private boolean isLockRound = false;
-
+    /** The player list hash map */
 	private Map<Integer, Player> playerList = null;
+	/** The node list hash map */
+	private Map<Integer, Player> nodeList = null;
+	/** The list of client servers arraylist */
+	private ArrayList<String> serverList = null;
 
 	private List<Integer> playerIDList = null;
 
@@ -67,6 +71,10 @@ public final class PlayerClientManager {
 		playerClientList.put(clientID, clientThread);
 	}
 
+	/**
+	 * Adds a new player to the list
+	 * @param gamePlayerInfo
+	 */
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
 
 		playerList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
@@ -85,6 +93,10 @@ public final class PlayerClientManager {
 
 	}
 
+	/**
+	 * Removes a player from the list
+	 * @param nodeID
+	 */
 	public synchronized void removePlayer(int nodeID) {
 		playerList.remove(nodeID);
 		for (Integer i : playerIDList) {
@@ -153,6 +165,12 @@ public final class PlayerClientManager {
 
 	}
 
+	
+	/**
+	 * Returns the lock round status from all the players
+	 * @return
+	 */
+
 	public synchronized boolean isLockRound() {
 		if (playerClientList.size() >= 1) {
 			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
@@ -182,6 +200,11 @@ public final class PlayerClientManager {
 		return sb.toString();
 	}
 
+	/**
+	 * Updates the card requested by the player
+	 * @param nodeID
+	 * @param c
+	 */
 	public synchronized void updatePlayerCard(int nodeID, Card c) {
 		Player p = playerList.get(nodeID);
 		p.selectFromDeck(c);
@@ -189,6 +212,9 @@ public final class PlayerClientManager {
 
 	}
 
+	/**
+	 * Checks all the player statuses in the game
+	 */
 	public synchronized void checkPlayerStatus() {
 		// Trigger the play panel here and to have the fixed size of the player
 		if (isLockRound() && playerIDList.size() == GAME_SIZE) {
@@ -198,6 +224,14 @@ public final class PlayerClientManager {
 				entry.getValue().setClientStatus(false);
 			}
 		}
+	}
+	
+	/**
+	 * This sets the node list of the client's neighbors
+	 * @param gamePlayerInfo
+	 */
+	public void addNodeToList(GamePlayerInfo gamePlayerInfo){
+		nodeList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
 	}
 
 	public Card dealerDrawnCard() {
@@ -213,6 +247,14 @@ public final class PlayerClientManager {
 
 	public synchronized List<Integer> getPlayerIDList() {
 		return playerIDList;
+	}
+	/**
+	 * Updates the list of client servers
+	 * @param serverList
+	 */
+	public void updateServerList(ArrayList<String> serverList){
+		this.serverList.clear();
+		this.serverList = serverList;
 	}
 
 }

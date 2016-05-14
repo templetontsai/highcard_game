@@ -66,7 +66,10 @@ public class BodyMessage implements Serializable{
 		BCT_RDY(4),
 		BCT_CRD(5),
 		CRD(6),
-		DSC(7);
+		DSC(7),
+		LST(8),
+		ELE(9),
+		COD(10);
 
 		
 		/** The code. */
@@ -134,5 +137,9 @@ public class BodyMessage implements Serializable{
 	
 	public GamePlayerInfo getGamePlayerInfo() {
 		return this.mGamePlayerInfo;
+	}
+	
+	public void setGamePlayerInfo(GamePlayerInfo gamePlayerInfo){
+		this.mGamePlayerInfo = gamePlayerInfo;
 	}
 }

@@ -73,6 +73,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	private String serverIPAddress;
 
+	private Timer timer = null;
+
 	private boolean isGameReady = false;
 
 	private MainGameLoginClientPanel mMainGameLoginClientPanel = null;
@@ -156,12 +158,15 @@ public final class GameClient implements Runnable, NetworkInterface {
 				mObjectOutputStream.close();
 				mObjectInputStream.close();
 				mSocket.close();
+				timer.cancel();
 			} catch (IOException ioe) {
 				// TODO Adding error handling
 				ioe.printStackTrace();
+				timer.cancel();
 			} catch (InterruptedException e) {
 				// TODO Adding error handling
 				e.printStackTrace();
+				timer.cancel();
 			}
 
 		}
@@ -193,6 +198,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 			default:
 				System.out.println("Uknown State");
 			}
+		} else {
+			System.out.println("No longer communicating with " + mPlayer.getGameServerInfo().getIPAddress() + ":"
+					+ mPlayer.getGameServerInfo().getPort());
 		}
 
 	}
@@ -209,7 +217,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 						"ACK Message received from leader node" + mBodyMessage.getGamePlayerInfo().getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
 				// Start the still alive timer beacon to the leader
-				Timer timer = new Timer();
+				timer = new Timer();
 				timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 
@@ -236,15 +244,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			break;
 		case BCT_CRD:
-			
+
 			Map<Integer, Card> playerCard = (HashMap<Integer, Card>) mBodyMessage.getMessage();
-			for(Integer i : playerIDList) {
+			for (Integer i : playerIDList) {
 				Card card = playerCard.get(i);
-				
-				if( card != null && i != mPlayer.getGamePlayerInfo().getNodeID())//no need to update my own card
+
+				if (card != null && i != mPlayer.getGamePlayerInfo().getNodeID())// no
+																					// need
+																					// to
+																					// update
+																					// my
+																					// own
+																					// card
 					mMainGameLoginClientPanel.updateCard(card, i);
 			}
-	
+
 		case BCT_RST:
 			System.out.println(mBodyMessage.getMessage());
 			break;
@@ -261,9 +275,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
 			System.out.println(mBodyMessage.getMessage());
-			
 
-			
 			break;
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
@@ -300,6 +312,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		JSONObject mMessage = new JSONObject();
 		BodyMessage mBodyMessage;
 
+		System.out.println("Leader state is now running in game client");
 		switch (clientConnectionState) {
 
 		case CONNECTING:
@@ -360,7 +373,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * server and be removed from the server thread pool
 	 */
 	public void disconnect() {
+		System.out.println("Disconnecting from the game");
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
+		isRunning = false;
+		try {
+			System.out.println("conection closing...");
+			mObjectOutputStream.close();
+			mObjectInputStream.close();
+			mSocket.close();
+			timer.cancel();
+		} catch (IOException ioe) {
+			// TODO Adding error handling
+			ioe.printStackTrace();
+			timer.cancel();
+		}
+
 	}
 
 	/**
@@ -384,6 +411,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			isRunning = false;
 			System.out.println("Leader has gone haywire");
 			ioe.printStackTrace();
+			timer.cancel();
 		}
 
 	}
@@ -441,6 +469,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	}
 
+	/**
+	 * This plays the game with the server
+	 */
 	public void play() {
 
 		if (this.clientConnectionState == ClientConnectionState.INIT) {
@@ -455,9 +486,31 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
+	/**
+	 * This sets the port and IP address for the server stored in the player
+	 * object
+	 */
 	public void setServerDetails() {
-		serverPort = Integer.parseInt(mPlayer.getGameServerInfo().getPort());
+
 		serverIPAddress = mPlayer.getGameServerInfo().getIPAddress();
+	}
+
+	/**
+	 * Returns the details of the server the client connects to
+	 * 
+	 * @return
+	 */
+	public String getServerDetails() {
+		return mPlayer.getGameServerInfo().getIPAddress() + ":" + mPlayer.getGameServerInfo().getPort();
+	}
+
+	/**
+	 * Re-establishing a connection with the server
+	 */
+	public void reConnect() {
+		mObjectOutputStream = null;
+		mObjectInputStream = null;
+		connect();
 	}
 
 	public void setPanel(MainGameLoginClientPanel mainGameLoginClientPanel) {
