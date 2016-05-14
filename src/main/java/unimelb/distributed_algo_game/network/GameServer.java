@@ -349,24 +349,29 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * This starts a leader election by creating a thread connecting to the next player
 	 */
 	public void startElection(){
-		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
-		PlayerServerThread t = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
-		mPlayerServerManager.addPlayer(nextPlayer);
-		mPlayerServerManager.addClient(nextPlayer.getNodeID(), t);
-		
-		t.setGameClientInfo(nextPlayer);
-		t.setName("GameServer Election Socket Thread");
-		t.connect();
-		t.start();
 
-		try{
-			  Thread.sleep(3000);
-			}catch (InterruptedException e) {
-				// TODO Adding error handling
-				e.printStackTrace();
-			}
-		
-        t.startElection();
+		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
+		if(nextPlayer!=null){
+			PlayerServerThread t = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
+			mPlayerServerManager.addPlayer(nextPlayer);
+			mPlayerServerManager.addClient(nextPlayer.getNodeID(), t);
+			
+			t.setGameClientInfo(nextPlayer);
+			t.setName("GameServer Election Socket Thread");
+			t.connect();
+			t.start();
+
+			try{
+				  Thread.sleep(3000);
+				}catch (InterruptedException e) {
+					// TODO Adding error handling
+					e.printStackTrace();
+				}
+			
+	        t.startElection();
+		}else{
+			System.out.println("Not enough players to elect a new leader");
+		}
 	}
 	
 	/**

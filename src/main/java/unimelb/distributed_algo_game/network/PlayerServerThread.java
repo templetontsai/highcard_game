@@ -41,20 +41,32 @@ public class PlayerServerThread extends Thread{
 	/** The boolean for running the client server thread */
 	private boolean isRunning = false;
 	
+	/** The is client locked in a game round boolean */
 	private boolean isClientLockRound;
 
+	/** The is the client still alive in the game boolean */
 	private boolean isClientStillAlive = false;
 		
+	/** The player information of the client server */
 	private GamePlayerInfo mGameClientInfo = null;
 	
+	/** The player information of this server */
 	private GamePlayerInfo mGameServerInfo = null;
 	
+	/** The connection state of the client of this thread */
 	private ClientConnectionState clientConnectionState = null;
 	
+	/** The node ID of this thread */
 	private int clientNodeID = -1;
 	
+	/** The timer to send periodic still alive messages to the client server */
 	private Timer timer = null;
 	
+	/**
+	 * Constructor for this thread
+	 * @param mGameServer
+	 * @param mGameServerInfo
+	 */
 	public PlayerServerThread(GameServer mGameServer, GamePlayerInfo mGameServerInfo){
 		
 		mLock = new Object();
@@ -66,6 +78,9 @@ public class PlayerServerThread extends Thread{
 		this.clientConnectionState = ClientConnectionState.DISCONNECTED;
 	}
 	
+	/**
+	 * Established connection with the client's server
+	 */
 	public void connect(){
 		try{
 		    mSocket = new Socket(mGameClientInfo.getIPAddress(), Integer.parseInt(mGameClientInfo.getPort()));
@@ -136,6 +151,9 @@ public class PlayerServerThread extends Thread{
 	    }
 	}
 	
+	/**
+	 * Begins an election by sending a message containing this server's node ID
+	 */
 	public synchronized void startElection(){
 		JSONObject mMessage = new JSONObject();
 		BodyMessage mBodyMessage = new BodyMessage(mGameServerInfo.getNodeID(), MessageType.ELE,
@@ -147,6 +165,9 @@ public class PlayerServerThread extends Thread{
 		sendMessage(mMessage);
 	}
 	
+	/**
+	 * Sends a still alive message from the server to the client's server
+	 */
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
 		BodyMessage mBodyMessage = new BodyMessage(mGameServerInfo, MessageType.ACK,
@@ -156,6 +177,10 @@ public class PlayerServerThread extends Thread{
 		sendMessage(mMessage);
 	}
 
+	/**
+	 * Initiates a time task to send periodic still alive messages to the 
+	 * client's server
+	 */
 	final class StillAliveTimerTask extends TimerTask {
 
 		@Override
@@ -167,6 +192,9 @@ public class PlayerServerThread extends Thread{
 
 	}
 	
+	/**
+	 * Initializes a connection with the client's server
+	 */
 	public void init(){
 		if(this.clientConnectionState == ClientConnectionState.INIT){
 		JSONObject mMessage = new JSONObject();

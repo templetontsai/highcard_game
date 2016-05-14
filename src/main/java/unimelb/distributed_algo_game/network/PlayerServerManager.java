@@ -109,7 +109,9 @@ public class PlayerServerManager {
 		}
 	}
 	
-	
+	/**
+	 * Checks the status of all the players
+	 */
 	public synchronized void checkPlayerStatus() {
 		//Trigger the play panel here and to have the fixed size of the player
 		if (isLockRound() && playerList.size() >= 2) {
@@ -122,6 +124,11 @@ public class PlayerServerManager {
 		}
 	}
 	
+	/**
+	 * Sends a card update to the player
+	 * @param nodeID
+	 * @param c
+	 */
 	public synchronized void updatePlayerCard(int nodeID, Card c) {
 		Player p = playerList.get(nodeID);
 		p.selectFromDeck(c);
@@ -129,6 +136,10 @@ public class PlayerServerManager {
 	
 	}
 	
+	/**
+	 * Returns the lock round status of all the players
+	 * @return
+	 */
 	public synchronized boolean isLockRound() {
 		if(playerClientServerList.size() >= 1) {
 			for (Map.Entry<Integer, PlayerServerThread> entry : playerClientServerList.entrySet()) {
@@ -174,6 +185,10 @@ public class PlayerServerManager {
 		return sb.toString();
 	}
 	
+	/**
+	 * Updates the list of current player servers in the game
+	 * @param serverArrayList
+	 */
 	public void updateServerList(ArrayList<String> serverArrayList){
 		
 		this.serverList.clear();
@@ -209,6 +224,10 @@ public class PlayerServerManager {
 		return myNeighbor;
 	}
 	
+	/**
+	 * Sends a message to the neighbor client server
+	 * @param mMessage
+	 */
 	public void sendMessageToNeighbor(JSONObject mMessage){
 		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
 			if(t.getKey()==myNeighbor.getNodeID()){
