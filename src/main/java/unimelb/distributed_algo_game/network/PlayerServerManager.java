@@ -31,6 +31,8 @@ public class PlayerServerManager {
 	private Map<Integer, Player> nodeList = null;
 	
 	private Map<Integer, String[]> serverList = null;
+	
+	private GamePlayerInfo myNeighbor = null;
 
 	/**
 	 * Instantiates a new player client manager.
@@ -189,7 +191,6 @@ public class PlayerServerManager {
 	 * @return
 	 */
 	public GamePlayerInfo getNextNeighbor(){
-		GamePlayerInfo myNeighbor = null;
 		
 		int clientID = mPlayer.getGamePlayerInfo().getNodeID();
 		boolean nextFound = false;
@@ -199,13 +200,21 @@ public class PlayerServerManager {
 			if(i==0)
 				myNeighbor = new GamePlayerInfo(t.getValue());
 			
-			if(!nextFound && clientID<t.getKey()){
+			if(!nextFound && clientID < t.getKey()){
 				myNeighbor = new GamePlayerInfo(t.getValue());
 				nextFound = true;
 			}
 			i++;
 		}
 		return myNeighbor;
+	}
+	
+	public void sendMessageToNeighbor(JSONObject mMessage){
+		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
+			if(t.getKey()==myNeighbor.getNodeID()){
+			    t.getValue().sendMessage(mMessage);
+			}
+		}
 	}
 
 }

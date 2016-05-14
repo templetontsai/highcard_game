@@ -194,6 +194,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 			default:
 				System.out.println("Uknown State");
 			}
+		}else{
+			System.out.println("No longer communicating with "+mPlayer.getGameServerInfo().getIPAddress()+":"+mPlayer.getGameServerInfo().getPort());
 		}
 
 	}
@@ -269,6 +271,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		JSONObject mMessage = new JSONObject();
 		BodyMessage mBodyMessage;
 
+		System.out.println("Leader state is now running in game client");
 		switch (clientConnectionState) {
 
 		case CONNECTING:

@@ -148,7 +148,6 @@ public class PlayerClientThread extends Thread {
 		try {
 			mObjectInputStream.close();
 			mObjectOutputStream.close();
-			mSocket.close();
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
@@ -283,12 +282,11 @@ public class PlayerClientThread extends Thread {
 			updateClientList(mBodyMessage);
 			break;
 		case ELE:
-			System.out.println("Received election message from "+mGameClientInfo.getNodeID());
-			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
+			System.out.println("Received election message from "+mBodyMessage.getNodeID());
 			sendElectionMessage(mBodyMessage);
 			break;
 		case COD:
-			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
+			System.out.println("Received coordinator message from "+mBodyMessage.getNodeID());
 			setNewCoordinator(mBodyMessage);
 			break;
 		default:
@@ -320,7 +318,7 @@ public class PlayerClientThread extends Thread {
 	 * This sends an election message to the node's neighbor SC
 	 * @param mBodyMessage
 	 */
-    public void sendElectionMessage(BodyMessage mBodyMessage){
+    public synchronized void sendElectionMessage(BodyMessage mBodyMessage){
     	int messageNodeID = Integer.parseInt((String)mBodyMessage.getMessage());
     	//System.out.println("My ID is "+mGameDealerInfo.getNodeID()+" and other is "+messageNodeID);
 		if(messageNodeID > this.mGameDealerInfo.getNodeID()){
@@ -344,7 +342,7 @@ public class PlayerClientThread extends Thread {
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", bodyMessage);
 
-		sendMessage(mMessage);
+		sendMessageToNext(mMessage);
 		
 	}
     
@@ -352,7 +350,7 @@ public class PlayerClientThread extends Thread {
      * This sets the new coordinator of the game
      * @param mBodyMessage
      */
-    public void setNewCoordinator(BodyMessage mBodyMessage){
+    public synchronized void setNewCoordinator(BodyMessage mBodyMessage){
 
     	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
     	System.out.println("The new dealer is node "+newDealer.getNodeID());
@@ -364,14 +362,15 @@ public class PlayerClientThread extends Thread {
 			mGameServer.updateServerDetails();
 			System.out.println("The new dealer is "+mGameServer.getServerDetails());
 			
-			mGameServer.disconnectClient();
+			//mGameServer.reconnectClient();
+			//mGameServer.runClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
 			mBodyMessage.setMessageType(MessageType.COD);
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
-			sendMessage(mMessage);
+			sendMessageToNext(mMessage);
 		}
 	}
 	/**
@@ -406,7 +405,9 @@ public class PlayerClientThread extends Thread {
 	/**
 	 * This sends a message to the next node in the logical ring
 	 */
-	
+	public synchronized void sendMessageToNext(JSONObject mMessage){
+		mGameServer.sendMessageToNext(mMessage);
+	}
 	
 	/**
 	 * Receive message from the client.

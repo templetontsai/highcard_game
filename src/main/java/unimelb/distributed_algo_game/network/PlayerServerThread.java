@@ -136,18 +136,13 @@ public class PlayerServerThread extends Thread{
 	    }
 	}
 	
-	public void startElection(){
+	public synchronized void startElection(){
 		JSONObject mMessage = new JSONObject();
 		BodyMessage mBodyMessage = new BodyMessage(mGameServerInfo.getNodeID(), MessageType.ELE,
 				Integer.toString(mGameServerInfo.getNodeID()));
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", mBodyMessage);
 		boolean isConnectionActive = false;
-		System.out.println("Waiting to send election message");
-		while(!isConnectionActive){
-			if(mObjectOutputStream!=null)
-				isConnectionActive = true;
-		}
 		System.out.println("Sending election message");
 		sendMessage(mMessage);
 	}
@@ -330,11 +325,11 @@ public class PlayerServerThread extends Thread{
 			System.out.println(mBodyMessage.getMessage());
 			break;
 		case ELE:
-			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
+			System.out.println("Received election message from "+mBodyMessage.getNodeID());
 			sendElectionMessage(mBodyMessage);
 			break;
 		case COD:
-			mBodyMessage.setGamePlayerInfo(mGameClientInfo);
+			System.out.println("Received coordinator message from "+mBodyMessage.getNodeID());
 			setNewCoordinator(mBodyMessage);
 			break;
 		default:
@@ -347,7 +342,7 @@ public class PlayerServerThread extends Thread{
 	 * This sends an election message to the node's neighbor SC
 	 * @param mBodyMessage
 	 */
-    public void sendElectionMessage(BodyMessage mBodyMessage){
+    public synchronized void sendElectionMessage(BodyMessage mBodyMessage){
     	int messageNodeID = Integer.parseInt((String)mBodyMessage.getMessage());
     	//System.out.println("My ID is "+mGameServerInfo.getNodeID()+" and other is "+messageNodeID);
 		if(messageNodeID > this.mGameServerInfo.getNodeID()){
@@ -378,7 +373,7 @@ public class PlayerServerThread extends Thread{
      * This sets the new coordinator of the game
      * @param mBodyMessage
      */
-    public void setNewCoordinator(BodyMessage mBodyMessage){
+    public synchronized void setNewCoordinator(BodyMessage mBodyMessage){
 
     	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
     	System.out.println("The new dealer is node "+newDealer.getNodeID());
@@ -389,7 +384,8 @@ public class PlayerServerThread extends Thread{
 			mGameServer.updateServerDetails();
 			System.out.println("The new dealer is "+mGameServer.getServerDetails());
 			
-			mGameServer.disconnectClient();
+			//mGameServer.reconnectClient();
+			//mGameServer.runClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;

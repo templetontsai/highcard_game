@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import org.json.simple.JSONObject;
+
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
@@ -216,7 +218,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 								;
 							mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 							mPlayerClientManager.addClient(t.getClientNodeID(), t);
-							System.out.println("Waiting to accept new connections");
 						}
 						System.out.println("Connection closed");
 						// Close server port once the server is no longer running
@@ -363,6 +364,14 @@ public final class GameServer implements Runnable, NetworkInterface {
 	
 	public void reconnectClient(){
 		mGameClient.connect();
+	}
+	
+	public void runClient(){
+		mGameClient.run();
+	}
+	
+	public void sendMessageToNext(JSONObject mMessage){
+		mPlayerServerManager.sendMessageToNeighbor(mMessage);
 	}
 
 }
