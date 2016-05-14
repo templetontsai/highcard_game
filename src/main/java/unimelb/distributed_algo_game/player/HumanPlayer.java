@@ -11,7 +11,6 @@ import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
 import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
 import unimelb.distributed_algo_game.state.GameState;
 
-
 // TODO: Auto-generated Javadoc
 /**
  * The Class HumanPlayer.
@@ -24,7 +23,6 @@ public class HumanPlayer extends Player {
 	/** The game is over. */
 	private boolean gameIsOver = false;
 
-
 	/** The game client. */
 	private GameClient gameClient = null;
 
@@ -36,8 +34,8 @@ public class HumanPlayer extends Player {
 
 	/** The game server thread. */
 	private Thread gameServerThread = null;
-	
-	private JPanel mPanel = null;
+
+	private JPanel mMainGameLoginDealerPanel = null;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -52,7 +50,7 @@ public class HumanPlayer extends Player {
 		super(name, gamePlayerInfo, GameState.NONE, new PlayerScore());
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
-		this.mPanel = panel;
+		this.mMainGameLoginDealerPanel = panel;
 
 	}
 
@@ -60,37 +58,34 @@ public class HumanPlayer extends Player {
 	 * Runs the main thread of the human player
 	 */
 	public void run() {
-		
+
 		gameServer.setPlayer(this);
-		
-		gameServer.setPanel((MainGameLoginDealerPanel)mPanel);
-		
-		
+
+		gameServer.setPanel((MainGameLoginDealerPanel) mMainGameLoginDealerPanel);
+
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
 		/*
-		gameClient.setPlayer(this);
-		gameClientThread = new Thread(gameClient);
-		gameClient.connect();
-		gameClientThread.start();
-		*/
+		 * gameClient.setPlayer(this); gameClientThread = new
+		 * Thread(gameClient); gameClient.connect(); gameClientThread.start();
+		 */
 		this.setGameState(GameState.PLAY);
-		while(this.getGameState() == GameState.PLAY) {
+		while (this.getGameState() == GameState.PLAY) {
 			if (this.isDealer()) {
-				//TODO do dealer stuff here, checking connection, updating stuff
-				//System.out.println("dealer/node0 is playing game");
-				//Card card = this.getCard(1);
-				//gameServer.sendCard(card, 1);
+				// TODO do dealer stuff here, checking connection, updating
+				// stuff
+				// System.out.println("dealer/node0 is playing game");
+				// Card card = this.getCard(1);
+				// gameServer.sendCard(card, 1);
 			} else {
-				//TODO do client stuff here, checking connection, updating stuff
-				//System.out.println("client is playing game");
-			
-				
-			}
-			
-		}
+				// TODO do client stuff here, checking connection, updating
+				// stuff
+				// System.out.println("client is playing game");
 
+			}
+
+		}
 
 	}
 
@@ -101,6 +96,10 @@ public class HumanPlayer extends Player {
 	public void update() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void dealerDrawnCard() {
+		gameServer.dealerDrawnCard();
 	}
 
 }

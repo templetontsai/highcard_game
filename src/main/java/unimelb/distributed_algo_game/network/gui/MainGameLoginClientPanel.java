@@ -1,6 +1,5 @@
 package unimelb.distributed_algo_game.network.gui;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -24,14 +23,13 @@ public class MainGameLoginClientPanel extends JPanel {
 	private JLabel lblNewLabel;
 	private JLabel lblNewLabel_1, serverIPLabel, serverPortLabel;
 	private JButton btnStart = null;
-	private JButton btnPlay = null;
 	private MainGameLoginClientPanel self = null;
-	private PlayButtonActionListerner mPlayButtonActionListerner = null;
 	private StartButtonActionListerner mStartButtonActionListerner = null;
 	private MainGameFrameGUI mMainGameFrameGUI = null;
 	private Card c;
 	private Player p;
 	private List<CardPanel> mPlayerPanelList;
+	private GameTablePanel gmaeTable;
 
 	
 
@@ -40,7 +38,7 @@ public class MainGameLoginClientPanel extends JPanel {
 	public MainGameLoginClientPanel(MainGameFrameGUI mainGameFrameGUI) {
 		self = this;
 		setLayout(null);
-		mMainGameFrameGUI = mainGameFrameGUI;
+		this.mMainGameFrameGUI = mainGameFrameGUI;
 		nodeField = new JTextField();
 		nodeField.setBounds(153, 52, 114, 19);
 		add(nodeField);
@@ -87,18 +85,14 @@ public class MainGameLoginClientPanel extends JPanel {
 		add(serverPortLabel);
 
 		mStartButtonActionListerner = new StartButtonActionListerner();
-		mPlayButtonActionListerner = new PlayButtonActionListerner();
+		
 		btnStart = new JButton("Start");
 		btnStart.addActionListener(mStartButtonActionListerner);
 		btnStart.setBounds(12, 225, 117, 25);
 		add(btnStart);
 		btnStart.setVisible(true);
 		
-		btnPlay = new JButton("Play");
-		btnPlay.addActionListener(mPlayButtonActionListerner);
-		btnPlay.setBounds(153, 225, 117, 25);
-		add(btnPlay);
-		btnPlay.setEnabled(false);
+		
 		mPlayerPanelList = new ArrayList<CardPanel>();
 
 	}
@@ -107,11 +101,16 @@ public class MainGameLoginClientPanel extends JPanel {
 		public void actionPerformed(ActionEvent action) {
 			// TODO get ip and port from textfield and set init server
 			// socket
-
-			String ipAddress = ipTextField.getText();
+			
+			/*String ipAddress = ipTextField.getText();
 			String port = portTextField.getText();
 			String serverIPAddress = serverIPTextField.getText();
-			String serverPort = serverPortTextField.getText();
+			String serverPort = serverPortTextField.getText();*/
+			String ipAddress = "localhost";
+			String port = "500" + nodeID;
+			String serverIPAddress = "localhost";
+			String serverPort = "5000";
+			
 			if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
 				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
 				String gameServerInfo[] = { "0", serverIPAddress, serverPort };
@@ -128,49 +127,27 @@ public class MainGameLoginClientPanel extends JPanel {
 
 	}
 
-	final class PlayButtonActionListerner implements ActionListener {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO get ip and port from textfield and set init server
-			// socket
-			System.out.println("inside play");
-			
-			mMainGameFrameGUI.getContentPane().removeAll();
-
-			GameTablePanel gmaeTable = new GameTablePanel(mPlayerPanelList);
-			gmaeTable.setDealer(false);
-			add(gmaeTable, BorderLayout.CENTER);
-			
-
-
-			mMainGameFrameGUI.setContentPane(gmaeTable);// Adding to
-													// content pane,
-													// not to Frame
-			mMainGameFrameGUI.setSize(500, 500);
-			mMainGameFrameGUI.setVisible(true);
-			mMainGameFrameGUI.invalidate();
-			mMainGameFrameGUI.validate();
-
-			// mainGameFrameGUI.printAll(getGraphics());
-
-		}
-
-	}
 
 	public void setClientNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}
 
-	public void setButtonEnable(boolean isEnable, List<Integer> mPlayerIDList) {
+	public void showGameTable(boolean isEnable, List<Integer> mPlayerIDList) {
 		
 		for (Integer i : mPlayerIDList) {
 			mPlayerPanelList.add(new CardPanel(i));
 		}
+		
+		mMainGameFrameGUI.getContentPane().removeAll();
+		gmaeTable = new GameTablePanel(mPlayerPanelList, false, p);
+		mMainGameFrameGUI.setContentPane(gmaeTable);
+		mMainGameFrameGUI.revalidate();
 
-
-		btnPlay.setEnabled(isEnable);
 		System.out.println("Player Ready");
+	}
+	
+	public void updateCard(Card c, int nodeID) {
+		gmaeTable.updateCard(c, nodeID);
 	}
 
 }

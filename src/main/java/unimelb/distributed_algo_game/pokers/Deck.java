@@ -55,10 +55,11 @@ public final class Deck implements Serializable{
 	 */
 	private void init() {
 		for (CardRank cardRank : CardRank.values()) {
+			//TODO comment other pattern out for the simplicity of the game to demo
 			deck.add(new Clubs(cardRank));
-			deck.add(new Diamonds(cardRank));
-			deck.add(new Hearts(cardRank));
-			deck.add(new Spades(cardRank));
+			//deck.add(new Diamonds(cardRank));
+			//deck.add(new Hearts(cardRank));
+			//deck.add(new Spades(cardRank));
 		}
 
 	}

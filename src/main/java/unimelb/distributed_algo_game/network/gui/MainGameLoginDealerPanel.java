@@ -32,16 +32,17 @@ public class MainGameLoginDealerPanel extends JPanel {
 	private MainGameLoginDealerPanel self = null;
 	private static int playerCount = 0;
 	private MainGameFrameGUI mMainGameFrameGUI = null;
-	private PlayButtonActionListerner mPlayButtonActionListerner = null;
+	
 	private StartButtonActionListerner mStartButtonActionListerner = null;
 	private Card c = null;
 	private Player p = null;
 	private List<CardPanel> mPlayerPanelList = null;
+	private GameTablePanel gameTable = null;
 
-	public MainGameLoginDealerPanel(final MainGameFrameGUI mainGameFrameGUI) {
+	public MainGameLoginDealerPanel(MainGameFrameGUI mainGameFrameGUI) {
 
 		self = this;
-		mMainGameFrameGUI = mainGameFrameGUI;
+		this.mMainGameFrameGUI = mainGameFrameGUI;
 
 		setLayout(null);
 
@@ -65,7 +66,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 
 		
 		mStartButtonActionListerner = new StartButtonActionListerner();
-		mPlayButtonActionListerner = new PlayButtonActionListerner();
+		
 		
 		btnStart = new JButton("Start");
 		btnStart.addActionListener(new StartButtonActionListerner());
@@ -80,17 +81,12 @@ public class MainGameLoginDealerPanel extends JPanel {
 		textArea.setBounds(304, 96, 122, 143);
 		add(textArea);
 
-		textArea.getDocument().addDocumentListener(new MyDocumentListener());
 
 		JLabel lblPlayerList = new JLabel("Player List");
 		lblPlayerList.setBounds(304, 81, 122, 15);
 		add(lblPlayerList);
 		
-		btnPlay = new JButton("Play");
-		btnPlay.addActionListener(mPlayButtonActionListerner);
-		btnPlay.setBounds(153, 185, 117, 25);
-		add(btnPlay);
-		btnPlay.setEnabled(false);
+		
 		mPlayerPanelList = new ArrayList<CardPanel>();
 	}
 
@@ -98,9 +94,12 @@ public class MainGameLoginDealerPanel extends JPanel {
 		public void actionPerformed(ActionEvent action) {
 			// TODO get ip and port from textfield and set init server
 			// socket
-
+/*
 			String ipAddress = ipTextField.getText();
-			String port = portTextField.getText();
+			String port = portTextField.getText();*/
+
+			String ipAddress = "localhost";
+			String port = "5000";
 			if (!ipAddress.equals("") && !port.equals("")) {
 				System.out.println(ipAddress + "-" + port);
 				System.out.println("Dealer/Node0 Starts the game");
@@ -122,29 +121,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 		}
 	}
 
-	final class PlayButtonActionListerner implements ActionListener {
-		public void actionPerformed(ActionEvent action) {
-			// TODO get ip and port from textfield and set init server
-			// socket
-			System.out.println("inside play");
-			mMainGameFrameGUI.getContentPane().removeAll();
 
-			GameTablePanel gameTable = new GameTablePanel(mPlayerPanelList);
-			gameTable.setDealer(true);
-			// add(board, BorderLayout.CENTER);
-		
-			mMainGameFrameGUI.setContentPane(gameTable);// Adding to
-													// content pane,
-													// not to Frame
-			mMainGameFrameGUI.setSize(500, 500);
-			mMainGameFrameGUI.setVisible(true);
-			mMainGameFrameGUI.invalidate();
-			mMainGameFrameGUI.validate();
-			
-
-			// mainGameFrameGUI.printAll(getGraphics());
-		}
-	}
 
 	public synchronized void updatePlayerList(int nodeID) {
 		textArea.append("Node" + nodeID + " is joined\n");
@@ -154,47 +131,23 @@ public class MainGameLoginDealerPanel extends JPanel {
 		this.nodeID = nodeID;
 	}
 	
-	public void setButtonEnable(boolean isEnable,  List<Integer> mPlayerIDList) {
+	public void showGameTable(boolean isEnable,  List<Integer> mPlayerIDList) {
 		
 		for (Integer i : mPlayerIDList) {
 			mPlayerPanelList.add(new CardPanel(i));
 		}
-
-		btnPlay.setEnabled(isEnable);
+		
+		mMainGameFrameGUI.getContentPane().removeAll();
+		gameTable = new GameTablePanel(mPlayerPanelList, true, p);	
+		mMainGameFrameGUI.setContentPane(gameTable);
+		mMainGameFrameGUI.revalidate();
 		System.out.println("Dealer Ready");
 	}
 
-	class MyDocumentListener implements DocumentListener {
-		String newline = "\n";
+	
 
-		public void insertUpdate(DocumentEvent e) {
-			updateLog(e, "inserted into");
-		}
-
-		public void removeUpdate(DocumentEvent e) {
-			// updateLog(e, "removed from");
-			// System.out.println("deleted someting");
-		}
-
-		public void changedUpdate(DocumentEvent e) {
-			// Plain text components do not fire these events
-			// System.out.println("updated someting");
-			// updateLog(e, "update");
-		}
-
-		public void updateLog(DocumentEvent e, String action) {
-
-			/*playerCount++;
-			if (playerCount == 3) {
-				System.out.println("button visible");
-				btn.setText("Play");
-				btn.removeActionListener(mStartButtonActionListerner);
-				btn.addActionListener(mPlayButtonActionListerner);
-				btn.setEnabled(true);
-			}*/
-
-		}
+	public void updateCard(Card c, int nodeID) {
+		gameTable.updateCard(c, nodeID);
 	}
 
-	
 }

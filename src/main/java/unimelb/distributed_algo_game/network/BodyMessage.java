@@ -64,8 +64,9 @@ public class BodyMessage implements Serializable{
 		BCT_RST(2),
 		BCT_LST(3),
 		BCT_RDY(4),
-		CRD(5),
-		DSC(6);
+		BCT_CRD(5),
+		CRD(6),
+		DSC(7);
 
 		
 		/** The code. */

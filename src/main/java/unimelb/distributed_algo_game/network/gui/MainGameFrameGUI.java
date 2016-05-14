@@ -14,7 +14,7 @@ public class MainGameFrameGUI extends JFrame {
 	private MainGameLoginClientPanel mainLoginClientPanel;
 
 	public MainGameFrameGUI(String name, int nodeID) {
-		super(name);
+		super(name + ": Node" + nodeID);
 		init(nodeID);
 	}
 
@@ -25,13 +25,15 @@ public class MainGameFrameGUI extends JFrame {
 			mainLoginPanel.setNodeID(nodeID);
 
 			this.setContentPane(mainLoginPanel);
-			this.setSize(500, 500);
+			this.setSize(700, 700);
+			setResizable(false);
 			this.setVisible(true);
 		} else if (nodeID > 0) {
 			mainLoginClientPanel = new MainGameLoginClientPanel(this);
 			mainLoginClientPanel.setClientNodeID(nodeID);
 			this.setContentPane(mainLoginClientPanel);
-			this.setSize(500, 500);
+			this.setSize(700, 700);
+			setResizable(false);
 			this.setVisible(true);
 		}
 	}

@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -84,7 +85,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	protected GameClient() {
 		mLock = new Object();
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
-		
+
 	}
 
 	/**
@@ -223,7 +224,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		case CRD:
 			// TODO update this on GUI when GUI is ready
 			System.out.println("The card you get is ");
-			((Card) mBodyMessage.getMessage()).showCard();
+			Card c = (Card) mBodyMessage.getMessage();
+			c.showCard();
+			mMainGameLoginClientPanel.updateCard(c, mPlayer.getGamePlayerInfo().getNodeID());
 			// Notify the dealer the card has been received
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body",
@@ -232,22 +235,35 @@ public final class GameClient implements Runnable, NetworkInterface {
 			sendMessage(mMessage);
 
 			break;
+		case BCT_CRD:
+			
+			Map<Integer, Card> playerCard = (HashMap<Integer, Card>) mBodyMessage.getMessage();
+			for(Integer i : playerIDList) {
+				Card card = playerCard.get(i);
+				
+				if( card != null && i != mPlayer.getGamePlayerInfo().getNodeID())//no need to update my own card
+					mMainGameLoginClientPanel.updateCard(card, i);
+			}
+	
 		case BCT_RST:
 			System.out.println(mBodyMessage.getMessage());
 			break;
 		case BCT_RDY:
 			System.out.println("Game is ready to play, start request card from dealer");
 			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
-			System.out.println(mBodyMessage.getMessage());
+			if (isGameReady) {
+				mMainGameLoginClientPanel.showGameTable(true, playerIDList);
+			}
 			break;
 		case BCT_LST:
-			
+
 			playerIDList = (List<Integer>) mBodyMessage.getMessage();
-			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + "receives player list");
-			// Receive player list, call gui to draw the players and folded card
-			// on GameTablePanel
-			
+
+			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
 			System.out.println(mBodyMessage.getMessage());
+			
+
+			
 			break;
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
@@ -436,11 +452,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			sendMessage(mMessage);
 
-		} else if (isGameReady) {
-			mMainGameLoginClientPanel.setButtonEnable(true, playerIDList);
-
 		}
-
 	}
 
 	public void setServerDetails() {
