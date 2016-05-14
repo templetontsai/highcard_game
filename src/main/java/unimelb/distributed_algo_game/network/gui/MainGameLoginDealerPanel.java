@@ -52,13 +52,13 @@ public class MainGameLoginDealerPanel extends JPanel {
 		ipTextField.setBounds(153, 52, 114, 19);
 		add(ipTextField);
 		ipTextField.setColumns(10);
-		ipTextField.setText("127.0.0.1");
+		
 
 		portTextField = new JTextField();
 		portTextField.setBounds(153, 83, 114, 19);
 		add(portTextField);
 		portTextField.setColumns(10);
-		portTextField.setText("6066");
+		
 
 		JLabel lblNewLabel = new JLabel("Dealer IP Address");
 		lblNewLabel.setBounds(12, 54, 181, 15);
