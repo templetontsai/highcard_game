@@ -36,7 +36,6 @@ public class MainGameLoginClientPanel extends JPanel {
 		ipTextField.setBounds(153, 83, 114, 19);
 		add(ipTextField);
 		ipTextField.setColumns(10);
-        ipTextField.setText("127.0.0.");
 		
 		portTextField = new JTextField();
 		portTextField.setBounds(153, 113, 114, 19);
@@ -47,14 +46,11 @@ public class MainGameLoginClientPanel extends JPanel {
 		serverIPTextField.setBounds(153, 142, 114, 19);
 		add(serverIPTextField);
 		serverIPTextField.setColumns(10);
-		serverIPTextField.setText("127.0.0.1");
 		
 		serverPortTextField = new JTextField();
 		serverPortTextField.setBounds(153, 172, 114, 19);
 		add(serverPortTextField);
 		serverPortTextField.setColumns(10);
-		
-		serverPortTextField.setText("6066");
 
 		lblNewLabel_0 = new JLabel("NODE ID");
 		lblNewLabel_0.setBounds(12, 54, 181, 15);
