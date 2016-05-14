@@ -281,20 +281,36 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return mPlayer.getCard(index);
 	}
 
+	/**
+	 * This updates the player card of the player
+	 * @param nodeID
+	 * @param c
+	 */
 	public synchronized void updatePlayerCard(int nodeID, Card c) {
 		mPlayerClientManager.updatePlayerCard(nodeID, c);
 	}
 
+	/**
+	 * This checks the current status of the player
+	 */
 	public synchronized void checkPlayerStatus() {
 		mPlayerClientManager.checkPlayerStatus();
 	}
 	
+	/**
+	 * This removes a client from the game server client thread pool
+	 * @param nodeID
+	 */
 	public synchronized void removeClient(int nodeID) {
 		mPlayerClientManager.removeClient(nodeID);
 		mPlayerClientManager.removePlayer(nodeID);
 		
 	}
 	
+	/**
+	 * This sets the local panel of the game
+	 * @param panel
+	 */
 	public void setPanel(MainGameLoginDealerPanel panel) {
 		this.mPanel = panel;
 	}
@@ -306,6 +322,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayer.setDealer(true);
 	}
 
+	/**
+	 * This returns the leader state of the player
+	 * @return
+	 */
 	public boolean getIsLeader(){
 		return mPlayer.isDealer();
 	}
@@ -316,11 +336,18 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayer.setGameServerInfo(gameServerInfo);
 	}
 
+	/**
+	 * This updates all the servers with the current list of players
+	 * @param gameClients
+	 */
 	public void updateServerList(ArrayList<String> gameClients) {
 		// TODO Auto-generated method stub
 		mPlayerServerManager.updateServerList(gameClients);
 	}
 	
+	/**
+	 * This starts a leader election by creating a thread connecting to the next player
+	 */
 	public void startElection(){
 		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
 		PlayerServerThread t = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
@@ -342,36 +369,58 @@ public final class GameServer implements Runnable, NetworkInterface {
         t.startElection();
 	}
 	
+	/**
+	 * This sends a message to the server's neighbor server
+	 * @param mMessage
+	 */
+	public void sendMessageToNext(JSONObject mMessage){
+		mPlayerServerManager.sendMessageToNeighbor(mMessage);
+	}
+	
+	/**
+	 * This returns the player object of this server
+	 * @return
+	 */
 	public Player getPlayer(){
 		return mPlayer;
 	}
 	
+	/**
+	 * This sets the game client object for this player server
+	 * @param mGameClient
+	 */
 	public void setGameClient(GameClient mGameClient){
 		this.mGameClient = mGameClient;
 	}
 	
+	/**
+	 * This updates the server details for the client
+	 */
 	public void updateServerDetails(){
 		mGameClient.setServerDetails();
 	}
 	
+	/**
+	 * This returns the server details of the game client
+	 * @return
+	 */
 	public String getServerDetails(){
 		return mGameClient.getServerDetails();
 	}
 	
+	/**
+	 * This disconnects the client connection of the player
+	 */
 	public void disconnectClient(){
 		mGameClient.disconnect();
 	}
 	
+	/**
+	 * This reconnects a client to the server
+	 */
 	public void reconnectClient(){
-		mGameClient.connect();
+		mGameClient.reConnect();
 	}
 	
-	public void runClient(){
-		mGameClient.run();
-	}
-	
-	public void sendMessageToNext(JSONObject mMessage){
-		mPlayerServerManager.sendMessageToNeighbor(mMessage);
-	}
 
 }

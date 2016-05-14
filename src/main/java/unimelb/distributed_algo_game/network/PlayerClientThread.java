@@ -178,6 +178,9 @@ public class PlayerClientThread extends Thread {
 
 	}
 	
+	/**
+	 * This starts an election on the server
+	 */
 	public void startElection(){
 		mGameServer.startElection();
 	}
@@ -295,7 +298,10 @@ public class PlayerClientThread extends Thread {
 		}
 	}
  
-	
+	/**
+	 * This updates the current list of players in the game
+	 * @param mBodyMessage
+	 */
 	public void updateClientList(BodyMessage mBodyMessage){
 		
 		String clients = (String)mBodyMessage.getMessage();
@@ -310,19 +316,19 @@ public class PlayerClientThread extends Thread {
 				gameClients.add(clientList[i]);
 			}
 		}
-		System.out.println("Total added clients: "+gameClients.size());
+		//System.out.println("Total added clients: "+gameClients.size());
 		mGameServer.updateServerList(gameClients);
 	}
 	
 	/**
-	 * This sends an election message to the node's neighbor SC
+	 * This sends an election message to the node's neighbor after comparing the received node
+	 * ID to it's own
 	 * @param mBodyMessage
 	 */
     public synchronized void sendElectionMessage(BodyMessage mBodyMessage){
     	int messageNodeID = Integer.parseInt((String)mBodyMessage.getMessage());
-    	//System.out.println("My ID is "+mGameDealerInfo.getNodeID()+" and other is "+messageNodeID);
+    	//Send message to the next node without changing it
 		if(messageNodeID > this.mGameDealerInfo.getNodeID()){
-			//Send message to the next node without changing it
 			//System.out.println(mGameDealerInfo.getNodeID()+" cannot be the new dealer");
 		}else if(messageNodeID < this.mGameDealerInfo.getNodeID()){
 			//Replace the node ID in the message with own
@@ -355,15 +361,9 @@ public class PlayerClientThread extends Thread {
     	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
     	System.out.println("The new dealer is node "+newDealer.getNodeID());
 		if(newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()){
-			
-			System.out.println("New dealer info: "+newDealer.getIPAddress()+":"+newDealer.getPort());
+			//Update the new server details on the game client
 			mGameServer.setGameServerLeader(newDealer);
-			
 			mGameServer.updateServerDetails();
-			System.out.println("The new dealer is "+mGameServer.getServerDetails());
-			
-			//mGameServer.reconnectClient();
-			//mGameServer.runClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
@@ -373,6 +373,7 @@ public class PlayerClientThread extends Thread {
 			sendMessageToNext(mMessage);
 		}
 	}
+    
 	/**
 	 * Sends message to a client.
 	 *
@@ -403,7 +404,7 @@ public class PlayerClientThread extends Thread {
 	}
 	
 	/**
-	 * This sends a message to the next node in the logical ring
+	 * This sends a message to the next player in the logical ring
 	 */
 	public synchronized void sendMessageToNext(JSONObject mMessage){
 		mGameServer.sendMessageToNext(mMessage);
@@ -440,19 +441,34 @@ public class PlayerClientThread extends Thread {
 
 	}
 	
-
+	/**
+	 * This returns the client ID of this thread
+	 * @return
+	 */
 	public synchronized int getClientNodeID() {
 		return mGameClientInfo.getNodeID();
 	}
 
+	/**
+	 * This returns the lock round status of this thread
+	 * @return
+	 */
 	public synchronized boolean getClientStatus() {
 		return isClientLockRound;
 	}
 
+	/**
+	 * This sets the status of the client thread
+	 * @param isClientLockRound
+	 */
 	public synchronized void setClientStatus(boolean isClientLockRound) {
 		this.isClientLockRound = isClientLockRound;
 	}
 	
+	/**
+	 * This returns the player information of this thread
+	 * @return
+	 */
 	public synchronized GamePlayerInfo getClientGamePlayerInfo() {
 		return this.mGameClientInfo;
 	}

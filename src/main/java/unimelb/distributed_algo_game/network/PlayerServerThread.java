@@ -378,14 +378,10 @@ public class PlayerServerThread extends Thread{
     	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
     	System.out.println("The new dealer is node "+newDealer.getNodeID());
 		if(newDealer.getNodeID() != this.mGameServerInfo.getNodeID()){
-			System.out.println("New dealer info: "+newDealer.getIPAddress()+":"+newDealer.getPort());
+
+			//Update the client server details to connect to
 			mGameServer.setGameServerLeader(newDealer);
-			
 			mGameServer.updateServerDetails();
-			System.out.println("The new dealer is "+mGameServer.getServerDetails());
-			
-			//mGameServer.reconnectClient();
-			//mGameServer.runClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
@@ -396,26 +392,50 @@ public class PlayerServerThread extends Thread{
 		}
 	}
 	
+    /**
+     * This sets player information of this thread
+     * @param gameClientInfo
+     */
 	public void setGameClientInfo(GamePlayerInfo gameClientInfo){
 		this.mGameClientInfo = gameClientInfo;
 	}
 	
+	/**
+	 * This sets the server information of this thread
+	 * @param gameServerInfo
+	 */
 	public void setGameServerInfo(GamePlayerInfo gameServerInfo){
 		this.mGameServerInfo = gameServerInfo;
 	}
 	
+	/**
+	 * This returns the node ID of this thread
+	 * @return
+	 */
 	public synchronized int getClientNodeID() {
 		return mGameClientInfo.getNodeID();
 	}
 
+	/**
+	 * This returns the client status of this thread
+	 * @return
+	 */
 	public synchronized boolean getClientStatus() {
 		return isClientLockRound;
 	}
 
+	/**
+	 * This sets the client status of this thread
+	 * @param isClientLockRound
+	 */
 	public synchronized void setClientStatus(boolean isClientLockRound) {
 		this.isClientLockRound = isClientLockRound;
 	}
 	
+	/**
+	 * This returns the game player information of this thread
+	 * @return
+	 */
 	public synchronized GamePlayerInfo getClientGamePlayerInfo() {
 		return this.mGameClientInfo;
 	}
