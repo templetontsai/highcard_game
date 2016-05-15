@@ -105,6 +105,7 @@ public final class PlayerClientManager {
 				toRemove = i;
 		}
 		playerIDList.remove(toRemove);
+		System.out.println("Player List size is "+playerIDList.size());
 		notifyAllClients(playerIDList, ClientConnectionState.CONNECTED, MessageType.BCT_UPT);
 	}
 

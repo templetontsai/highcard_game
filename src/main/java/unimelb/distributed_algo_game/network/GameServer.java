@@ -333,7 +333,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayerClientManager.removePlayer(nodeID);
 		mPlayerServerManager.removeClient(nodeID);
 		mPlayerServerManager.removePlayer(nodeID);
-
+		
 	}
 
 	/**
@@ -502,12 +502,15 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public int getNumofNodes() {
 		return mPlayerServerManager.getNumNodes();
 	}
+	
+	public int getPlayerListSize(){
+		return mPlayerClientManager.getPlayerIDList().size();
+	}
 
 	public void startServer() {
 		mConnectionState = ServerConnectionState.DISCONNECTED;
-		((SlavePlayer) mPlayer).restartServer();
-		
 		JPanel panel = ((SlavePlayer) mPlayer).getPanel();
+		((SlavePlayer) mPlayer).restartServer();
 		((MainGameLoginClientPanel) panel).updateGameTable(mPlayerClientManager.getPlayerIDList(), true);
 
 	}

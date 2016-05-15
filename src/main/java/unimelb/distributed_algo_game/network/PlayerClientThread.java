@@ -155,8 +155,11 @@ public class PlayerClientThread extends Thread {
 			if (timer != null) {
 				timer.cancel();
 				//Only carry out an election if we lose the dealer of the game
-				if(mGameClientInfo.getNodeID()==mGameServer.getPlayer().getGameServerInfo().getNodeID())
-				   startElection();
+				if(mGameClientInfo.getNodeID()==mGameServer.getPlayer().getGameServerInfo().getNodeID()){
+					mGameServer.removeClient(clientNodeID);
+				    System.out.println("Remaining players: "+mGameServer.getNumofNodes());
+					startElection();
+				}
 			}
 
 			System.out.println("Client closed");
