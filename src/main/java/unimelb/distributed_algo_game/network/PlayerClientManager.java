@@ -13,9 +13,9 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.utils.Utils;
-import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
@@ -77,7 +77,7 @@ public final class PlayerClientManager {
 	 */
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
 
-		playerList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
+		playerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
 		playerIDList.add(gamePlayerInfo.getNodeID());
 
 	}
@@ -229,7 +229,7 @@ public final class PlayerClientManager {
 	 * @param gamePlayerInfo
 	 */
 	public void addNodeToList(GamePlayerInfo gamePlayerInfo){
-		nodeList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
+		nodeList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
 	}
 
 

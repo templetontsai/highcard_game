@@ -18,7 +18,7 @@ import unimelb.distributed_algo_game.state.GameState;
  * @author Ting-Ying Tsai
  */
 
-public class HumanPlayer extends Player {
+public class DealerPlayer extends Player {
 
 	/** The game is over. */
 	private boolean gameIsOver = false;
@@ -46,7 +46,7 @@ public class HumanPlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public HumanPlayer(String name, GamePlayerInfo gamePlayerInfo, JPanel panel) {
+	public DealerPlayer(String name, GamePlayerInfo gamePlayerInfo, JPanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, new PlayerScore());
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
@@ -54,10 +54,8 @@ public class HumanPlayer extends Player {
 
 	}
 
-	/**
-	 * Runs the main thread of the human player
-	 */
-	public void run() {
+
+	public void play() {
 
 		gameServer.setPlayer(this);
 
@@ -66,26 +64,6 @@ public class HumanPlayer extends Player {
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
-		/*
-		 * gameClient.setPlayer(this); gameClientThread = new
-		 * Thread(gameClient); gameClient.connect(); gameClientThread.start();
-		 */
-		this.setGameState(GameState.PLAY);
-		while (this.getGameState() == GameState.PLAY) {
-			if (this.isDealer()) {
-				// TODO do dealer stuff here, checking connection, updating
-				// stuff
-				// System.out.println("dealer/node0 is playing game");
-				// Card card = this.getCard(1);
-				// gameServer.sendCard(card, 1);
-			} else {
-				// TODO do client stuff here, checking connection, updating
-				// stuff
-				// System.out.println("client is playing game");
-
-			}
-
-		}
 
 	}
 

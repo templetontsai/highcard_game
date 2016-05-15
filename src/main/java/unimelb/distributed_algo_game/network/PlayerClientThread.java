@@ -230,7 +230,7 @@ public class PlayerClientThread extends Thread {
 		case CON:
 			// if the game is started already, don't respond to the message
 			if (!getClientStatus()) {
-
+				System.out.println("CON");
 				//clientNodeID = mBodyMessage.getNodeID();
 				this.mGameClientInfo = mBodyMessage.getGamePlayerInfo();
 				clientNodeID = this.mGameClientInfo.getNodeID();

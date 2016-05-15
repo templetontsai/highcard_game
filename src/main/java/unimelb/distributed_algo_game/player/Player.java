@@ -21,7 +21,7 @@ import unimelb.distributed_algo_game.state.GameState;
  * @author templeton
  *
  */
-public abstract class Player implements Serializable, Runnable, NetworkObserver {
+public abstract class Player implements Serializable, NetworkObserver {
 
 	/** The selected card. */
 	private Card selectedCard = null;
@@ -48,12 +48,15 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	private GamePlayerInfo mGamePlayerInfo = null;
 
 	private GamePlayerInfo mGameServerInfo = null;
+	
+	private boolean isPlaying = false;
 
 	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState) {
 		this.name = name;
 		this.mGamePlayerInfo = gamePlayerInfo;
 		this.playerScore = new PlayerScore();
 		this.gameState = gameState;
+		this.isPlaying = true;
 	}
 	
 	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState, GamePlayerInfo gameServerInfo) {
@@ -62,6 +65,7 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 		this.playerScore = new PlayerScore();
 		this.gameState = gameState;
 		this.mGameServerInfo = gameServerInfo;
+		this.isPlaying = true;
 	}
 
 	/**
@@ -213,5 +217,14 @@ public abstract class Player implements Serializable, Runnable, NetworkObserver 
 	 * Runs an update
 	 */
 	public abstract void update();
+	
+	public void setIsPlaying(boolean isPlaying){
+		this.isPlaying = isPlaying;
+	}
+	
+	public boolean getIsPlaying(){
+		return isPlaying;
+	}
 
+	public abstract void play();
 }

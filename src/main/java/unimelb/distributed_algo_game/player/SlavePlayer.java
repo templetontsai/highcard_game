@@ -16,7 +16,7 @@ import unimelb.distributed_algo_game.state.GameState;
  *
  * @author Ting-Ying Tsai
  */
-public class AIPlayer extends Player {
+public class SlavePlayer extends Player {
 
 	/** The game client. */
 	private GameClient gameClient = null;
@@ -42,15 +42,15 @@ public class AIPlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public AIPlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, JPanel panel) {
+	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, JPanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 		this.mPanel = panel;
 	}
 
-	public AIPlayer(GamePlayerInfo gamePlayerInfo) {
-		super("AI", gamePlayerInfo, GameState.NONE);
+	public SlavePlayer(GamePlayerInfo gamePlayerInfo) {
+		super("Slave", gamePlayerInfo, GameState.NONE);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 	}
@@ -58,7 +58,7 @@ public class AIPlayer extends Player {
 	/**
 	 * Runs the main thread of the AI player
 	 */
-	public void run() {
+	public void play() {
 
 		gameServer.setPlayer(this);
 		gameServerThread = new Thread(gameServer);
@@ -70,41 +70,12 @@ public class AIPlayer extends Player {
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
-		gameClientThread.setName("AI Player Socket Thread");
+
+		gameClientThread.setName("Slave Player Socket Thread");
 		gameClientThread.start();
 
 		gameServer.setGameClient(gameClient);
-
-		this.setGameState(GameState.PLAY);
-		while (this.getGameState() == GameState.PLAY) {
-			if (this.isDealer()) {
-				// TODO do dealer stuff here, checking connection, updating
-				// stuff
-				// System.out.println("dealer/node0 is playing game");
-				// Card card = this.getCard(1);
-				// gameServer.sendCard(card, 1);
-				//System.out.println("I am the new dealer");
-				if(!dealerReset){
-					dealerReset = true;
-					
-					gameServerThread = new Thread(gameServer);
-					gameServerThread.start();
-				}
-			} else {
-				// TODO do client stuff here, checking connection, updating
-				// stuff
-				//System.out.println("client is playing game");
-				gameClient.play();
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
-
-		}
+		gameClient.play();
 
 	}
 

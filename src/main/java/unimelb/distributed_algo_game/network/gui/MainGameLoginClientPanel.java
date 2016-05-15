@@ -11,9 +11,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
 public class MainGameLoginClientPanel extends JPanel {
@@ -117,10 +117,8 @@ public class MainGameLoginClientPanel extends JPanel {
 				String gameServerInfo[] = { "0", serverIPAddress, serverPort };
 				System.out.println("Client" + nodeID + " sending connection to dealer");
 
-				p = new AIPlayer("AI", new GamePlayerInfo(gamePlayerInfo), new GamePlayerInfo(gameServerInfo), self);
-				Thread t = new Thread(p);
-				t.setName("AI Player Thread");
-				t.start();
+				p = new SlavePlayer("Slave" + nodeID, new GamePlayerInfo(gamePlayerInfo), new GamePlayerInfo(gameServerInfo), self);
+				p.play();
 				btnStart.setEnabled(false);
 
 			}

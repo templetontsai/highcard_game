@@ -8,11 +8,10 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
-import unimelb.distributed_algo_game.network.NetworkInterface.ServerConnectionState;
 import unimelb.distributed_algo_game.network.utils.Utils;
-import unimelb.distributed_algo_game.player.AIPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 /**
  * This class is responsible for managing the threads connected to the other servers
@@ -68,7 +67,7 @@ public class PlayerServerManager {
 	}
 
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
-		playerList.put(gamePlayerInfo.getNodeID(), new AIPlayer(gamePlayerInfo));
+		playerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
 	}
 
 	/**

@@ -131,8 +131,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 				 * Read input stream from the server and write output stream to
 				 * the server
 				 */
-				mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
-				mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
+				
 				isRunning = true;
 
 				/** Main while loop for the thread */
@@ -353,6 +352,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 		try {
 
 			mSocket = new Socket(serverIPAddress, serverPort);
+			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
+			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 			clientConnectionState = ClientConnectionState.INIT;
 
 		} catch (IOException ioe) {
@@ -476,7 +477,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CON, "init");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
-
+			System.out.println("client play");
 			sendMessage(mMessage);
 
 		} 

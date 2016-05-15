@@ -12,8 +12,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
-import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.token.Token;
@@ -104,11 +104,9 @@ public class MainGameLoginDealerPanel extends JPanel {
 				System.out.println("Dealer/Node0 Starts the game");
 				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
 				// Initialize players
-				p = new HumanPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo), self);
+				p = new DealerPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo), self);
 				p.setDealer(true);
-				Thread t = new Thread(p);
-				t.start();
-				t.setName("Human Player");
+				p.play();
 				textArea.append("Node" + nodeID + " is joined\n");
 				// Initialize game token for mutex
 				Token gameToken = new Token();

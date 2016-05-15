@@ -8,9 +8,9 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import unimelb.distributed_algo_game.player.AIPlayer;
-import unimelb.distributed_algo_game.player.HumanPlayer;
+import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.Player;
+import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
 class GameTablePanel extends JPanel {
@@ -56,7 +56,7 @@ class GameTablePanel extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			((HumanPlayer) mPlayer).dealerDrawnCard();
+			((DealerPlayer) mPlayer).dealerDrawnCard();
 			//btn.setEnabled(false);
 		}
 
@@ -67,7 +67,7 @@ class GameTablePanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 
-			((AIPlayer) mPlayer).requestCardFromDealer();
+			((SlavePlayer) mPlayer).requestCardFromDealer();
 			btn.setEnabled(false);
 
 		}

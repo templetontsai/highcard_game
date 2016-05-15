@@ -3,13 +3,7 @@
  */
 package unimelb.distributed_algo_game;
 
-import java.util.ArrayList;
-
 import unimelb.distributed_algo_game.network.gui.MainGameFrameGUI;
-import unimelb.distributed_algo_game.player.AIPlayer;
-import unimelb.distributed_algo_game.player.HumanPlayer;
-import unimelb.distributed_algo_game.player.Player;
-import unimelb.distributed_algo_game.token.Token;
 
 // TODO: Auto-generated Javadoc
 /**
