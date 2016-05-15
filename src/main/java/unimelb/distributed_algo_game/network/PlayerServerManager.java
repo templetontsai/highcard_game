@@ -247,8 +247,6 @@ public class PlayerServerManager {
 			}
 		}
 	}
-<<<<<<< HEAD
-=======
 	
 	public synchronized boolean isAllCRTReplied() {
 		if(playerClientServerList.size() >= 1) {
@@ -264,10 +262,5 @@ public class PlayerServerManager {
 		return this.isReplied;
 		
 	}
-	
-
-	
-
->>>>>>> 58a705b828df2d396a99782d63c0036490b8d4d4
 
 }

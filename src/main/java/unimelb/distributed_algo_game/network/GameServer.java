@@ -388,10 +388,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 			t.setName("GameServer Election Socket Thread");
 			t.connect();
 			t.start();
-<<<<<<< HEAD
-=======
-
->>>>>>> 58a705b828df2d396a99782d63c0036490b8d4d4
 		} else {
 			System.out.println("Could not connect to neighbor");
 		}
@@ -467,10 +463,11 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	}
 	
-<<<<<<< HEAD
+
 	public void restart(){
 		run();
-=======
+	}
+	
 	public void updateGameTable() {
 		mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
 	}
@@ -481,6 +478,5 @@ public final class GameServer implements Runnable, NetworkInterface {
 	
 	public boolean getReply() {
 		return mPlayerServerManager.isAllCRTReplied();
->>>>>>> 58a705b828df2d396a99782d63c0036490b8d4d4
 	}
 }
