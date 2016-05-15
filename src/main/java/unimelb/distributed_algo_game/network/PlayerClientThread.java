@@ -336,6 +336,7 @@ public class PlayerClientThread extends Thread {
 		}
 		System.out.println("Total added clients: "+gameClients.size());
 		mGameServer.updateServerList(gameClients);
+		mGameServer.connectToNeighbor();
 	}
 	
 	/**
@@ -390,7 +391,7 @@ public class PlayerClientThread extends Thread {
 			//Update the new server details on the game client
 			mGameServer.setGameServerLeader(newDealer);
 			mGameServer.updateServerDetails();
-			mGameServer.reconnectClient();
+			//mGameServer.reconnectClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
@@ -463,7 +464,7 @@ public class PlayerClientThread extends Thread {
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
 			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
-			System.out.println("Connection lost in receiveMessage, node: " + this.mGameDealerInfo.getNodeID());
+			System.out.println("Connection lost in receiveMessage client, node: " + this.mGameClientInfo.getNodeID());
 			isRunning = false;
 			if(timer != null)
 				timer.cancel();

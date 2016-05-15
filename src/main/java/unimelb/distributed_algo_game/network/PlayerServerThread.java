@@ -277,7 +277,7 @@ public class PlayerServerThread extends Thread{
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
 			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
-			System.out.println("Connection lost in receiveMessage, node: " + this.mGameServerInfo.getNodeID());
+			System.out.println("Connection lost in receiveMessage server, node: " + this.mGameServerInfo.getNodeID());
 			isRunning = false;
 			//ioe.printStackTrace();
 		}
@@ -498,4 +498,5 @@ public class PlayerServerThread extends Thread{
 	public synchronized GamePlayerInfo getClientGamePlayerInfo() {
 		return this.mGameClientInfo;
 	}
+	
 }

@@ -238,5 +238,13 @@ public class PlayerServerManager {
 			}
 		}
 	}
+	
+	public void startElection(){
+		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
+			if(t.getKey()==myNeighbor.getNodeID()){
+			    t.getValue().startElection();
+			}
+		}
+	}
 
 }
