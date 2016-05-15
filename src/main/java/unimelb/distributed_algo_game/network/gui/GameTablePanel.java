@@ -3,6 +3,7 @@ package unimelb.distributed_algo_game.network.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -20,21 +21,29 @@ class GameTablePanel extends JPanel {
 	private GetCardButtonActionListener mGetCardButtonListener = null;
 	private DrawButtonActionListener mDrawButtonActionListener = null;
 	private Player mPlayer = null;
+	private List<CardPanel> mPlayerPanelList = null;
+	private boolean isDealer = false;
 
-
-	public GameTablePanel(List<CardPanel> mPlayerCardPanelList, boolean isDealer, Player mPlayer) {
+	public GameTablePanel(List<Integer> mPlayerIDList, boolean isDealer, Player mPlayer) {
 		setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-		
+
 		this.mPlayer = mPlayer;
 
-		if (mPlayerCardPanelList.size() == 0)
+		if (mPlayerIDList.size() == 0)
 			throw new IllegalArgumentException();
-		this.mPlayerCardPanelList = mPlayerCardPanelList;
-		
-		for (CardPanel cPanel : mPlayerCardPanelList) {
+		this.isDealer = isDealer;
+		initGUI(mPlayerIDList);
 
-			this.add(cPanel);
+	}
+
+	private void initGUI(List<Integer> mPlayerIDList) {
+		mPlayerCardPanelList = new ArrayList<CardPanel>(mPlayerIDList.size());
+		for (Integer i : mPlayerIDList) {
+			CardPanel p = new CardPanel(i);
+			mPlayerCardPanelList.add(p);
+			this.add(p);
 		}
+
 		btn = new JButton();
 		if (isDealer) {
 			mDrawButtonActionListener = new DrawButtonActionListener();
@@ -47,9 +56,6 @@ class GameTablePanel extends JPanel {
 		}
 
 		this.add(btn);
-		
-		//this.revalidate();
-
 	}
 
 	final class DrawButtonActionListener implements ActionListener {
@@ -57,7 +63,6 @@ class GameTablePanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			((DealerPlayer) mPlayer).dealerDrawnCard();
-			//btn.setEnabled(false);
 		}
 
 	}
@@ -78,19 +83,21 @@ class GameTablePanel extends JPanel {
 		CardPanel panel = mPlayerCardPanelList.get(nodeID);
 		panel.setParameters(c, true);
 		this.repaint();
-	
 
 	}
-	
+
 	public void newRound() {
-		
-		
+
 		for (CardPanel cPanel : mPlayerCardPanelList) {
 			cPanel.setGameInProgress(false);
 		}
 		this.repaint();
 		btn.setEnabled(true);
-		//System.out.println(btn.isEnabled());
-		
+
+	}
+
+	public void updateGameTable(List<Integer> mPlayerIDList) {
+		initGUI(mPlayerIDList);
+		this.repaint();
 	}
 }

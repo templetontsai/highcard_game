@@ -133,12 +133,10 @@ public class MainGameLoginClientPanel extends JPanel {
 
 	public void showGameTable(boolean isEnable, List<Integer> mPlayerIDList) {
 		
-		for (Integer i : mPlayerIDList) {
-			mPlayerPanelList.add(new CardPanel(i));
-		}
+
 		
 		mMainGameFrameGUI.getContentPane().removeAll();
-		gameTable = new GameTablePanel(mPlayerPanelList, false, p);
+		gameTable = new GameTablePanel(mPlayerIDList, false, p);
 		mMainGameFrameGUI.setContentPane(gameTable);
 		mMainGameFrameGUI.revalidate();
 
@@ -155,8 +153,11 @@ public class MainGameLoginClientPanel extends JPanel {
 		else if(nodeID != -1)
 			JOptionPane.showMessageDialog(null, "node" + nodeID + " has won");
 		gameTable.newRound();
-		
-		
+
+	}
+	
+	public void updateGameTable(List<Integer> mPlayerIDList) {
+		gameTable.updateGameTable(mPlayerIDList);
 	}
 
 }

@@ -32,16 +32,8 @@ public class HighCardGameApp {
 	 * This runs the game server of the game
 	 */
 	public static void runGame(int id){
-		
-		if(id == 0) {
-			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
-		} else {
-			MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
-			
-		}
-		
-		
-		
+		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
+
 	}
 	
 	

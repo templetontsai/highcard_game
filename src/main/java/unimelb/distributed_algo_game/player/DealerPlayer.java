@@ -20,8 +20,7 @@ import unimelb.distributed_algo_game.state.GameState;
 
 public class DealerPlayer extends Player {
 
-	/** The game is over. */
-	private boolean gameIsOver = false;
+
 
 	/** The game client. */
 	private GameClient gameClient = null;
