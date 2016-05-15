@@ -201,7 +201,7 @@ public class PlayerServerManager {
 			String[] serverInfo = {details[0], details[1], details[2]};
 			serverList.put(new Integer(details[0]), serverInfo);
 		}
-		//System.out.println("New server list size is "+serverList.size());
+		
 	}
 	
 	/**
@@ -235,6 +235,14 @@ public class PlayerServerManager {
 		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
 			if(t.getKey()==myNeighbor.getNodeID()){
 			    t.getValue().sendMessage(mMessage);
+			}
+		}
+	}
+	
+	public void startElection(){
+		for (Map.Entry<Integer, PlayerServerThread> t : playerClientServerList.entrySet()) {
+			if(t.getKey()==myNeighbor.getNodeID()){
+			    t.getValue().startElection();
 			}
 		}
 	}

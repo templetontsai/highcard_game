@@ -107,7 +107,7 @@ public class PlayerServerThread extends Thread{
 		try{
 			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
-			System.out.println("Server connection is "+mObjectOutputStream);
+			System.out.println("Slave Server connection is running");
 		}catch(IOException ioe){
 			System.out.println("Can't reach the client's server");
 			ioe.printStackTrace();
@@ -219,12 +219,12 @@ public class PlayerServerThread extends Thread{
 	 */
 	public void init(){
 		if(this.clientConnectionState == ClientConnectionState.INIT){
-		JSONObject mMessage = new JSONObject();
-		BodyMessage bodyMessage = new BodyMessage(mGameServerInfo, MessageType.CON, "init");
-		mMessage.put("header", ClientConnectionState.CONNECTED);
-		mMessage.put("body", bodyMessage);
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = new BodyMessage(mGameServerInfo, MessageType.CON, "init");
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
 
-		sendMessage(mMessage);
+			sendMessage(mMessage);
 		}
 	}
 	
@@ -397,6 +397,12 @@ public class PlayerServerThread extends Thread{
 		if(messageNodeID > this.mGameServerInfo.getNodeID()){
 			//Send message to the next node without changing it
 			//System.out.println(mGameServerInfo.getNodeID()+" cannot be the new dealer");
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessage(mMessage);
 		}else if(messageNodeID < this.mGameServerInfo.getNodeID()){
 			//Replace the node ID in the message with own
 			mBodyMessage.setMessage(mGameServerInfo.getStringNodeID());
@@ -408,14 +414,15 @@ public class PlayerServerThread extends Thread{
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameServerInfo);
 			System.out.println("Hell ya I'm in charge now ");
+			
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessage(mMessage);
 		}
 		
-		JSONObject mMessage = new JSONObject();
-		BodyMessage bodyMessage = mBodyMessage;
-		mMessage.put("header", ClientConnectionState.CONNECTED);
-		mMessage.put("body", bodyMessage);
-
-		sendMessage(mMessage);
 	}
     
     /**
@@ -431,13 +438,16 @@ public class PlayerServerThread extends Thread{
 			//Update the client server details to connect to
 			mGameServer.setGameServerLeader(newDealer);
 			mGameServer.updateServerDetails();
-			
+			//mGameServer.reconnectClient();
+
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
 			mBodyMessage.setMessageType(MessageType.COD);
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 			sendMessage(mMessage);
+		}else{
+			mGameServer.restart();
 		}
 	}
 	

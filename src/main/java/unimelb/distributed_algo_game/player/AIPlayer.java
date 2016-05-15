@@ -16,7 +16,7 @@ import unimelb.distributed_algo_game.state.GameState;
  *
  * @author Ting-Ying Tsai
  */
-public class SlavePlayer extends Player {
+public class AIPlayer extends Player {
 
 	/** The game client. */
 	private GameClient gameClient = null;
@@ -30,6 +30,8 @@ public class SlavePlayer extends Player {
 	private Thread gameServerThread = null;
 
 	private JPanel mPanel = null;
+	
+	private boolean dealerReset = false;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -40,15 +42,15 @@ public class SlavePlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, JPanel panel) {
+	public AIPlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, JPanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 		this.mPanel = panel;
 	}
 
-	public SlavePlayer(GamePlayerInfo gamePlayerInfo) {
-		super("Slave", gamePlayerInfo, GameState.NONE);
+	public AIPlayer(GamePlayerInfo gamePlayerInfo) {
+		super("AI", gamePlayerInfo, GameState.NONE);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
 	}
@@ -56,7 +58,7 @@ public class SlavePlayer extends Player {
 	/**
 	 * Runs the main thread of the AI player
 	 */
-	public void play() {
+	public void run() {
 
 		gameServer.setPlayer(this);
 		gameServerThread = new Thread(gameServer);
@@ -68,27 +70,42 @@ public class SlavePlayer extends Player {
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
-
-		gameClientThread.setName("Slave Player Socket Thread");
+		gameClientThread.setName("AI Player Socket Thread");
 		gameClientThread.start();
 
 		gameServer.setGameClient(gameClient);
-		gameClient.play();
 
-	}
-	
-	public void rePlay(){
-		gameClient.setPlayer(this);
-		gameClient.setPanel((MainGameLoginClientPanel) mPanel);
-		gameClient.setServerDetails();
-		gameClientThread = new Thread(gameClient);
-		gameClient.connect();
+		this.setGameState(GameState.PLAY);
+		while (this.getGameState() == GameState.PLAY) {
+			if (this.isDealer()) {
+				// TODO do dealer stuff here, checking connection, updating
+				// stuff
+				// System.out.println("dealer/node0 is playing game");
+				// Card card = this.getCard(1);
+				// gameServer.sendCard(card, 1);
+				//System.out.println("I am the new dealer");
+				if(!dealerReset){
+					dealerReset = true;
+					
+					gameServerThread = new Thread(gameServer);
+					gameServerThread.start();
+				}
+			} else {
+				// TODO do client stuff here, checking connection, updating
+				// stuff
+				//System.out.println("client is playing game");
+				gameClient.play();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
-		gameClientThread.setName("Slave Player Socket Thread");
-		gameClientThread.start();
+			}
 
-		gameServer.setGameClient(gameClient);
-		gameClient.play();
+		}
+
 	}
 
 	/**
