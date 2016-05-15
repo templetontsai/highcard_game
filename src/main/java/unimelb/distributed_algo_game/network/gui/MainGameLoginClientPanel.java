@@ -103,14 +103,14 @@ public class MainGameLoginClientPanel extends JPanel {
 			// TODO get ip and port from textfield and set init server
 			// socket
 			
-			/*String ipAddress = ipTextField.getText();
+		String ipAddress = ipTextField.getText();
 			String port = portTextField.getText();
 			String serverIPAddress = serverIPTextField.getText();
-			String serverPort = serverPortTextField.getText();*/
-			String ipAddress = "localhost";
+			String serverPort = serverPortTextField.getText();
+			/*String ipAddress = "localhost";
 			String port = "500" + nodeID;
 			String serverIPAddress = "localhost";
-			String serverPort = "5000";
+			String serverPort = "5000";*/
 			
 			if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
 				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };

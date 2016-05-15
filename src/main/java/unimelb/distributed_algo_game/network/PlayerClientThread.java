@@ -22,6 +22,7 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.network.PlayerServerThread.StillAliveTimerTask;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.pokers.Card;
 
@@ -41,7 +42,6 @@ public class PlayerClientThread extends Thread {
 
 	/** The m object input stream. */
 	private ObjectInputStream mObjectInputStream = null;
-	
 
 	/** The m lock. */
 	private Object mLock = null;
@@ -60,16 +60,14 @@ public class PlayerClientThread extends Thread {
 	private boolean isClientLockRound;
 
 	private boolean isClientStillAvle = false;
-	
+
 	private GamePlayerInfo mGameDealerInfo = null;
-	
 
 	private GamePlayerInfo mGameClientInfo = null;
-	
+
 	private Timer timer = null;
 
 	private Card c;
-
 
 	/**
 	 * Instantiates a new player client thread.
@@ -91,8 +89,6 @@ public class PlayerClientThread extends Thread {
 		this.mGameDealerInfo = mGameDealerInfo;
 		this.mGameClientInfo = new GamePlayerInfo();
 	}
-	
-
 
 	/**
 	 * Runs the main method of the client thread
@@ -132,7 +128,7 @@ public class PlayerClientThread extends Thread {
 				case ACK:
 				case CONNECTING:
 				case CONNECTED:
-					
+
 					checkMessageType(bodyMessage);
 					break;
 				case DISCONNECTING:
@@ -146,9 +142,6 @@ public class PlayerClientThread extends Thread {
 					break;
 
 				}
-			} else {
-				timer = new Timer();
-				timer.schedule(new StillAliveTimerTask(), NetworkInterface.STILL_ALIVE_TIME_OUT);
 			}
 
 		}
@@ -159,18 +152,16 @@ public class PlayerClientThread extends Thread {
 			mObjectOutputStream.close();
 
 			mSocket.close();
-			if(timer != null){
+			if (timer != null) {
 				timer.cancel();
-				System.out.println("Dealer has left the game! Leader election beginning!");
-				startElection();	
+				startElection();
 			}
 
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
-			if(timer != null){
+			if (timer != null)
 				timer.cancel();
-			}
 			ioe.printStackTrace();
 		}
 	}
@@ -183,35 +174,42 @@ public class PlayerClientThread extends Thread {
 
 		@Override
 		public void run() {
-			
+
 			synchronized (mLock) {
-				isClientStillAvle = false;
-				//mGameServer.removeClient(clientNodeID);
+
+				// mGameServer.removeClient(clientNodeID);
 				isRunning = false;
-				//System.out.println("Node:" + clientNodeID + " has left the game");
+				System.out.println("Node:" + clientNodeID + " has left the game");
+				timer.cancel();
+				/*
+				 * if(!mGameServer.getIsLeader()){ timer.cancel();
+				 * //System.out.println("It's morphin time!");
+				 * //startElection(); }
+				 */
+
 			}
 		}
 
 	}
-	
+
 	/**
 	 * This starts an election on the server
 	 */
-	public void startElection(){
+	public void startElection() {
 		mGameServer.startElection();
 	}
-	
+
 	/**
 	 * Sends still alive message to the client
 	 */
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
-		BodyMessage mBodyMessage = new BodyMessage(this.mGameDealerInfo, MessageType.ACK,
-				ACKCode.STILL_ALIVE);
+		BodyMessage mBodyMessage = new BodyMessage(this.mGameDealerInfo, MessageType.ACK, ACKCode.STILL_ALIVE);
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", mBodyMessage);
 		sendMessage(mMessage);
 	}
+
 	/**
 	 * This method checks the type of JSON body message and carries out the
 	 * necessary action for each message type
@@ -222,27 +220,25 @@ public class PlayerClientThread extends Thread {
 		ClientConnectionState connectionState;
 		MessageType messagType = mBodyMessage.getMessageType();
 		Object message = mBodyMessage.getMessage();
-		
 
 		switch (messagType) {
 		case CON:
 			// if the game is started already, don't respond to the message
 			if (!getClientStatus()) {
 				System.out.println("CON");
-				//clientNodeID = mBodyMessage.getNodeID();
+				// clientNodeID = mBodyMessage.getNodeID();
 				this.mGameClientInfo = mBodyMessage.getGamePlayerInfo();
 				clientNodeID = this.mGameClientInfo.getNodeID();
-				
+
 				connectionState = ClientConnectionState.CONNECTED;
 				// Player specifies the card to
-				//mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
+				// mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK,
+				// ACKCode.NODE_ID_RECEIVED);
 				mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
 				mMessage.put("header", connectionState);
 				mMessage.put("body", mBodyMessage);
 				sendMessage(mMessage);
-				synchronized (mLock) {
-					isClientStillAvle = true;
-				}
+		
 
 			}
 
@@ -262,14 +258,16 @@ public class PlayerClientThread extends Thread {
 				mGameServer.broadcastCards(playerCard);
 				mGameServer.updateCard(c, mBodyMessage.getGamePlayerInfo().getNodeID());
 				isClientLockRound = true;
-				
 
 				break;
 			case STILL_ALIVE:
-				synchronized (mLock) {
-					isClientStillAvle = true;
-				}
-				//System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
+				if(timer != null)
+					timer.cancel();
+				timer = new Timer();
+				timer.schedule(new StillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+				
+				// System.out.println("Node: " +
+				// this.mGameClientInfo.getNodeID() + " is still playing");
 				break;
 			default:
 				System.out.println("Uknown ACK code");
@@ -283,7 +281,7 @@ public class PlayerClientThread extends Thread {
 			// Player specifies the card to
 			c = mGameServer.getCard(1);
 			mGameServer.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
-			//mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
+			// mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
 			mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.CRD, c);
 
 			mMessage.put("header", connectionState);
@@ -293,26 +291,26 @@ public class PlayerClientThread extends Thread {
 		// Used to send a disconnect message
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
-			//TODO put this in the right place later on, when it is false the game is no longer locked
+			// TODO put this in the right place later on, when it is false the
+			// game is no longer locked
 			isClientLockRound = false;
 			break;
 		case LST:
-			System.out.println("Received client list: "+mBodyMessage.getMessage());
+			System.out.println("Received client list: " + mBodyMessage.getMessage());
 			updateClientList(mBodyMessage);
 			break;
 		case ELE:
-			System.out.println("Received election message from "+mBodyMessage.getNodeID());
+			System.out.println("Received election message from " + mBodyMessage.getNodeID());
 			sendElectionMessage(mBodyMessage);
 			break;
 		case COD:
-			System.out.println("Received coordinator message from "+mBodyMessage.getNodeID());
+			System.out.println("Received coordinator message from " + mBodyMessage.getNodeID());
 			setNewCoordinator(mBodyMessage);
 			break;
 		case BCT_CRT:
 			System.out.println(mBodyMessage.getMessage());
 			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body",
-					new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.CRT_RPY));
+			mMessage.put("body", new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.CRT_RPY));
 
 			sendMessage(mMessage);
 			break;
@@ -321,58 +319,63 @@ public class PlayerClientThread extends Thread {
 
 		}
 	}
- 
+
 	/**
 	 * This updates the current list of players in the game
+	 * 
 	 * @param mBodyMessage
 	 */
-	public void updateClientList(BodyMessage mBodyMessage){
-		
-		String clients = (String)mBodyMessage.getMessage();
+	public void updateClientList(BodyMessage mBodyMessage) {
+
+		String clients = (String) mBodyMessage.getMessage();
 		String[] clientList = clients.split("\n");
 		ArrayList<String> gameClients = new ArrayList();
-		
-		for(int i=0; i < clientList.length; i++){
+
+		for (int i = 0; i < clientList.length; i++) {
 			String[] clientDetails = clientList[i].split(":");
-			//Only maintain list of clients not yourself
-			if(!clientDetails[0].equals(Integer.toString(mGameDealerInfo.getNodeID()))){
-			    //System.out.println(clientDetails[0]+"-"+mGameDealerInfo.getNodeID());
+			// Only maintain list of clients not yourself
+			if (!clientDetails[0].equals(Integer.toString(mGameDealerInfo.getNodeID()))) {
+				// System.out.println(clientDetails[0]+"-"+mGameDealerInfo.getNodeID());
 				gameClients.add(clientList[i]);
 			}
 		}
-		System.out.println("Total added clients: "+gameClients.size());
+		System.out.println("Total added clients: " + gameClients.size());
 		mGameServer.updateServerList(gameClients);
 		mGameServer.connectToNeighbor();
 	}
-	
+
 	/**
-	 * This sends an election message to the node's neighbor after comparing the received node
-	 * ID to it's own
+	 * This sends an election message to the node's neighbor after comparing the
+	 * received node ID to it's own
+	 * 
 	 * @param mBodyMessage
 	 */
-    public synchronized void sendElectionMessage(BodyMessage mBodyMessage){
-    	int messageNodeID = Integer.parseInt((String)mBodyMessage.getMessage());
-    	//Send message to the next node without changing it
-		if(messageNodeID > this.mGameDealerInfo.getNodeID()){
-			//System.out.println(mGameDealerInfo.getNodeID()+" cannot be the new dealer");
+	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
+		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
+		// Send message to the next node without changing it
+		if (messageNodeID > this.mGameDealerInfo.getNodeID()) {
+			// System.out.println(mGameDealerInfo.getNodeID()+" cannot be the
+			// new dealer");
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 
 			sendMessageToNext(mMessage);
-		}else if(messageNodeID < this.mGameDealerInfo.getNodeID()){
-			//Replace the node ID in the message with own
-			//System.out.println("I will become the new dealer "+this.mGameDealerInfo.getNodeID());
-			//mBodyMessage.setMessage(mGameDealerInfo.getStringNodeID());
+		} else if (messageNodeID < this.mGameDealerInfo.getNodeID()) {
+			// Replace the node ID in the message with own
+			// System.out.println("I will become the new dealer
+			// "+this.mGameDealerInfo.getNodeID());
+			// mBodyMessage.setMessage(mGameDealerInfo.getStringNodeID());
 
-		}else if(messageNodeID == this.mGameDealerInfo.getNodeID()){
-			//This means i have received my election message and I am the new coordinator
+		} else if (messageNodeID == this.mGameDealerInfo.getNodeID()) {
+			// This means i have received my election message and I am the new
+			// coordinator
 			mGameServer.setPlayerDealer();
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameDealerInfo);
 			System.out.println("Hell ya I'm in charge now ");
-			
+
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
 			mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -380,36 +383,33 @@ public class PlayerClientThread extends Thread {
 
 			sendMessageToNext(mMessage);
 		}
-		
-		
-		
-	}
-    
-    /**
-     * This sets the new coordinator of the game
-     * @param mBodyMessage
-     */
-    public synchronized void setNewCoordinator(BodyMessage mBodyMessage){
 
-    	GamePlayerInfo newDealer = (GamePlayerInfo)mBodyMessage.getMessage();
-    	System.out.println("The new dealer is node "+newDealer.getNodeID());
-		if(newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()){
-			//Update the new server details on the game client
+	}
+
+	/**
+	 * This sets the new coordinator of the game
+	 * 
+	 * @param mBodyMessage
+	 */
+	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
+
+		GamePlayerInfo newDealer = (GamePlayerInfo) mBodyMessage.getMessage();
+		System.out.println("The new dealer is node " + newDealer.getNodeID());
+		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
+			// Update the new server details on the game client
 			mGameServer.setGameServerLeader(newDealer);
 			mGameServer.updateServerDetails();
-			//mGameServer.reconnectClient();
-			
+			// mGameServer.reconnectClient();
+
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
 			mBodyMessage.setMessageType(MessageType.COD);
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 			sendMessageToNext(mMessage);
-		}else{
-			mGameServer.restart();
 		}
 	}
-    
+
 	/**
 	 * Sends message to a client.
 	 *
@@ -434,20 +434,20 @@ public class PlayerClientThread extends Thread {
 			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in sendMessage, node: " + this.mGameDealerInfo.getNodeID());
 			isRunning = false;
-			if(timer != null)
+			if (timer != null)
 				timer.cancel();
 			ioe.printStackTrace();
 		}
 
 	}
-	
+
 	/**
 	 * This sends a message to the next player in the logical ring
 	 */
-	public synchronized void sendMessageToNext(JSONObject mMessage){
+	public synchronized void sendMessageToNext(JSONObject mMessage) {
 		mGameServer.sendMessageToNext(mMessage);
 	}
-	
+
 	/**
 	 * Receive message from the client.
 	 */
@@ -472,17 +472,18 @@ public class PlayerClientThread extends Thread {
 			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in receiveMessage client, node: " + this.mGameClientInfo.getNodeID());
 			isRunning = false;
-			if(timer != null)
+			if (timer != null)
 				timer.cancel();
-			//ioe.printStackTrace();
+			// ioe.printStackTrace();
 		}
 
 		return message;
 
 	}
-	
+
 	/**
 	 * This returns the client ID of this thread
+	 * 
 	 * @return
 	 */
 	public synchronized int getClientNodeID() {
@@ -491,6 +492,7 @@ public class PlayerClientThread extends Thread {
 
 	/**
 	 * This returns the lock round status of this thread
+	 * 
 	 * @return
 	 */
 	public synchronized boolean getClientStatus() {
@@ -499,20 +501,20 @@ public class PlayerClientThread extends Thread {
 
 	/**
 	 * This sets the status of the client thread
+	 * 
 	 * @param isClientLockRound
 	 */
 	public synchronized void setClientStatus(boolean isClientLockRound) {
 		this.isClientLockRound = isClientLockRound;
 	}
-	
+
 	/**
 	 * This returns the player information of this thread
+	 * 
 	 * @return
 	 */
 	public synchronized GamePlayerInfo getClientGamePlayerInfo() {
 		return this.mGameClientInfo;
 	}
-
-
 
 }

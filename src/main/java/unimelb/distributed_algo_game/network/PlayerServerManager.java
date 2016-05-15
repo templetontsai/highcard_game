@@ -38,6 +38,8 @@ public class PlayerServerManager {
 	private GamePlayerInfo myNeighbor = null;
 	
 	private boolean isReplied = false;
+	
+	
 
 	/**
 	 * Instantiates a new player client manager.

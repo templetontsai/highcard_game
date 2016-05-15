@@ -245,7 +245,7 @@ public class PlayerServerThread extends Thread {
 
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
-				//mObjectOutputStream.reset();
+				// mObjectOutputStream.reset();
 
 			} else {
 				System.out.println("Server output stream is null");
@@ -346,7 +346,8 @@ public class PlayerServerThread extends Thread {
 				synchronized (mLock) {
 					isClientStillAlive = true;
 				}
-				//System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
+				// System.out.println("Node: " +
+				// this.mGameClientInfo.getNodeID() + " is still playing");
 				break;
 			case CRT_RPY:
 				System.out.println("CRT is replied");
@@ -393,12 +394,14 @@ public class PlayerServerThread extends Thread {
 			break;
 		case BCT_CRT:
 			System.out.println(mBodyMessage.getMessage());
-			
+			while (mGameServer.isRequested())
+				;
+
 			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body",
-					new BodyMessage(mGameServerInfo, MessageType.ACK, ACKCode.CRT_RPY));
+			mMessage.put("body", new BodyMessage(mGameServerInfo, MessageType.ACK, ACKCode.CRT_RPY));
 
 			sendMessage(mMessage);
+
 			break;
 
 		default:
@@ -472,8 +475,6 @@ public class PlayerServerThread extends Thread {
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 			sendMessage(mMessage);
-		} else {
-			mGameServer.restart();
 		}
 	}
 
@@ -534,4 +535,5 @@ public class PlayerServerThread extends Thread {
 	public boolean getReply() {
 		return this.isReplied;
 	}
+
 }

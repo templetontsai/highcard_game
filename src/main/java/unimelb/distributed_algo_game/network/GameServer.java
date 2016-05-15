@@ -57,11 +57,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private MainGameLoginDealerPanel mMainGameLoginDealerPanel = null;
 	// This number is the total player number but not including node 0 itself
-	private final int GAME_START = 4;
+	private final int GAME_START = 3;
 
 	private PlayerServerManager mPlayerServerManager = null;
 
 	private GameClient mGameClient = null;
+	
+	private boolean isRequested = false;
 
 	/**
 	 * Instantiates a new game server.
@@ -462,9 +464,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	}
 
-	public void restart() {
-		//run();
-	}
 
 	public void broadcastCRT() {
 		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
@@ -472,5 +471,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public boolean getReply() {
 		return mPlayerServerManager.isAllCRTReplied();
+	}
+	
+	public void setIsRequested(boolean isRequested) {
+		this.isRequested = isRequested;
+	}
+	
+	public boolean isRequested() {
+		return this.isRequested;
 	}
 }
