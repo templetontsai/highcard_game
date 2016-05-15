@@ -446,6 +446,8 @@ public class PlayerServerThread extends Thread {
 			// This means i have received my election message and I am the new
 			// coordinator
 			mGameServer.setPlayerDealer();
+			mGameServer.disconnect();
+			mGameServer.startServer();
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameServerInfo);
 			System.out.println("Hell ya I'm in charge now ");
@@ -474,7 +476,7 @@ public class PlayerServerThread extends Thread {
 			// Update the client server details to connect to
 			mGameServer.setGameServerLeader(newDealer);
 			mGameServer.updateServerDetails();
-			// mGameServer.reconnectClient();
+			mGameServer.reconnectClient();
 
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;

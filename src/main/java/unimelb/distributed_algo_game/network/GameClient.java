@@ -280,7 +280,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		case BCT_UPT:
 			playerIDList = (List<Integer>) mBodyMessage.getMessage();
 
-			mMainGameLoginClientPanel.updateGameTable(playerIDList);
+			mMainGameLoginClientPanel.updateGameTable(playerIDList, false);
 			break;
 		case BCT_CRT:
 			System.out.println(mBodyMessage.getMessage());

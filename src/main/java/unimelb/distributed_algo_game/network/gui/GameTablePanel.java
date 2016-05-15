@@ -35,12 +35,12 @@ class GameTablePanel extends JPanel {
 		this.mPlayerCardPanelList = mPlayerCardPanelList;
 
 		this.isDealer = isDealer;
-		initGUI(mPlayerIDList);
+		initGUI(mPlayerIDList, isDealer);
 		
 
 	}
 
-	private void initGUI(List<Integer> mPlayerIDList) {
+	private void initGUI(List<Integer> mPlayerIDList, boolean isDealer) {
 		this.removeAll();
 		mPlayerCardPanelList = new ArrayList<CardPanel>(mPlayerIDList.size());
 		for (Integer i : mPlayerIDList) {
@@ -58,7 +58,7 @@ class GameTablePanel extends JPanel {
 			btn.setText("Get Card");
 			btn.addActionListener(mGetCardButtonListener);
 		}
-
+		
 		this.add(btn);
 		this.revalidate();
 		this.repaint();
@@ -104,8 +104,8 @@ class GameTablePanel extends JPanel {
 
 	}
 
-	public void updateGameTable(List<Integer> mPlayerIDList) {
-		initGUI(mPlayerIDList);
+	public void updateGameTable(List<Integer> mPlayerIDList, boolean isDealer) {
+		initGUI(mPlayerIDList, isDealer);
 		
 		
 	}

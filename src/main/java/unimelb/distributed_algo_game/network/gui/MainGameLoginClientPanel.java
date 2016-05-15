@@ -155,9 +155,9 @@ public class MainGameLoginClientPanel extends JPanel {
 
 	}
 
-	public void updateGameTable(List<Integer> mPlayerIDList) {
+	public void updateGameTable(List<Integer> mPlayerIDList, boolean isDealer) {
 		//gameTable.setDealer(true);
-		gameTable.updateGameTable(mPlayerIDList);
+		gameTable.updateGameTable(mPlayerIDList, isDealer);
 	}
 
 }
