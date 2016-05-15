@@ -18,7 +18,8 @@ public class BodyMessage implements Serializable{
 	public enum ACKCode {
 		NODE_ID_RECEIVED(0),
 		CARD_RECEIVED(1),
-		STILL_ALIVE(2);
+		STILL_ALIVE(2),
+		CRT_RPY(3);
 		/** The code. */
 		private int code;
 
@@ -65,12 +66,13 @@ public class BodyMessage implements Serializable{
 		BCT_LST(3),
 		BCT_RDY(4),
 		BCT_CRD(5),
-		CRD(6),
-		DSC(7),
-		BCT(8),
-		LST(9),
-		ELE(10),
-		COD(11);
+		BCT_CRT(6),
+		CRD(7),
+		DSC(8),
+		BCT(9),
+		LST(10),
+		ELE(11),
+		COD(12);
 
 		
 		/** The code. */

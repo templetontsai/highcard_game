@@ -365,6 +365,15 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
 		if (nextPlayer != null) {
+			mPlayerServerManager.startElection();
+		} else {
+			System.out.println("Not enough players to elect a new leader");
+		}
+	}
+	
+	public void connectToNeighbor(){
+		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
+		if (nextPlayer != null) {
 			PlayerServerThread t = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
 			mPlayerServerManager.addPlayer(nextPlayer);
 			mPlayerServerManager.addClient(nextPlayer.getNodeID(), t);
@@ -374,16 +383,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 			t.connect();
 			t.start();
 
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Adding error handling
-				e.printStackTrace();
-			}
-
-			t.startElection();
 		} else {
-			System.out.println("Not enough players to elect a new leader");
+			System.out.println("Could not connect to neighbor");
 		}
 	}
 
@@ -459,5 +460,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 	
 	public void updateGameTable() {
 		mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
+	}
+	
+	public void broadcastCRT() {
+		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
+	}
+	
+	public boolean getReply() {
+		return mPlayerServerManager.isAllCRTReplied();
 	}
 }
