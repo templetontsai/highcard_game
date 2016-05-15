@@ -155,8 +155,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mSocket = mServerSocket.accept();
 					System.out.println("a client connected");
 					PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
-
-
+					PlayerServerThread t2 = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
 
 					t.setName("GameServer Socket Thread");
 					t.start();
@@ -167,12 +166,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
-
-					/*PlayerServerThread t2 = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
+					mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
+					mPlayerServerManager.addClient(t.getClientNodeID(), t2);
+					
 					t2.setGameClientInfo(t.getClientGamePlayerInfo());
 					t2.setName("GameServer Client Socket Thread");
 					t2.connect();
-					t2.start();*/
+					t2.start();
 
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 
@@ -186,12 +186,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 						
 
 					}
-
-					//mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
-					//mPlayerServerManager.addClient(t.getClientNodeID(), t2);
-
-					// Every time a new player is added, send the current list
-					// to all the players
 
 				}
 				// Close server port once the server is no longer running
