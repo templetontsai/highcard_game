@@ -403,7 +403,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			if (mObjectOutputStream != null) {
 				GamePlayerInfo info = (GamePlayerInfo)((BodyMessage)((JSONObject)mGameSendDataObject).get("body")).getGamePlayerInfo();
 				if(info != null) {
-					System.out.println("Client send message, timeStamp: " + info.getTimeStamp());
+					//System.out.println("Client send message, timeStamp: " + info.getTimeStamp());
 					((BodyMessage)((JSONObject)mGameSendDataObject).get("body")).getGamePlayerInfo().setTimeStamp();
 					mObjectOutputStream.writeObject(mGameSendDataObject);
 					mObjectOutputStream.flush();

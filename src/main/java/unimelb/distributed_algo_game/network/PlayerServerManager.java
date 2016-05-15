@@ -253,8 +253,9 @@ public class PlayerServerManager {
 	public synchronized boolean isAllCRTReplied() {
 		if(playerClientServerList.size() >= 1) {
 			for (Map.Entry<Integer, PlayerServerThread> entry : playerClientServerList.entrySet()) {
-				this.isReplied = entry.getValue().getClientStatus();
+				this.isReplied = entry.getValue().getReply();
 			}
+			System.out.println(this.isReplied);
 
 		} else {
 			

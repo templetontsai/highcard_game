@@ -161,14 +161,16 @@ public class PlayerClientThread extends Thread {
 			mSocket.close();
 			if(timer != null){
 				timer.cancel();
+				System.out.println("Dealer has left the game! Leader election beginning!");
 				startElection();	
 			}
 
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
-			if(timer != null)
+			if(timer != null){
 				timer.cancel();
+			}
 			ioe.printStackTrace();
 		}
 	}
@@ -187,10 +189,6 @@ public class PlayerClientThread extends Thread {
 				//mGameServer.removeClient(clientNodeID);
 				isRunning = false;
 				//System.out.println("Node:" + clientNodeID + " has left the game");
-				if(!mGameServer.getIsLeader()){
-					System.out.println("It's morphin time!");
-					startElection();
-				}
 			}
 		}
 
@@ -271,7 +269,7 @@ public class PlayerClientThread extends Thread {
 				synchronized (mLock) {
 					isClientStillAvle = true;
 				}
-				System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
+				//System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
 				break;
 			default:
 				System.out.println("Uknown ACK code");
@@ -309,6 +307,14 @@ public class PlayerClientThread extends Thread {
 		case COD:
 			System.out.println("Received coordinator message from "+mBodyMessage.getNodeID());
 			setNewCoordinator(mBodyMessage);
+			break;
+		case BCT_CRT:
+			System.out.println(mBodyMessage.getMessage());
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body",
+					new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.CRT_RPY));
+
+			sendMessage(mMessage);
 			break;
 		default:
 			System.out.println("Uknown Message Type");

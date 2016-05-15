@@ -57,7 +57,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private MainGameLoginDealerPanel mMainGameLoginDealerPanel = null;
 	// This number is the total player number but not including node 0 itself
-	private final int GAME_START = 3;
+	private final int GAME_START = 4;
 
 	private PlayerServerManager mPlayerServerManager = null;
 
@@ -171,7 +171,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerServerManager.addClient(t.getClientNodeID(), t2);
-					
+
 					t2.setGameClientInfo(t.getClientGamePlayerInfo());
 					t2.setName("GameServer Client Socket Thread");
 					t2.connect();
@@ -180,7 +180,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
-						
+
 						System.out.println("Game Start");
 						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
 						broadcastPlayerList();
@@ -318,8 +318,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayerClientManager.updatePlayerCard(nodeID, c);
 	}
 
-
-
 	public synchronized void removeClient(int nodeID) {
 		mPlayerClientManager.removeClient(nodeID);
 		mPlayerClientManager.removePlayer(nodeID);
@@ -376,8 +374,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 			System.out.println("Not enough players to elect a new leader");
 		}
 	}
-	
-	public void connectToNeighbor(){
+
+	public void connectToNeighbor() {
 		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
 		if (nextPlayer != null) {
 			PlayerServerThread t = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
@@ -457,14 +455,22 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public void dealerDrawnCard() {
 		Card c = mPlayerClientManager.dealerDrawnCard();
-		if(c != null) {
+		if (c != null) {
 			mMainGameLoginDealerPanel.updateCard(c, nodeID);
 			mMainGameLoginDealerPanel.declareWinner(mPlayerClientManager.checkWinner());
 		}
 
 	}
-	
-	public void restart(){
-		run();
+
+	public void restart() {
+		//run();
+	}
+
+	public void broadcastCRT() {
+		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
+	}
+
+	public boolean getReply() {
+		return mPlayerServerManager.isAllCRTReplied();
 	}
 }
