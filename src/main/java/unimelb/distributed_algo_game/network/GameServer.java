@@ -462,4 +462,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 		}
 
 	}
+	
+	public void updateGameTable() {
+		mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
+	}
 }

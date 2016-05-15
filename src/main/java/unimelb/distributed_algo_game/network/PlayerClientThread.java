@@ -184,7 +184,9 @@ public class PlayerClientThread extends Thread {
 			
 			synchronized (mLock) {
 				isClientStillAvle = false;
-				//mGameServer.removeClient(clientNodeID);
+				
+				mGameServer.removeClient(clientNodeID);
+				//mGameServer.updateGameTable();
 				isRunning = false;
 				//System.out.println("Node:" + clientNodeID + " has left the game");
 				if(!mGameServer.getIsLeader()){
