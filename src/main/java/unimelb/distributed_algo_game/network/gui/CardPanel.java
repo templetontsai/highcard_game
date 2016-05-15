@@ -45,6 +45,11 @@ public class CardPanel extends JPanel {
 		this.add(idLabel);
 	} // end constructor
 
+	public void setGameInProgress(boolean gameInProgress) {
+		this.gameInProgress = gameInProgress;
+	}
+	
+
 	/**
 	 * Load the image from the file "cards.png", which must be somewhere on the
 	 * classpath for this program. If the file is found, then cardImages will

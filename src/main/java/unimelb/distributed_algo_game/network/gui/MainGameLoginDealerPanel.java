@@ -4,17 +4,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
-import unimelb.distributed_algo_game.network.PlayerClientThread;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.HumanPlayer;
 import unimelb.distributed_algo_game.player.Player;
@@ -30,9 +27,7 @@ public class MainGameLoginDealerPanel extends JPanel {
 
 
 	private JButton btnStart = null;
-	private JButton btnPlay = null;
 	private MainGameLoginDealerPanel self = null;
-	private static int playerCount = 0;
 	private MainGameFrameGUI mMainGameFrameGUI = null;
 	
 	private StartButtonActionListerner mStartButtonActionListerner = null;
@@ -99,11 +94,11 @@ public class MainGameLoginDealerPanel extends JPanel {
 			// TODO get ip and port from textfield and set init server
 			// socket
 
-			String ipAddress = ipTextField.getText();
-			String port = portTextField.getText();
+			/*String ipAddress = ipTextField.getText();
+			String port = portTextField.getText();*/
 
-			/*String ipAddress = "localhost";
-			String port = "5000";*/
+			String ipAddress = "localhost";
+			String port = "5000";
 			if (!ipAddress.equals("") && !port.equals("")) {
 				System.out.println(ipAddress + "-" + port);
 				System.out.println("Dealer/Node0 Starts the game");
@@ -152,6 +147,15 @@ public class MainGameLoginDealerPanel extends JPanel {
 
 	public void updateCard(Card c, int nodeID) {
 		gameTable.updateCard(c, nodeID);
+	}
+	
+	public void declareWinner(int nodeID) {
+		if(nodeID == this.nodeID)
+			JOptionPane.showMessageDialog(null, "You win");
+		else if(nodeID != -1)
+			JOptionPane.showMessageDialog(null, "node" + nodeID + " has won");
+		gameTable.newRound();
+		
 	}
 
 }

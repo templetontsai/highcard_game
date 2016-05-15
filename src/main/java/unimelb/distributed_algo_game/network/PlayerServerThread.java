@@ -317,7 +317,6 @@ public class PlayerServerThread extends Thread{
 				// System.out.println("CARD_RECEIVED ACK Message received from
 				// node" + mBodyMessage.getNodeID());
 				isClientLockRound = true;
-				mGameServer.checkPlayerStatus();
 
 				break;
 			case STILL_ALIVE:

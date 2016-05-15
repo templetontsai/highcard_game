@@ -156,11 +156,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					System.out.println("a client connected");
 					PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
 
-					if (mPlayerClientManager.isLockRound()) {
-						t.setClientStatus(true);
-					}
 
-					
 
 					t.setName("GameServer Socket Thread");
 					t.start();
@@ -172,31 +168,27 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 
-					PlayerServerThread t2 = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
+					/*PlayerServerThread t2 = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
 					t2.setGameClientInfo(t.getClientGamePlayerInfo());
 					t2.setName("GameServer Client Socket Thread");
 					t2.connect();
-					t2.start();
-					
+					t2.start();*/
+
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
-						// TODO make sure the receiving order is correct
+						
 						System.out.println("Game Start");
 						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
 						broadcastPlayerList();
 						broadcastClientList();
 						broadcastGameReadyToClients(new Boolean(true));
+						
 
 					}
 
-					mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
-					mPlayerServerManager.addClient(t.getClientNodeID(), t2);
-
-			
-
-
-					
+					//mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
+					//mPlayerServerManager.addClient(t.getClientNodeID(), t2);
 
 					// Every time a new player is added, send the current list
 					// to all the players
@@ -326,12 +318,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayerClientManager.updatePlayerCard(nodeID, c);
 	}
 
-	/**
-	 * This checks the current status of the player
-	 */
-	public synchronized void checkPlayerStatus() {
-		mPlayerClientManager.checkPlayerStatus();
-	}
+
 
 	public synchronized void removeClient(int nodeID) {
 		mPlayerClientManager.removeClient(nodeID);
@@ -339,18 +326,12 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	}
 
-	
-
-	
-
 	/**
 	 * This sets the player as the dealer of the game
 	 */
 	public void setPlayerDealer() {
 		mPlayer.setDealer(true);
 	}
-
-
 
 	public void setPanel(MainGameLoginDealerPanel mMainGameLoginDealerPanel) {
 		this.mMainGameLoginDealerPanel = mMainGameLoginDealerPanel;
@@ -469,14 +450,16 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mGameClient.reConnect();
 	}
 
-	
-
 	public synchronized void updateCard(Card c, int nodeID) {
 		this.mMainGameLoginDealerPanel.updateCard(c, nodeID);
 	}
 
 	public void dealerDrawnCard() {
-		mMainGameLoginDealerPanel.updateCard(mPlayerClientManager.dealerDrawnCard(), nodeID);
-		mPlayerClientManager.checkPlayerStatus();
+		Card c = mPlayerClientManager.dealerDrawnCard();
+		if(c != null) {
+			mMainGameLoginDealerPanel.updateCard(c, nodeID);
+			mMainGameLoginDealerPanel.declareWinner(mPlayerClientManager.checkWinner());
+		}
+
 	}
 }

@@ -60,7 +60,10 @@ public class Utils {
 		return winner;
 	}
 
-	public static synchronized String compareRank(Map<Integer, Player> players) {
+	
+
+	
+	public static synchronized int compareRank(Map<Integer, Player> players) {
 
 		// Initializes the variables
 		String matchDetails = "node" + players.get(0).getGamePlayerInfo().getNodeID() + " drew "
@@ -88,16 +91,17 @@ public class Utils {
 						+ " " + players.get(i).getSelectedCard().getPattern());
 		}
 		String winner = "";
+		int winner_id = -1;
 		// Ensures to check if there is a draw and awards no point in that case
 		if (!matchDraw) {
 			winner = players.get(playerID).getGamePlayerInfo().getNodeID() + " has won the match. " + sb.toString();
+			winner_id = players.get(playerID).getGamePlayerInfo().getNodeID();
 			players.get(playerID).updateScore();
 		} else {
 			winner = "The match was declared a draw. " + sb.toString();
 		}
-		return winner;
+		return winner_id;
 	}
-
 	/**
 	 * This method returns the leaderboard of the current players.
 	 *

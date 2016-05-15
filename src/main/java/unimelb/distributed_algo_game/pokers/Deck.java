@@ -23,7 +23,7 @@ public final class Deck implements Serializable{
 	private static Deck instance = null;
 
 	/** The Constant DECK_SIZE. */
-	private static final int DECK_SIZE = 52;// For testing changing it to 13
+	private static final int DECK_SIZE = 13;// For testing changing it to 13
 											// from 52
 
 	/** The deck. */
@@ -121,9 +121,9 @@ public final class Deck implements Serializable{
 		deck.clear();
 		for (CardRank cardRank : CardRank.values()) {
 			deck.add(new Clubs(cardRank));
-			deck.add(new Hearts(cardRank));
-			deck.add(new Diamonds(cardRank));
-			deck.add(new Spades(cardRank));
+			//deck.add(new Hearts(cardRank));
+			//deck.add(new Diamonds(cardRank));
+			//deck.add(new Spades(cardRank));
 		}
 	}
 

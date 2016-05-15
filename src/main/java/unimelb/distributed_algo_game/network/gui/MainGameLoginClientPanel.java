@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -29,7 +30,7 @@ public class MainGameLoginClientPanel extends JPanel {
 	private Card c;
 	private Player p;
 	private List<CardPanel> mPlayerPanelList;
-	private GameTablePanel gmaeTable;
+	private GameTablePanel gameTable;
 
 	
 
@@ -102,14 +103,14 @@ public class MainGameLoginClientPanel extends JPanel {
 			// TODO get ip and port from textfield and set init server
 			// socket
 			
-			String ipAddress = ipTextField.getText();
+			/*String ipAddress = ipTextField.getText();
 			String port = portTextField.getText();
 			String serverIPAddress = serverIPTextField.getText();
-			String serverPort = serverPortTextField.getText();
-			/*String ipAddress = "localhost";
+			String serverPort = serverPortTextField.getText();*/
+			String ipAddress = "localhost";
 			String port = "500" + nodeID;
 			String serverIPAddress = "localhost";
-			String serverPort = "5000";*/
+			String serverPort = "5000";
 			
 			if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
 				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
@@ -139,15 +140,25 @@ public class MainGameLoginClientPanel extends JPanel {
 		}
 		
 		mMainGameFrameGUI.getContentPane().removeAll();
-		gmaeTable = new GameTablePanel(mPlayerPanelList, false, p);
-		mMainGameFrameGUI.setContentPane(gmaeTable);
+		gameTable = new GameTablePanel(mPlayerPanelList, false, p);
+		mMainGameFrameGUI.setContentPane(gameTable);
 		mMainGameFrameGUI.revalidate();
 
 		System.out.println("Player Ready");
 	}
 	
 	public void updateCard(Card c, int nodeID) {
-		gmaeTable.updateCard(c, nodeID);
+		gameTable.updateCard(c, nodeID);
+	}
+	
+	public void declareWinner(int nodeID) {
+		if(nodeID == this.nodeID)
+			JOptionPane.showMessageDialog(null, "You win");
+		else if(nodeID != -1)
+			JOptionPane.showMessageDialog(null, "node" + nodeID + " has won");
+		gameTable.newRound();
+		
+		
 	}
 
 }

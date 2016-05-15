@@ -209,15 +209,17 @@ public final class PlayerClientManager {
 	/**
 	 * Checks all the player statuses in the game
 	 */
-	public synchronized void checkPlayerStatus() {
-		// Trigger the play panel here and to have the fixed size of the player
+	public synchronized int checkWinner() {
+		
+		int winnerNodeID = -1;
 		if (isLockRound() && playerIDList.size() == GAME_SIZE) {
-
-			notifyAllClients(Utils.compareRank(playerList), ClientConnectionState.CONNECTED, MessageType.BCT_RST);
+			winnerNodeID = Utils.compareRank(playerList);
+			notifyAllClients(winnerNodeID, ClientConnectionState.CONNECTED, MessageType.BCT_RST);
 			for (Map.Entry<Integer, PlayerClientThread> entry : playerClientList.entrySet()) {
 				entry.getValue().setClientStatus(false);
 			}
 		}
+		return winnerNodeID;
 	}
 	
 	/**
@@ -230,12 +232,16 @@ public final class PlayerClientManager {
 
 
 	public Card dealerDrawnCard() {
-		// Dealer draw a card
-		Card c = mPlayer.getCard(1);
-		updatePlayerCard(mPlayer.getGamePlayerInfo().getNodeID(), c);
-		Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
-		playerCard.put(mPlayer.getGamePlayerInfo().getNodeID(), c);
-		notifyAllClients(playerCard, ClientConnectionState.CONNECTED, MessageType.BCT_CRD);
+		Card c = null;
+		if(isLockRound()) {
+			// Dealer draw a card
+			c = mPlayer.getCard(1);
+			updatePlayerCard(mPlayer.getGamePlayerInfo().getNodeID(), c);
+			Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
+			playerCard.put(mPlayer.getGamePlayerInfo().getNodeID(), c);
+			notifyAllClients(playerCard, ClientConnectionState.CONNECTED, MessageType.BCT_CRD);
+		}
+
 		
 		return c;
 	}

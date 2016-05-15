@@ -30,7 +30,7 @@ class GameTablePanel extends JPanel {
 		if (mPlayerCardPanelList.size() == 0)
 			throw new IllegalArgumentException();
 		this.mPlayerCardPanelList = mPlayerCardPanelList;
-		System.out.println(mPlayerCardPanelList.size());
+		
 		for (CardPanel cPanel : mPlayerCardPanelList) {
 
 			this.add(cPanel);
@@ -57,7 +57,7 @@ class GameTablePanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			((HumanPlayer) mPlayer).dealerDrawnCard();
-			btn.setEnabled(false);
+			//btn.setEnabled(false);
 		}
 
 	}
@@ -80,5 +80,17 @@ class GameTablePanel extends JPanel {
 		this.repaint();
 	
 
+	}
+	
+	public void newRound() {
+		
+		
+		for (CardPanel cPanel : mPlayerCardPanelList) {
+			cPanel.setGameInProgress(false);
+		}
+		this.repaint();
+		btn.setEnabled(true);
+		//System.out.println(btn.isEnabled());
+		
 	}
 }

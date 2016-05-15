@@ -251,9 +251,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 				if( card != null && i != mPlayer.getGamePlayerInfo().getNodeID())//no need to update my own card
 					mMainGameLoginClientPanel.updateCard(card, i);
 			}
-	
+			break;
 		case BCT_RST:
-			System.out.println(mBodyMessage.getMessage());
+			int winnerID = (Integer)mBodyMessage.getMessage();
+			mMainGameLoginClientPanel.declareWinner(winnerID);
 			break;
 		case BCT_RDY:
 			System.out.println("Game is ready to play, start request card from dealer");
