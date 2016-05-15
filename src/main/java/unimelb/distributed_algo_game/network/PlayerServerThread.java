@@ -154,6 +154,23 @@ public class PlayerServerThread extends Thread{
 	    					}
 	    				}
 	    }
+	 // Close the input and output streams to the server
+	 		try {
+	 			mObjectInputStream.close();
+	 			mObjectOutputStream.close();
+
+	 			mSocket.close();
+	 			if(timer != null){
+	 				timer.cancel();
+	 			}
+
+	 			System.out.println("Client closed");
+	 		} catch (IOException ioe) {
+	 			// Print out the details of the exception error
+	 			if(timer != null)
+	 				timer.cancel();
+	 			ioe.printStackTrace();
+	 		}
 	}
 	
 	/**

@@ -159,8 +159,10 @@ public class PlayerClientThread extends Thread {
 			mObjectOutputStream.close();
 
 			mSocket.close();
-			if(timer != null)
+			if(timer != null){
 				timer.cancel();
+				startElection();	
+			}
 
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
