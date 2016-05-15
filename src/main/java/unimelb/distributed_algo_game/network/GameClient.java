@@ -7,6 +7,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,6 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
-import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
@@ -268,15 +268,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
 			System.out.println(mBodyMessage.getMessage());
+			
 
-			break;
-		case BCT_CRT:
-			System.out.println(mBodyMessage.getMessage());
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body",
-					new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CRT_RPY));
-
-			sendMessage(mMessage);
+			
 			break;
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
@@ -401,14 +395,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 		try {
 
 			if (mObjectOutputStream != null) {
-				GamePlayerInfo info = (GamePlayerInfo)((BodyMessage)((JSONObject)mGameSendDataObject).get("body")).getGamePlayerInfo();
-				if(info != null) {
-					System.out.println("Client send message, timeStamp: " + info.getTimeStamp());
-					((BodyMessage)((JSONObject)mGameSendDataObject).get("body")).getGamePlayerInfo().setTimeStamp();
-					mObjectOutputStream.writeObject(mGameSendDataObject);
-					mObjectOutputStream.flush();
-					mObjectOutputStream.reset();
-				}
+
+				mObjectOutputStream.writeObject(mGameSendDataObject);
+				mObjectOutputStream.flush();
+				mObjectOutputStream.reset();
 
 			} else {
 				System.out.println("mObjectOutputStream is null");

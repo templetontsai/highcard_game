@@ -6,7 +6,6 @@ package unimelb.distributed_algo_game.network.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Map;
 
 import unimelb.distributed_algo_game.player.Player;
@@ -102,11 +101,6 @@ public class Utils {
 			winner = "The match was declared a draw. " + sb.toString();
 		}
 		return winner_id;
-	}
-	
-	public synchronized static long getProcessTimestamp()
-	{
-		return new Date().getTime();
 	}
 	/**
 	 * This method returns the leaderboard of the current players.

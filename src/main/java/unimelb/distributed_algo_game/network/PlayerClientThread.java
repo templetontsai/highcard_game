@@ -415,14 +415,13 @@ public class PlayerClientThread extends Thread {
 		try {
 			if (mObjectOutputStream != null && mGameSendDataObject != null) {
 
-				GamePlayerInfo info = (GamePlayerInfo)((BodyMessage)((JSONObject)mGameSendDataObject).get("body")).getGamePlayerInfo();
-				if(info != null) {
-					System.out.println("Server send message, timeStamp: " + info.getTimeStamp());
-					((BodyMessage)((JSONObject)mGameSendDataObject).get("body")).getGamePlayerInfo().setTimeStamp();
-					mObjectOutputStream.writeObject(mGameSendDataObject);
-					mObjectOutputStream.flush();
-					mObjectOutputStream.reset();
-				}
+				mObjectOutputStream.writeObject(mGameSendDataObject);
+				mObjectOutputStream.flush();
+				// TODO object has to be reset, otherwise the client won't
+				// receive any new reference of object.
+				// However, this might cause issue if the packet is lost in
+				// between communication
+				mObjectOutputStream.reset();
 			}
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
