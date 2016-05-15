@@ -6,8 +6,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.net.URL;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -56,8 +55,12 @@ public class CardPanel extends JPanel {
 	 * refer to the Image. If not, then cardImages will be null.
 	 */
 	private void loadImage() {
-		cardImages = Toolkit.getDefaultToolkit()
-				.createImage("src/main/java/unimelb/distributed_algo_game/network/gui/cards.png");
+		
+		
+		ClassLoader cl = CardPanel.class.getClassLoader();
+	       URL imageURL = cl.getResource("unimelb/distributed_algo_game/network/gui/cards.png");
+	       if (imageURL != null)
+	          cardImages = Toolkit.getDefaultToolkit().createImage(imageURL);
 	}
 
 	public void paintComponent(Graphics g) {
