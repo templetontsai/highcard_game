@@ -62,7 +62,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private PlayerServerManager mPlayerServerManager = null;
 
 	private GameClient mGameClient = null;
-	
+
 	private boolean isRequested = false;
 
 	/**
@@ -323,6 +323,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public synchronized void removeClient(int nodeID) {
 		mPlayerClientManager.removeClient(nodeID);
 		mPlayerClientManager.removePlayer(nodeID);
+		mPlayerServerManager.removeClient(nodeID);
+		mPlayerServerManager.removePlayer(nodeID);
+		
+		
 
 	}
 
@@ -464,7 +468,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	}
 
-
 	public void broadcastCRT() {
 		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
 	}
@@ -472,12 +475,21 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public boolean getReply() {
 		return mPlayerServerManager.isAllCRTReplied();
 	}
-	
+
 	public void setIsRequested(boolean isRequested) {
 		this.isRequested = isRequested;
 	}
-	
+
 	public boolean isRequested() {
 		return this.isRequested;
+	}
+
+	public void updateGameTable() {
+	
+		mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
+	}
+	
+	public int getNumofNodes() {
+		return mPlayerServerManager.getNumNodes();
 	}
 }

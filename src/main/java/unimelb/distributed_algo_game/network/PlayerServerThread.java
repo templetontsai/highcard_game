@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -403,8 +404,14 @@ public class PlayerServerThread extends Thread {
 			sendMessage(mMessage);
 
 			break;
+		case BCT_UPT:
+			//playerIDList = (List<Integer>) mBodyMessage.getMessage();
+
+			//mMainGameLoginClientPanel.updateGameTable(playerIDList);
+			break;
 
 		default:
+			
 			System.out.println("Uknown Message Type");
 
 		}

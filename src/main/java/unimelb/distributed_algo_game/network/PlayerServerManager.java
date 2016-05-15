@@ -82,12 +82,17 @@ public class PlayerServerManager {
 	 */
 	public synchronized void removeClient(int clientThread) {
 		playerClientServerList.remove(clientThread);
+		System.out.println( playerClientServerList.size() + "sss");
 	}
 
 	public synchronized void removePlayer(int nodeID) {
 		playerList.remove(nodeID);
 	}
 
+	public int getNumNodes() {
+		
+		return playerClientServerList.size();
+	}
 	/**
 	 * Notify all clients.
 	 */
@@ -257,11 +262,11 @@ public class PlayerServerManager {
 			for (Map.Entry<Integer, PlayerServerThread> entry : playerClientServerList.entrySet()) {
 				this.isReplied = entry.getValue().getReply();
 			}
-			System.out.println(this.isReplied);
+			
 
 		} else {
 			
-			this.isReplied =  false;
+			this.isReplied =  true;
 		}
 		
 		return this.isReplied;

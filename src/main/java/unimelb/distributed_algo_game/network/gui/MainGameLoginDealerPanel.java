@@ -25,11 +25,10 @@ public class MainGameLoginDealerPanel extends JPanel {
 	private JTextArea textArea = null;
 	private int nodeID = -1;
 
-
 	private JButton btnStart = null;
 	private MainGameLoginDealerPanel self = null;
 	private MainGameFrameGUI mMainGameFrameGUI = null;
-	
+
 	private StartButtonActionListerner mStartButtonActionListerner = null;
 	private Card c = null;
 	private Player p = null;
@@ -61,31 +60,22 @@ public class MainGameLoginDealerPanel extends JPanel {
 		lblNewLabel_1.setBounds(12, 81, 123, 15);
 		add(lblNewLabel_1);
 
-
-		
 		mStartButtonActionListerner = new StartButtonActionListerner();
-		
-		
+
 		btnStart = new JButton("Start");
 		btnStart.addActionListener(new StartButtonActionListerner());
-		
+
 		btnStart.setBounds(18, 185, 117, 25);
 		add(btnStart);
-
-	
-	
-
 
 		textArea = new JTextArea();
 		textArea.setBounds(304, 96, 122, 143);
 		add(textArea);
 
-
 		JLabel lblPlayerList = new JLabel("Player List");
 		lblPlayerList.setBounds(304, 81, 122, 15);
 		add(lblPlayerList);
-		
-		
+
 		mPlayerPanelList = new ArrayList<CardPanel>();
 	}
 
@@ -94,11 +84,12 @@ public class MainGameLoginDealerPanel extends JPanel {
 			// TODO get ip and port from textfield and set init server
 			// socket
 
-			String ipAddress = ipTextField.getText();
-			String port = portTextField.getText();
-/*
-			String ipAddress = "localhost";
-			String port = "5000";*/
+			//String ipAddress = ipTextField.getText();
+			//String port = portTextField.getText();
+			
+			  String ipAddress = "localhost"; 
+			  String port = "5000";
+			 
 			if (!ipAddress.equals("") && !port.equals("")) {
 				System.out.println(ipAddress + "-" + port);
 				System.out.println("Dealer/Node0 Starts the game");
@@ -118,8 +109,6 @@ public class MainGameLoginDealerPanel extends JPanel {
 		}
 	}
 
-
-
 	public synchronized void updatePlayerList(int nodeID) {
 		textArea.append("Node" + nodeID + " is joined\n");
 	}
@@ -127,33 +116,35 @@ public class MainGameLoginDealerPanel extends JPanel {
 	public void setNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}
-	
-	public void showGameTable(boolean isEnable,  List<Integer> mPlayerIDList) {
-		
+
+	public void showGameTable(boolean isEnable, List<Integer> mPlayerIDList) {
+
 		for (Integer i : mPlayerIDList) {
 			mPlayerPanelList.add(new CardPanel(i));
 		}
-		
+
 		mMainGameFrameGUI.getContentPane().removeAll();
-		gameTable = new GameTablePanel(mPlayerPanelList, true, p);	
+		gameTable = new GameTablePanel(mPlayerIDList, true, p);
 		mMainGameFrameGUI.setContentPane(gameTable);
 		mMainGameFrameGUI.revalidate();
 		System.out.println("Dealer Ready");
 	}
 
-	
-
 	public void updateCard(Card c, int nodeID) {
 		gameTable.updateCard(c, nodeID);
 	}
-	
+
 	public void declareWinner(int nodeID) {
-		if(nodeID == this.nodeID)
+		if (nodeID == this.nodeID)
 			JOptionPane.showMessageDialog(null, "You win");
-		else if(nodeID != -1)
+		else if (nodeID != -1)
 			JOptionPane.showMessageDialog(null, "node" + nodeID + " has won");
 		gameTable.newRound();
-		
+
+	}
+
+	public void updateGameTable(List<Integer> mPlayerIDList) {
+		gameTable.updateGameTable(mPlayerIDList);
 	}
 
 }

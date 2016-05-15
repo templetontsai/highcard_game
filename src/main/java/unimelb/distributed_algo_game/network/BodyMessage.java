@@ -33,29 +33,12 @@ public class BodyMessage implements Serializable {
 		}
 	}
 
-	public enum BCTCode {
-		BCT_DRAW_MSG(0), BCT_CLIENT_LST(1);
-		/** The code. */
-		private int code;
-
-		private BCTCode(int c) {
-			code = c;
-		}
-
-		/**
-		 * Gets the code.
-		 *
-		 * @return the code
-		 */
-		public int getCode() {
-			return code;
-		}
-	}
+	
 
 	public enum MessageType {
-		CON(0), ACK(1), BCT_RST(2), BCT_LST(3), BCT_RDY(4), BCT_CRD(5), BCT_CRT(6),
+		CON(0), ACK(1), BCT_RST(2), BCT_LST(3), BCT_UPT(4), BCT_RDY(5), BCT_CRD(6), BCT_CRT(7),
 
-		CRD(7), DSC(8), BCT(9), LST(10), ELE(11), COD(12);
+		CRD(8), DSC(9), BCT(10), LST(11), ELE(12), COD(13);
 
 		/** The code. */
 		private int code;

@@ -177,15 +177,12 @@ public class PlayerClientThread extends Thread {
 
 			synchronized (mLock) {
 
-				// mGameServer.removeClient(clientNodeID);
+				mGameServer.removeClient(clientNodeID);
+				mGameServer.updateGameTable();
 				isRunning = false;
 				System.out.println("Node:" + clientNodeID + " has left the game");
 				timer.cancel();
-				/*
-				 * if(!mGameServer.getIsLeader()){ timer.cancel();
-				 * //System.out.println("It's morphin time!");
-				 * //startElection(); }
-				 */
+			
 
 			}
 		}
@@ -315,6 +312,7 @@ public class PlayerClientThread extends Thread {
 			sendMessage(mMessage);
 			break;
 		default:
+			
 			System.out.println("Uknown Message Type");
 
 		}

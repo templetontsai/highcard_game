@@ -32,8 +32,6 @@ public class MainGameLoginClientPanel extends JPanel {
 	private List<CardPanel> mPlayerPanelList;
 	private GameTablePanel gameTable;
 
-	
-
 	private int nodeID;
 
 	public MainGameLoginClientPanel(MainGameFrameGUI mainGameFrameGUI) {
@@ -49,7 +47,7 @@ public class MainGameLoginClientPanel extends JPanel {
 		ipTextField.setBounds(153, 83, 114, 19);
 		add(ipTextField);
 		ipTextField.setColumns(10);
-		
+
 		portTextField = new JTextField();
 		portTextField.setBounds(153, 113, 114, 19);
 		add(portTextField);
@@ -86,14 +84,13 @@ public class MainGameLoginClientPanel extends JPanel {
 		add(serverPortLabel);
 
 		mStartButtonActionListerner = new StartButtonActionListerner();
-		
+
 		btnStart = new JButton("Start");
 		btnStart.addActionListener(mStartButtonActionListerner);
 		btnStart.setBounds(12, 225, 117, 25);
 		add(btnStart);
 		btnStart.setVisible(true);
-		
-		
+
 		mPlayerPanelList = new ArrayList<CardPanel>();
 
 	}
@@ -102,22 +99,23 @@ public class MainGameLoginClientPanel extends JPanel {
 		public void actionPerformed(ActionEvent action) {
 			// TODO get ip and port from textfield and set init server
 			// socket
-			
-		String ipAddress = ipTextField.getText();
+/*
+			String ipAddress = ipTextField.getText();
 			String port = portTextField.getText();
 			String serverIPAddress = serverIPTextField.getText();
-			String serverPort = serverPortTextField.getText();
-			/*String ipAddress = "localhost";
-			String port = "500" + nodeID;
-			String serverIPAddress = "localhost";
-			String serverPort = "5000";*/
+			String serverPort = serverPortTextField.getText();*/
 			
+			  String ipAddress = "localhost"; String port = "500" + nodeID;
+			  String serverIPAddress = "localhost"; String serverPort = "5000";
+			 
+
 			if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
 				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
 				String gameServerInfo[] = { "0", serverIPAddress, serverPort };
 				System.out.println("Client" + nodeID + " sending connection to dealer");
 
-				p = new SlavePlayer("Slave" + nodeID, new GamePlayerInfo(gamePlayerInfo), new GamePlayerInfo(gameServerInfo), self);
+				p = new SlavePlayer("Slave" + nodeID, new GamePlayerInfo(gamePlayerInfo),
+						new GamePlayerInfo(gameServerInfo), self);
 				p.play();
 				btnStart.setEnabled(false);
 
@@ -126,37 +124,40 @@ public class MainGameLoginClientPanel extends JPanel {
 
 	}
 
-
 	public void setClientNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}
 
 	public void showGameTable(boolean isEnable, List<Integer> mPlayerIDList) {
-		
+
 		for (Integer i : mPlayerIDList) {
 			mPlayerPanelList.add(new CardPanel(i));
 		}
-		
+
 		mMainGameFrameGUI.getContentPane().removeAll();
-		gameTable = new GameTablePanel(mPlayerPanelList, false, p);
+		gameTable = new GameTablePanel(mPlayerIDList, false, p);
 		mMainGameFrameGUI.setContentPane(gameTable);
 		mMainGameFrameGUI.revalidate();
 
 		System.out.println("Player Ready");
 	}
-	
+
 	public void updateCard(Card c, int nodeID) {
 		gameTable.updateCard(c, nodeID);
 	}
-	
+
 	public void declareWinner(int nodeID) {
-		if(nodeID == this.nodeID)
+		if (nodeID == this.nodeID)
 			JOptionPane.showMessageDialog(null, "You win");
-		else if(nodeID != -1)
+		else if (nodeID != -1)
 			JOptionPane.showMessageDialog(null, "node" + nodeID + " has won");
 		gameTable.newRound();
-		
-		
+
+	}
+
+	public void updateGameTable(List<Integer> mPlayerIDList) {
+		//gameTable.setDealer(true);
+		gameTable.updateGameTable(mPlayerIDList);
 	}
 
 }

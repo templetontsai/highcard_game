@@ -105,6 +105,7 @@ public final class PlayerClientManager {
 				toRemove = i;
 		}
 		playerIDList.remove(toRemove);
+		notifyAllClients(playerIDList, ClientConnectionState.CONNECTED, MessageType.BCT_UPT);
 	}
 
 	/**

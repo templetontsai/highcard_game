@@ -102,17 +102,23 @@ public class SlavePlayer extends Player {
 
 	public void requestCardFromDealer() {
 		//TODO implement recart, do a blocking call 
-		gameServer.setIsRequested(true);
-		gameServer.broadcastCRT();
-		System.out.println("requestCardFromDealer");
-		while(!gameServer.getReply())
-			;
-		gameClient.requestCard();
-		gameServer.setIsRequested(false);
+		if(gameServer.getNumofNodes() != 0) {
+			gameServer.setIsRequested(true);
+			gameServer.broadcastCRT();
+			System.out.println("requestCardFromDealer");
+			while(!gameServer.getReply())
+				;
+			gameClient.requestCard();
+			gameServer.setIsRequested(false);
+		} else {
+			gameClient.requestCard();
+		}
+		
 	}
 
 	public void disconnectClient() {
 		gameClient.disconnect();
 	}
+	
 
 }
