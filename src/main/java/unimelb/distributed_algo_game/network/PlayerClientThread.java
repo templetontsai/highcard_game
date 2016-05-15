@@ -154,7 +154,9 @@ public class PlayerClientThread extends Thread {
 			mSocket.close();
 			if (timer != null) {
 				timer.cancel();
-				startElection();
+				//Only carry out an election if we lose the dealer of the game
+				if(mGameClientInfo.getNodeID()==mGameServer.getPlayer().getGameServerInfo().getNodeID())
+				   startElection();
 			}
 
 			System.out.println("Client closed");
@@ -181,11 +183,6 @@ public class PlayerClientThread extends Thread {
 				isRunning = false;
 				System.out.println("Node:" + clientNodeID + " has left the game");
 				timer.cancel();
-				/*
-				 * if(!mGameServer.getIsLeader()){ timer.cancel();
-				 * //System.out.println("It's morphin time!");
-				 * //startElection(); }
-				 */
 
 			}
 		}
@@ -363,15 +360,14 @@ public class PlayerClientThread extends Thread {
 
 			sendMessageToNext(mMessage);
 		} else if (messageNodeID < this.mGameDealerInfo.getNodeID()) {
-			// Replace the node ID in the message with own
-			// System.out.println("I will become the new dealer
-			// "+this.mGameDealerInfo.getNodeID());
-			// mBodyMessage.setMessage(mGameDealerInfo.getStringNodeID());
+			// Don't forward to reduce number of messages
 
 		} else if (messageNodeID == this.mGameDealerInfo.getNodeID()) {
 			// This means i have received my election message and I am the new
 			// coordinator
 			mGameServer.setPlayerDealer();
+			mGameServer.disconnect();
+			mGameServer.startServer();
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameDealerInfo);
 			System.out.println("Hell ya I'm in charge now ");
@@ -399,7 +395,7 @@ public class PlayerClientThread extends Thread {
 			// Update the new server details on the game client
 			mGameServer.setGameServerLeader(newDealer);
 			mGameServer.updateServerDetails();
-			// mGameServer.reconnectClient();
+		    mGameServer.reconnectClient();
 
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;

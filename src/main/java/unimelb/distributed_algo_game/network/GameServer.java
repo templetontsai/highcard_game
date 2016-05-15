@@ -219,6 +219,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 					// Listen for messages from clients and add them to the
 					// thread pool
+					System.out.println("Waiting for new server clients");
 					mSocket = mServerSocket.accept();
 					System.out.println("the server connected");
 					PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
@@ -232,7 +233,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 				}
-				System.out.println("Connection closed");
+				System.out.println("Slave Connection closed");
 				// Close server port once the server is no longer running
 				mServerSocket.close();
 
@@ -265,6 +266,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	public synchronized void disconnect() {
 		mConnectionState = ServerConnectionState.DISCONNECTED;
+		try{
+		  mServerSocket.close();
+		}catch (IOException ioe) {
+			ioe.printStackTrace();
+			mServerSocket = null;
+		}
+		System.out.println("Server state is "+mConnectionState);
 	}
 
 	/**
@@ -479,5 +487,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 	
 	public boolean isRequested() {
 		return this.isRequested;
+	}
+	
+	public void startServer(){
+		mConnectionState = ServerConnectionState.DISCONNECTED;
+		((SlavePlayer) mPlayer).restartServer();
 	}
 }

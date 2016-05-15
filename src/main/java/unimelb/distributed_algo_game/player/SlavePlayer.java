@@ -90,6 +90,14 @@ public class SlavePlayer extends Player {
 		gameServer.setGameClient(gameClient);
 		gameClient.play();
 	}
+	
+	public void restartServer(){
+		GameServer newGameServer = GameServer.getInstance();
+		gameServer.setPlayer(this);
+		Thread gameServerThread1 = new Thread(gameServer);
+		gameServer.connect();
+		gameServerThread1.start();
+	}
 
 	/**
 	 * Runs an update
