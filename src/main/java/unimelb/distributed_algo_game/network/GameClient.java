@@ -507,11 +507,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public void reConnect(){
 		mObjectOutputStream = null;
 		mObjectInputStream = null;
+		System.out.println("Attempting to connect to "+getServerDetails());
 		connect();
+		run();
+		play();
 	}
 
 	public void setPanel(MainGameLoginClientPanel mainGameLoginClientPanel) {
 		this.mMainGameLoginClientPanel = mainGameLoginClientPanel;
+	}
+	
+	public MainGameLoginClientPanel getLoginPanel(){
+		return mMainGameLoginClientPanel;
 	}
 
 	public void requestCard() {

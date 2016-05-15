@@ -330,11 +330,11 @@ public class PlayerClientThread extends Thread {
 			String[] clientDetails = clientList[i].split(":");
 			//Only maintain list of clients not yourself
 			if(!clientDetails[0].equals(Integer.toString(mGameDealerInfo.getNodeID()))){
-			    System.out.println(clientDetails[0]+"-"+mGameDealerInfo.getNodeID());
+			    //System.out.println(clientDetails[0]+"-"+mGameDealerInfo.getNodeID());
 				gameClients.add(clientList[i]);
 			}
 		}
-		//System.out.println("Total added clients: "+gameClients.size());
+		System.out.println("Total added clients: "+gameClients.size());
 		mGameServer.updateServerList(gameClients);
 	}
 	
@@ -348,10 +348,16 @@ public class PlayerClientThread extends Thread {
     	//Send message to the next node without changing it
 		if(messageNodeID > this.mGameDealerInfo.getNodeID()){
 			//System.out.println(mGameDealerInfo.getNodeID()+" cannot be the new dealer");
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessageToNext(mMessage);
 		}else if(messageNodeID < this.mGameDealerInfo.getNodeID()){
 			//Replace the node ID in the message with own
 			//System.out.println("I will become the new dealer "+this.mGameDealerInfo.getNodeID());
-			mBodyMessage.setMessage(mGameDealerInfo.getStringNodeID());
+			//mBodyMessage.setMessage(mGameDealerInfo.getStringNodeID());
 
 		}else if(messageNodeID == this.mGameDealerInfo.getNodeID()){
 			//This means i have received my election message and I am the new coordinator
@@ -359,14 +365,16 @@ public class PlayerClientThread extends Thread {
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameDealerInfo);
 			System.out.println("Hell ya I'm in charge now ");
+			
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessageToNext(mMessage);
 		}
 		
-		JSONObject mMessage = new JSONObject();
-		BodyMessage bodyMessage = mBodyMessage;
-		mMessage.put("header", ClientConnectionState.CONNECTED);
-		mMessage.put("body", bodyMessage);
-
-		sendMessageToNext(mMessage);
+		
 		
 	}
     
@@ -382,6 +390,7 @@ public class PlayerClientThread extends Thread {
 			//Update the new server details on the game client
 			mGameServer.setGameServerLeader(newDealer);
 			mGameServer.updateServerDetails();
+			mGameServer.reconnectClient();
 			
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
@@ -389,6 +398,8 @@ public class PlayerClientThread extends Thread {
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 			sendMessageToNext(mMessage);
+		}else{
+			mGameServer.restart();
 		}
 	}
     

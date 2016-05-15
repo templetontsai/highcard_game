@@ -30,8 +30,6 @@ public class SlavePlayer extends Player {
 	private Thread gameServerThread = null;
 
 	private JPanel mPanel = null;
-	
-	private boolean dealerReset = false;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -77,6 +75,20 @@ public class SlavePlayer extends Player {
 		gameServer.setGameClient(gameClient);
 		gameClient.play();
 
+	}
+	
+	public void rePlay(){
+		gameClient.setPlayer(this);
+		gameClient.setPanel((MainGameLoginClientPanel) mPanel);
+		gameClient.setServerDetails();
+		gameClientThread = new Thread(gameClient);
+		gameClient.connect();
+
+		gameClientThread.setName("Slave Player Socket Thread");
+		gameClientThread.start();
+
+		gameServer.setGameClient(gameClient);
+		gameClient.play();
 	}
 
 	/**

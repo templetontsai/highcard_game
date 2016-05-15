@@ -14,7 +14,10 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
 import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
+import unimelb.distributed_algo_game.player.DealerPlayer;
+import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
@@ -181,10 +184,14 @@ public final class GameServer implements Runnable, NetworkInterface {
 						System.out.println("Game Start");
 						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
 						broadcastPlayerList();
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Adding error handling
+							e.printStackTrace();
+						}
 						broadcastClientList();
 						broadcastGameReadyToClients(new Boolean(true));
-						
-
 					}
 
 				}
@@ -285,7 +292,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public void broadcastClientList() {
 		mPlayerServerManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
-
 	}
 
 	/**
@@ -441,7 +447,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * This reconnects a client to the server
 	 */
 	public void reconnectClient() {
-		mGameClient.reConnect();
+		((SlavePlayer) mPlayer).rePlay();
 	}
 
 	public synchronized void updateCard(Card c, int nodeID) {
@@ -455,5 +461,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 			mMainGameLoginDealerPanel.declareWinner(mPlayerClientManager.checkWinner());
 		}
 
+	}
+	
+	public void restart(){
+		run();
 	}
 }
