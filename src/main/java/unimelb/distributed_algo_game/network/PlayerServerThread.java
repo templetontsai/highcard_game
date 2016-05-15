@@ -88,6 +88,7 @@ public class PlayerServerThread extends Thread{
 	 */
 	public void connect(){
 		try{
+		
 		    mSocket = new Socket(mGameClientInfo.getIPAddress(), Integer.parseInt(mGameClientInfo.getPort()));
 		    System.out.println("Server details: "+mGameClientInfo.getIPAddress()+" "+mGameClientInfo.getPort()+"-"+mGameServer);
 		    this.clientConnectionState = ClientConnectionState.INIT;
@@ -114,7 +115,7 @@ public class PlayerServerThread extends Thread{
 		}
 		
 		timer = new Timer();
-		timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);	
+		timer.scheduleAtFixedRate(new StillAliveTimerTask(), 10 * 1000, NetworkInterface.STILL_ALIVE_TIME_OUT);	
 		
 		JSONObject m;
 		BodyMessage bodyMessage;
@@ -192,6 +193,7 @@ public class PlayerServerThread extends Thread{
 	 */
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
+		
 		BodyMessage mBodyMessage = new BodyMessage(mGameServerInfo, MessageType.ACK,
 				ACKCode.STILL_ALIVE);
 		mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -235,11 +237,11 @@ public class PlayerServerThread extends Thread{
 
 		try {
 
-			if (mObjectOutputStream != null) {
+			if (mObjectOutputStream != null && mGameSendDataObject != null) {
 
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
-				mObjectOutputStream.reset();
+				//mObjectOutputStream.reset();
 
 			} else {
 				System.out.println("Server output stream is null");
@@ -279,7 +281,7 @@ public class PlayerServerThread extends Thread{
 			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in receiveMessage server, node: " + this.mGameServerInfo.getNodeID());
 			isRunning = false;
-			//ioe.printStackTrace();
+			ioe.printStackTrace();
 		}
 
 		return message;
