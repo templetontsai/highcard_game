@@ -67,6 +67,9 @@ public class PlayerServerThread extends Thread{
 	/** The timer to send periodic still alive messages to the client server */
 	private Timer timer = null;
 	
+	/** The participant in election boolean */
+	private boolean participant = false;
+	
 	/**
 	 * Constructor for this thread
 	 * @param mGameServer
@@ -384,22 +387,29 @@ public class PlayerServerThread extends Thread{
 		}else if(messageNodeID < this.mGameServerInfo.getNodeID()){
 			//Replace the node ID in the message with own
 			mBodyMessage.setMessage(mGameServerInfo.getStringNodeID());
-           // System.out.println("I will become the next dealer "+mGameServerInfo.getStringNodeID());
-			
+           // System.out.println("I will become the next dealer "+mGameServerInfo.getStringNodeID());	
 		}else if(messageNodeID == this.mGameServerInfo.getNodeID()){
 			//This means i have received my election message and I am the new coordinator
 		    mGameServer.setPlayerDealer();
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameServerInfo);
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
 			System.out.println("Hell ya I'm in charge now ");
+			sendMessage(mMessage);
 		}
 		
-		JSONObject mMessage = new JSONObject();
-		BodyMessage bodyMessage = mBodyMessage;
-		mMessage.put("header", ClientConnectionState.CONNECTED);
-		mMessage.put("body", bodyMessage);
+		if(!participant){
+		   JSONObject mMessage = new JSONObject();
+		   BodyMessage bodyMessage = mBodyMessage;
+		   mMessage.put("header", ClientConnectionState.CONNECTED);
+		   mMessage.put("body", bodyMessage);
 
-		sendMessage(mMessage);
+		   sendMessage(mMessage);
+		   participant = true;
+		}
 	}
     
     /**
@@ -423,6 +433,7 @@ public class PlayerServerThread extends Thread{
 			mMessage.put("body", bodyMessage);
 			sendMessage(mMessage);
 		}
+		participant = false;
 	}
 	
     /**

@@ -70,6 +70,8 @@ public class PlayerClientThread extends Thread {
 
 	private Card c;
 
+	/** The participant in election boolean */
+	private boolean participant = false;
 
 	/**
 	 * Instantiates a new player client thread.
@@ -363,14 +365,22 @@ public class PlayerClientThread extends Thread {
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameDealerInfo);
 			System.out.println("Hell ya I'm in charge now ");
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+			sendMessageToNext(mMessage);
 		}
 		
-		JSONObject mMessage = new JSONObject();
-		BodyMessage bodyMessage = mBodyMessage;
-		mMessage.put("header", ClientConnectionState.CONNECTED);
-		mMessage.put("body", bodyMessage);
+		if(!participant){
+		   JSONObject mMessage = new JSONObject();
+		   BodyMessage bodyMessage = mBodyMessage;
+		   mMessage.put("header", ClientConnectionState.CONNECTED);
+		   mMessage.put("body", bodyMessage);
 
-		sendMessageToNext(mMessage);
+		   sendMessageToNext(mMessage);
+		   participant = true;
+		}
 		
 	}
     
@@ -394,6 +404,7 @@ public class PlayerClientThread extends Thread {
 			mMessage.put("body", bodyMessage);
 			sendMessageToNext(mMessage);
 		}
+		participant = false;
 	}
     
 	/**

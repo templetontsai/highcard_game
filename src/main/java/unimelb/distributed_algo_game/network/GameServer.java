@@ -111,6 +111,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 			try {
 				runLeaderState();
+				System.out.println("Running leader state");
 			} catch (IOException ioe) {
 				// Display the details of the exception error
 				ioe.printStackTrace();
@@ -123,6 +124,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 			// This runs if the player is a client
 		} else {
 			try {
+				System.out.println("Running slave state");
 				runSlaveState();
 			} catch (IOException ioe) {
 				// Display the details of the exception error
@@ -191,10 +193,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 						broadcastGameReadyToClients(new Boolean(true));
 
 					}
-
-
-					// Every time a new player is added, send the current list
-					// to all the players
 
 				}
 				// Close server port once the server is no longer running
@@ -473,5 +471,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void dealerDrawnCard() {
 		mMainGameLoginDealerPanel.updateCard(mPlayerClientManager.dealerDrawnCard(), nodeID);
 		mPlayerClientManager.checkPlayerStatus();
+	}
+	
+	public void clientPlay(){
+		mGameClient.play();
 	}
 }

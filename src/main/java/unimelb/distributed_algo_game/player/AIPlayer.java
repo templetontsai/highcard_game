@@ -30,6 +30,8 @@ public class AIPlayer extends Player {
 	private Thread gameServerThread = null;
 
 	private JPanel mPanel = null;
+	
+	private boolean dealerReset = false;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -81,10 +83,17 @@ public class AIPlayer extends Player {
 				// System.out.println("dealer/node0 is playing game");
 				// Card card = this.getCard(1);
 				// gameServer.sendCard(card, 1);
+				//System.out.println("I am the new dealer");
+				if(!dealerReset){
+					dealerReset = true;
+					
+					gameServerThread = new Thread(gameServer);
+					gameServerThread.start();
+				}
 			} else {
 				// TODO do client stuff here, checking connection, updating
 				// stuff
-				// System.out.println("client is playing game");
+				//System.out.println("client is playing game");
 				gameClient.play();
 				try {
 					Thread.sleep(1000);
