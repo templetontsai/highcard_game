@@ -36,6 +36,8 @@ public class PlayerServerManager {
 	private Map<Integer, String[]> serverList = null;
 	
 	private GamePlayerInfo myNeighbor = null;
+	
+	private boolean isReplied = false;
 
 	/**
 	 * Instantiates a new player client manager.
@@ -149,7 +151,6 @@ public class PlayerServerManager {
 				this.isLockRound = entry.getValue().getClientStatus();
 			}
 
-			
 		} else {
 			
 			this.isLockRound =  false;
@@ -246,5 +247,26 @@ public class PlayerServerManager {
 			}
 		}
 	}
+
+	
+	public synchronized boolean isAllCRTReplied() {
+		if(playerClientServerList.size() >= 1) {
+			for (Map.Entry<Integer, PlayerServerThread> entry : playerClientServerList.entrySet()) {
+				this.isReplied = entry.getValue().getClientStatus();
+			}
+
+		} else {
+			
+			this.isReplied =  false;
+		}
+		
+		return this.isReplied;
+		
+	}
+	
+
+	
+
+
 
 }

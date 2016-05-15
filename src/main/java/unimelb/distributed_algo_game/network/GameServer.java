@@ -390,7 +390,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 			t.start();
 
 		} else {
-			System.out.println("No neighbor defined");
+
+
+			System.out.println("Could not connect to neighbor");
+
 		}
 	}
 
@@ -466,5 +469,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 	
 	public void restart(){
 		run();
+	}
+	
+	public void broadcastCRT() {
+		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
+	}
+	
+	public boolean getReply() {
+		return mPlayerServerManager.isAllCRTReplied();
 	}
 }
