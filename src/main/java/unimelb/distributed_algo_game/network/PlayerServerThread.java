@@ -143,7 +143,6 @@ public class PlayerServerThread extends Thread {
 
 				// Process the message based on the connection state
 				case INIT:
-				case ACK:
 				case CONNECTING:
 				case CONNECTED:
 					// System.out.println("connected from client");

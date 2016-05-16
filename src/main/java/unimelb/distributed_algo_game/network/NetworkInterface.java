@@ -18,7 +18,7 @@ public interface NetworkInterface {
 	public static final String GameServerName = "HighCard Game";
 	//ms
 	public static final int STILL_ALIVE_TIME_OUT = 1000;
-	public static final int STILL_ALIVE_ACK_TIME_OUT = 5000;
+	public static final int STILL_ALIVE_ACK_TIME_OUT = 10 * 1000;
 	
 
 	/**
@@ -53,8 +53,7 @@ public interface NetworkInterface {
 		DISCONNECTING,
 		/** The disconnect. */
 		DISCONNECTED,
-		/** Ack */
-		ACK
+
 	};
 
 

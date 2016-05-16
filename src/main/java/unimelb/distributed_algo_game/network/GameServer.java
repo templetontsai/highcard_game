@@ -64,6 +64,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private GameClient mGameClient = null;
 
 	private boolean isRequested = false;
+	private long requestedTimestamp = -1;
 
 	/**
 	 * Instantiates a new game server.
@@ -171,24 +172,12 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
-					
-
-					// mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
-					// mPlayerServerManager.addClient(t.getClientNodeID(), t2);
-
-					// t2.setGameClientInfo(t.getClientGamePlayerInfo());
-					// t2.setName("GameServer Client Socket Thread");
-					// t2.connect();
-					// t2.start();
-
 
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 					broadcastNodeList();
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
 
 						System.out.println("Game Start");
-
-						
 
 						try {
 							Thread.sleep(2000);
@@ -198,7 +187,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 						}
 
 						broadcastGameReadyToNodes(new Boolean(true));
-						
 
 						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
 					}
@@ -228,7 +216,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// thread pool
 					System.out.println("Waiting for new server clients");
 					mSocket = mServerSocket.accept();
-					System.out.println("the server connected");
+					System.out.println("a client connected in slave state");
 					PlayerClientThread t = new PlayerClientThread(mSocket, this, mPlayer.getGamePlayerInfo());
 
 					t.setName("GameServer Socket Thread");
@@ -338,7 +326,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public synchronized void removeNode(int nodeID) {
 		mPlayerClientManager.removeNode(nodeID);
-		// mPlayerClientManager.removePlayer(nodeID);
+
 		mPlayerServerManager.removeClient(nodeID);
 		mPlayerServerManager.removePlayer(nodeID);
 
@@ -474,7 +462,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public void dealerDrawnCard() {
-		
+
 		Card c = mPlayerClientManager.dealerDrawnCard();
 		if (c != null) {
 			mMainGameLoginDealerPanel.updateCard(c, nodeID);
@@ -487,8 +475,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return mPlayerServerManager.isAllCRTReplied();
 	}
 
-	public void setIsRequested(boolean isRequested) {
+	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
 		this.isRequested = isRequested;
+		this.requestedTimestamp = requestedTimestamp;
+	}
+
+	public long getRequestedTimestamp() {
+		return this.requestedTimestamp;
 	}
 
 	public boolean isRequested() {
@@ -512,26 +505,25 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mConnectionState = ServerConnectionState.CONNECTED;
 		DealerPlayer p = new DealerPlayer("Dealer", mPlayer.getGamePlayerInfo(), mMainGameLoginDealerPanel);
 
-
 		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game", p.getGamePlayerInfo().getNodeID());
 		MainGamePanel mainPanel = new MainGamePanel(mainGui, true);
 		((DealerPlayer) mPlayer).restartServer(mainPanel);
-/*
-		p.setDealer(true);
-		this.mPlayer = p;
-		System.out.println("The player is "+p.isDealer()+"-"+getIsLeader());
-		((DealerPlayer)mPlayer).restartServer();
-		
-		if(mMainGameLoginDealerPanel!=null)
-		   mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
-		
-		broadcastPlayerList();
-		broadcastClientList();
-*/
+		/*
+		 * p.setDealer(true); this.mPlayer = p; System.out.println(
+		 * "The player is "+p.isDealer()+"-"+getIsLeader());
+		 * ((DealerPlayer)mPlayer).restartServer();
+		 * 
+		 * if(mMainGameLoginDealerPanel!=null)
+		 * mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.
+		 * getPlayerIDList());
+		 * 
+		 * broadcastPlayerList(); broadcastClientList();
+		 */
 
 	}
 
 	public void resetGameStart(int num) {
 		this.GAME_START = num;
 	}
+
 }

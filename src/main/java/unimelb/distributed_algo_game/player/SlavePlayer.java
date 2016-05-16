@@ -6,8 +6,10 @@ package unimelb.distributed_algo_game.player;
 import javax.swing.JPanel;
 
 import unimelb.distributed_algo_game.network.GameClient;
+import unimelb.distributed_algo_game.network.GameClientSocketManager;
 import unimelb.distributed_algo_game.network.GameServer;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
+import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.state.GameState;
 
 // TODO: Auto-generated Javadoc
@@ -31,6 +33,8 @@ public class SlavePlayer extends Player {
 
 	private MainGamePanel mPanel = null;
 
+	private GameClientSocketManager mGameClientSocketManager = null;
+
 	/**
 	 * Public constructor that initializes a player object using name, id, game
 	 * state and score.
@@ -42,15 +46,17 @@ public class SlavePlayer extends Player {
 	 */
 	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, MainGamePanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
-		gameClient = GameClient.getInstance();
+		gameClient = new GameClient(this);
 		gameServer = GameServer.getInstance();
 		this.mPanel = panel;
+		mGameClientSocketManager = new GameClientSocketManager(this);
 	}
 
 	public SlavePlayer(GamePlayerInfo gamePlayerInfo) {
 		super("Slave", gamePlayerInfo, GameState.NONE);
-		gameClient = GameClient.getInstance();
+		gameClient = new GameClient(this);
 		gameServer = GameServer.getInstance();
+		mGameClientSocketManager = new GameClientSocketManager(this);
 	}
 
 	/**
@@ -63,24 +69,27 @@ public class SlavePlayer extends Player {
 		gameServer.connect();
 		gameServerThread.start();
 
-		gameClient.setPlayer(this);
 		gameClient.setPanel(mPanel);
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
 
-		gameClientThread.setName("Slave Player Socket Thread");
+		gameClientThread.setName("Slave Player Socket Thread0");
 		gameClientThread.start();
+		// Adding to the first gameclient and pass ref for manager later run
+		// this manager thread once it gets the list of nodes in the network
+		//mGameClientSocketManager.addSocketClient(gameClient);
+		gameClient.setClientSocketManager(mGameClientSocketManager);
+		// TODO check the need for this after refactoring
+		//gameServer.setGameClient(gameClient);
 
-		gameServer.setGameClient(gameClient);
 		gameClient.play();
 
 	}
-	
-	public void rePlay(){
+
+	public void rePlay() {
 		gameClient = null;
-		gameClient = GameClient.getInstance();
-		gameClient.setPlayer(this);
+		gameClient = new GameClient(this);
 		gameClient.setPanel(mPanel);
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
@@ -92,7 +101,6 @@ public class SlavePlayer extends Player {
 		gameServer.setGameClient(gameClient);
 		gameClient.play();
 	}
-	
 
 	/**
 	 * Runs an update
@@ -104,29 +112,30 @@ public class SlavePlayer extends Player {
 	}
 
 	public void requestCardFromDealer() {
-		//gameClient.requestCard();
-		
-		if(gameServer.getNumofNodes() >= 1) {
-			gameServer.setIsRequested(true);
-			gameServer.broadcastCRT();
+		// gameClient.requestCard();
+
+		if (gameServer.getNumofNodes() >= 1) {
+			long timestamp = Utils.getProcessTimestamp();
+			gameServer.setIsRequested(true, timestamp);
+			
+			mGameClientSocketManager.broadcastCRT(timestamp);
 			System.out.println("requestCardFromDealer");
-			while(!gameServer.getReply())
+			while (!mGameClientSocketManager.getReply())
 				;
 			gameClient.requestCard();
-			gameServer.setIsRequested(false);
+			gameServer.setIsRequested(false, Utils.getProcessTimestamp());
 		} else {
 			gameClient.requestCard();
 		}
-		
+
 	}
 
 	public void disconnectClient() {
 		gameClient.disconnect();
 	}
-	
+
 	public JPanel getPanel() {
 		return mPanel;
 	}
-	
 
 }

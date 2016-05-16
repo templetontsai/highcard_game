@@ -80,39 +80,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 	private MainGamePanel mMainGameLoginClientPanel = null;
 
 	private List<Integer> mNodeIDList = null;
-	
+
 	private List<GamePlayerInfo> mPlayerInfoList = null;
+
+	private GameClientSocketManager mGameClientSocketManager = null;
+	
+	private boolean isReplied = false;
 
 	/**
 	 * Instantiates a new game client.
 	 */
-	protected GameClient() {
-		mLock = new Object();
-		clientConnectionState = ClientConnectionState.DISCONNECTED;
-		mNodeIDList = new ArrayList<Integer>();
-		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
-
-	}
-
-	/**
-	 * Gets the single instance of GameClient.
-	 *
-	 * @return single instance of GameClient
-	 */
-	public static GameClient getInstance() {
-		if (instance == null) {
-			instance = new GameClient();
-		}
-		return instance;
-	}
-
-	/**
-	 * Sets the player.
-	 *
-	 * @param mPlayer
-	 *            the new player
-	 */
-	public void setPlayer(Player mPlayer) {
+	public GameClient(Player mPlayer) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
 
@@ -120,6 +98,27 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println("Player can't be null");
 			throw new NullPointerException();
 		}
+		mLock = new Object();
+		clientConnectionState = ClientConnectionState.DISCONNECTED;
+		mNodeIDList = new ArrayList<Integer>();
+		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
+
+	}
+
+	public GameClient(Player mPlayer, String serverIPAddress, int serverPort) {
+		if (mPlayer != null) {
+			this.mPlayer = mPlayer;
+
+		} else {
+			System.out.println("Player can't be null");
+			throw new NullPointerException();
+		}
+		mLock = new Object();
+		clientConnectionState = ClientConnectionState.DISCONNECTED;
+		mNodeIDList = new ArrayList<Integer>();
+		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
+		this.serverIPAddress = serverIPAddress;
+		this.serverPort = serverPort;
 
 	}
 
@@ -157,19 +156,20 @@ public final class GameClient implements Runnable, NetworkInterface {
 				 * Close socket connection and data streams once the main thread
 				 * is no longer running
 				 */
-				System.out.println("conection closing...");
+
 				mObjectOutputStream.close();
 				mObjectInputStream.close();
 				mSocket.close();
-				timer.cancel();
+				System.out.println("conection closed");
+
 			} catch (IOException ioe) {
 				// TODO Adding error handling
-				ioe.printStackTrace();
-				timer.cancel();
+				// ioe.printStackTrace();
+
 			} catch (InterruptedException e) {
 				// TODO Adding error handling
-				e.printStackTrace();
-				timer.cancel();
+				// e.printStackTrace();
+
 			}
 
 		}
@@ -184,8 +184,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 			ClientConnectionState connectionState = (ClientConnectionState) mMessage.get("header");
 			BodyMessage bodyMessage = (BodyMessage) mMessage.get("body");
 			switch (connectionState) {
-
-			case ACK:
 
 			case CONNECTING:
 			case CONNECTED:
@@ -216,8 +214,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			ACKCode ackCode = (ACKCode) mBodyMessage.getMessage();
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
-				System.out.println(
-						"ACK Message received from leader node" + mBodyMessage.getGamePlayerInfo().getNodeID());
+				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
 				// Start the still alive timer beacon to the leader
 				timer = new Timer();
@@ -227,7 +224,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			case CARD_RECEIVED:
 				break;
 			case STILL_ALIVE:
-				
+
+				break;
+			case CRT_RPY:
+				System.out.println("CRT is replied");
+				this.isReplied = true;
 				break;
 			default:
 				System.out.println("Uknown ACK code");
@@ -265,6 +266,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			break;
 		case BCT_RDY:
 			System.out.println("Game is ready to play, start request card from dealer");
+			// Init client socket manager here to connect to all the other nodes
+			// before the game starts
+			mGameClientSocketManager.setClientList(mPlayerInfoList);
+			this.mGameClientSocketManager.initGameClientsConnection();
+
 			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			if (isGameReady) {
 				mMainGameLoginClientPanel.showGameTable(true, mNodeIDList);
@@ -275,7 +281,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 			mPlayerInfoList = (List<GamePlayerInfo>) mBodyMessage.getMessage();
 			updateNodeList(mPlayerInfoList);
 			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
-			
 
 			break;
 		case BCT_UPT:
@@ -295,15 +300,15 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println(mBodyMessage.getMessage());
 			break;
 		default:
-			
+
 			System.out.println("Uknown Message Type");
 
 		}
 	}
-	
+
 	private synchronized void updateNodeList(List<GamePlayerInfo> mPlayerInfoList) {
 		mNodeIDList.clear();
-		for(GamePlayerInfo info: mPlayerInfoList) {
+		for (GamePlayerInfo info : mPlayerInfoList) {
 			mNodeIDList.add(info.getNodeID());
 		}
 	}
@@ -437,11 +442,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 				System.out.println("mObjectOutputStream is null");
 			}
 		} catch (IOException ioe) {
-			// TODO Adding Error Handling
-			isRunning = false;
-			System.out.println("Leader has gone haywire");
-			ioe.printStackTrace();
+
 			timer.cancel();
+			isRunning = false;	
+			System.out.println("Leader has gone haywire");
+			// ioe.printStackTrace();
+
 		}
 
 	}
@@ -467,13 +473,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 		} catch (IOException ioe) {
 			// Print the details of the exception error
 			isRunning = false;
-			try{
-			mSocket.close();
-			} catch (IOException ioe1) {
-				ioe1.printStackTrace();
-			}
 			System.out.println("Leader has gone haywire");
-			ioe.printStackTrace();
+			// ioe.printStackTrace();
 		}
 
 		return message;
@@ -553,7 +554,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	public void setPanel(MainGamePanel mainGameLoginClientPanel) {
-	
+
 		this.mMainGameLoginClientPanel = mainGameLoginClientPanel;
 	}
 
@@ -570,4 +571,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 		sendMessage(mMessage);
 	}
 
+	public void setClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
+		this.mGameClientSocketManager = mGameClientSocketManager;
+	}
+	public boolean getReply() {
+		return this.isReplied;
+	}
 }

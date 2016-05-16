@@ -47,7 +47,7 @@ public class DealerPlayer extends Player {
 	 */
 	public DealerPlayer(String name, GamePlayerInfo gamePlayerInfo, JPanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, new PlayerScore());
-		gameClient = GameClient.getInstance();
+		gameClient = new GameClient(this);
 		gameServer = GameServer.getInstance();
 		this.mMainGameLoginDealerPanel = panel;
 

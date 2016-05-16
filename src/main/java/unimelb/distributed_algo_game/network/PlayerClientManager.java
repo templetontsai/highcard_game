@@ -30,6 +30,7 @@ public final class PlayerClientManager {
 	private Map<Integer, Player> mLocalPlayerList = null;
 	private boolean isLockRound = false;
 
+
 	private static final int GAME_SIZE = 3;
 
 	/**
@@ -72,7 +73,9 @@ public final class PlayerClientManager {
 		mLocalPlayerList.remove(toRemove);
 		mPlayerClientList.remove(toRemove);
 		
+		
 	}
+	
 
 	/**
 	 * This sets the player acting as the server of this client manager
@@ -204,5 +207,7 @@ public final class PlayerClientManager {
 		System.out.println(mLocalPlayerList.size());
 		return playerIDList;
 	}
+	
+
 
 }
