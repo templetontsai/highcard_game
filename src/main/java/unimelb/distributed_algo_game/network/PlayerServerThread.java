@@ -283,7 +283,7 @@ public class PlayerServerThread extends Thread {
 			e.printStackTrace();
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
-			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
+			mGameServer.removeNode(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in receiveMessage server, node: " + this.mGameServerInfo.getNodeID());
 			isRunning = false;
 			// ioe.printStackTrace();

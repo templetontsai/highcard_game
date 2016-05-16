@@ -29,7 +29,7 @@ public class SlavePlayer extends Player {
 	/** The game server thread. */
 	private Thread gameServerThread = null;
 
-	private JPanel mPanel = null;
+	private MainGamePanel mPanel = null;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -40,7 +40,7 @@ public class SlavePlayer extends Player {
 	 * @param id
 	 *            the id
 	 */
-	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, JPanel panel) {
+	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, MainGamePanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
 		gameClient = GameClient.getInstance();
 		gameServer = GameServer.getInstance();
@@ -64,7 +64,7 @@ public class SlavePlayer extends Player {
 		gameServerThread.start();
 
 		gameClient.setPlayer(this);
-		gameClient.setPanel((MainGamePanel) mPanel);
+		gameClient.setPanel(mPanel);
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
@@ -79,7 +79,7 @@ public class SlavePlayer extends Player {
 	
 	public void rePlay(){
 		gameClient.setPlayer(this);
-		gameClient.setPanel((MainGamePanel) mPanel);
+		gameClient.setPanel(mPanel);
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();

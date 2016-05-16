@@ -9,14 +9,15 @@ public class GamePlayerInfo implements Serializable{
 	//0: nodeid, 1: ip address, 2: port
 	private String mGamePlayerInfo[] = {"-1", "", ""};
 	private long timeStamp = -1;
-	
+	private boolean isDealer = false;
 	
 	public GamePlayerInfo() {
 		
 	}
 	
-	public GamePlayerInfo(String mGamePlayerInfo[]) {
+	public GamePlayerInfo(String mGamePlayerInfo[], boolean isDealer) {
 		this.mGamePlayerInfo = mGamePlayerInfo;
+		this.isDealer = isDealer;
 	}
 	
 	public String getIPAddress() {
@@ -45,5 +46,12 @@ public class GamePlayerInfo implements Serializable{
 	
 	public long getTimeStamp() {
 		return this.timeStamp;
+	}
+	
+	public void setDealer() {
+		this.isDealer = isDealer;
+	}
+	public boolean isDealer() {
+		return this.isDealer;
 	}
 }

@@ -89,10 +89,7 @@ public class PlayerServerManager {
 		playerList.remove(nodeID);
 	}
 
-	public int getNumNodes() {
-		
-		return playerClientServerList.size();
-	}
+
 	/**
 	 * Notify all clients.
 	 */
@@ -223,11 +220,12 @@ public class PlayerServerManager {
 		int i = 0;
 		for (Map.Entry<Integer, String[]> t : serverList.entrySet()) {
 			//System.out.println(t.getValue()+"-"+t.getKey()+"-"+clientID);
+			//TODO fix this
 			if(i==0)
-				myNeighbor = new GamePlayerInfo(t.getValue());
+				myNeighbor = new GamePlayerInfo(t.getValue(), false);
 			
 			if(!nextFound && clientID < t.getKey()){
-				myNeighbor = new GamePlayerInfo(t.getValue());
+				myNeighbor = new GamePlayerInfo(t.getValue(), false);
 				nextFound = true;
 			}
 			i++;

@@ -152,11 +152,12 @@ public class PlayerClientThread extends Thread {
 			mObjectOutputStream.close();
 
 			mSocket.close();
+			
 			if (timer != null) {
 				timer.cancel();
 				//Only carry out an election if we lose the dealer of the game
-				if(mGameClientInfo.getNodeID()==mGameServer.getPlayer().getGameServerInfo().getNodeID())
-				   startElection();
+				//if(mGameClientInfo.getNodeID()==mGameServer.getPlayer().getGameServerInfo().getNodeID())
+				  // startElection();
 			}
 
 			System.out.println("Client closed");
@@ -179,7 +180,9 @@ public class PlayerClientThread extends Thread {
 
 			synchronized (mLock) {
 
-				mGameServer.removeClient(clientNodeID);
+				mGameServer.removeNode(clientNodeID);
+				mGameServer.broadcastUpdateNodeList();
+				
 				mGameServer.resetGameStart(mGameServer.getNumofNodes());
 				mGameServer.updateGameTable();
 				isRunning = false;
@@ -226,14 +229,12 @@ public class PlayerClientThread extends Thread {
 			// if the game is started already, don't respond to the message
 			if (!getClientStatus()) {
 				System.out.println("CON");
-				// clientNodeID = mBodyMessage.getNodeID();
+				
 				this.mGameClientInfo = mBodyMessage.getGamePlayerInfo();
 				clientNodeID = this.mGameClientInfo.getNodeID();
 
 				connectionState = ClientConnectionState.CONNECTED;
-				// Player specifies the card to
-				// mBodyMessage = new BodyMessage(this.nodeID, MessageType.ACK,
-				// ACKCode.NODE_ID_RECEIVED);
+	
 				mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
 				mMessage.put("header", connectionState);
 				mMessage.put("body", mBodyMessage);
@@ -255,7 +256,7 @@ public class PlayerClientThread extends Thread {
 			case CARD_RECEIVED:
 				Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
 				playerCard.put(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
-				mGameServer.broadcastCards(playerCard);
+				mGameServer.broadcastNodeCard(playerCard);
 				mGameServer.updateCard(c, mBodyMessage.getGamePlayerInfo().getNodeID());
 				isClientLockRound = true;
 
@@ -431,7 +432,7 @@ public class PlayerClientThread extends Thread {
 			}
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
-			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
+			mGameServer.removeNode(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in sendMessage, node: " + this.mGameDealerInfo.getNodeID());
 			isRunning = false;
 			if (timer != null)
@@ -469,7 +470,7 @@ public class PlayerClientThread extends Thread {
 			e.printStackTrace();
 		} catch (IOException ioe) {
 			// Print out the details of the exception error
-			mGameServer.removeClient(this.mGameClientInfo.getNodeID());
+			mGameServer.removeNode(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in receiveMessage client, node: " + this.mGameClientInfo.getNodeID());
 			isRunning = false;
 			if (timer != null)

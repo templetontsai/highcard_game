@@ -12,7 +12,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-
 import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
@@ -175,14 +174,11 @@ public class MainGamePanel extends JPanel {
 				System.out.println("Dealer/Node0 Starts the game");
 				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
 				// Initialize players
-				p = new DealerPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo), self);
+				p = new DealerPlayer("Dealer", new GamePlayerInfo(gamePlayerInfo, true), self);
 				p.setDealer(true);
 				p.play();
 				textArea.append("Node" + nodeID + " is joined\n");
-				// Initialize game token for mutex
-				Token gameToken = new Token();
-				// Initialize queue for mutex control
-				ArrayList<Player> tokenRequests = new ArrayList<Player>();
+
 				btnStart.setEnabled(false);
 			}
 
@@ -210,8 +206,8 @@ public class MainGamePanel extends JPanel {
 				String gameServerInfo[] = { "0", serverIPAddress, serverPort };
 				System.out.println("Client" + nodeID + " sending connection to dealer");
 
-				p = new SlavePlayer("Slave" + nodeID, new GamePlayerInfo(gamePlayerInfo),
-						new GamePlayerInfo(gameServerInfo), self);
+				p = new SlavePlayer("Node" + nodeID, new GamePlayerInfo(gamePlayerInfo, false),
+						new GamePlayerInfo(gameServerInfo, false), self);
 				p.play();
 				btnStart.setEnabled(false);
 
@@ -235,12 +231,12 @@ public class MainGamePanel extends JPanel {
 		}
 
 		mMainGameFrameGUI.getContentPane().removeAll();
-	
+
 		gameTable = new GameTablePanel(mPlayerIDList, isDealer, p);
-		
+
 		mMainGameFrameGUI.setContentPane(gameTable);
 		mMainGameFrameGUI.revalidate();
-		
+
 	}
 
 	public void updateCard(Card c, int nodeID) {
@@ -259,12 +255,10 @@ public class MainGamePanel extends JPanel {
 	public void updateGameTable(List<Integer> mPlayerIDList) {
 		gameTable.updateGameTable(mPlayerIDList);
 	}
-	
+
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
 		this.gameTable.setDealer(isDealer);
 	}
-	
-	
 
 }

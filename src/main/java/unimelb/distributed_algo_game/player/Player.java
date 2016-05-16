@@ -67,6 +67,13 @@ public abstract class Player implements Serializable, NetworkObserver {
 		this.mGameServerInfo = gameServerInfo;
 		this.isPlaying = true;
 	}
+	
+	public Player(String name, GamePlayerInfo gamePlayerInfo) {
+		this.name = name;
+		this.mGamePlayerInfo = gamePlayerInfo;
+		this.playerScore = new PlayerScore();
+		this.isPlaying = true;
+	}
 
 	/**
 	 * Method to initialize the player name, id and state.

@@ -79,7 +79,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	private MainGamePanel mMainGameLoginClientPanel = null;
 
-	private List<Integer> playerIDList = null;
+	private List<Integer> mNodeIDList = null;
+	
+	private List<GamePlayerInfo> mPlayerInfoList = null;
 
 	/**
 	 * Instantiates a new game client.
@@ -87,6 +89,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 	protected GameClient() {
 		mLock = new Object();
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
+		mNodeIDList = new ArrayList<Integer>();
+		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
 
 	}
 
@@ -222,6 +226,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			case CARD_RECEIVED:
 				break;
+			case STILL_ALIVE:
+				
+				break;
 			default:
 				System.out.println("Uknown ACK code");
 
@@ -245,16 +252,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 		case BCT_CRD:
 
 			Map<Integer, Card> playerCard = (HashMap<Integer, Card>) mBodyMessage.getMessage();
-			for (Integer i : playerIDList) {
+			for (Integer i : mNodeIDList) {
 				Card card = playerCard.get(i);
 
-				if (card != null && i != mPlayer.getGamePlayerInfo().getNodeID())// no
-																					// need
-																					// to
-																					// update
-																					// my
-																					// own
-																					// card
+				if (card != null && i != mPlayer.getGamePlayerInfo().getNodeID())
 					mMainGameLoginClientPanel.updateCard(card, i);
 			}
 			break;
@@ -266,21 +267,22 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println("Game is ready to play, start request card from dealer");
 			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			if (isGameReady) {
-				mMainGameLoginClientPanel.showGameTable(true, playerIDList);
+				mMainGameLoginClientPanel.showGameTable(true, mNodeIDList);
 			}
 			break;
 		case BCT_LST:
 
-			playerIDList = (List<Integer>) mBodyMessage.getMessage();
-
+			mPlayerInfoList = (List<GamePlayerInfo>) mBodyMessage.getMessage();
+			updateNodeList(mPlayerInfoList);
 			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
-			System.out.println(mBodyMessage.getMessage());
+			
 
 			break;
 		case BCT_UPT:
-			playerIDList = (List<Integer>) mBodyMessage.getMessage();
-
-			mMainGameLoginClientPanel.updateGameTable(playerIDList);
+			mPlayerInfoList = (List<GamePlayerInfo>) mBodyMessage.getMessage();
+			updateNodeList(mPlayerInfoList);
+			System.out.println("update list");
+			mMainGameLoginClientPanel.updateGameTable(mNodeIDList);
 			break;
 		case BCT_CRT:
 			System.out.println(mBodyMessage.getMessage());
@@ -296,6 +298,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 			
 			System.out.println("Uknown Message Type");
 
+		}
+	}
+	
+	private synchronized void updateNodeList(List<GamePlayerInfo> mPlayerInfoList) {
+		mNodeIDList.clear();
+		for(GamePlayerInfo info: mPlayerInfoList) {
+			mNodeIDList.add(info.getNodeID());
 		}
 	}
 
@@ -539,6 +548,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	public void setPanel(MainGamePanel mainGameLoginClientPanel) {
+	
 		this.mMainGameLoginClientPanel = mainGameLoginClientPanel;
 	}
 

@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.network.gui.MainGameFrameGUI;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.SlavePlayer;
@@ -94,7 +95,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 			this.mPlayer = mPlayer;
 			nodeID = this.mPlayer.getGamePlayerInfo().getNodeID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
-			mPlayerClientManager.addPlayer(mPlayer.getGamePlayerInfo());
+
 			mPlayerServerManager.setPlayer(this.mPlayer);
 			mPlayerServerManager.addPlayer(mPlayer.getGamePlayerInfo());
 
@@ -168,31 +169,36 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// then add to the manager's list
 					while (t.getClientNodeID() == -1)
 						;
-					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
-					mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
-					mPlayerServerManager.addClient(t.getClientNodeID(), t2);
+					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
+					
 
-					t2.setGameClientInfo(t.getClientGamePlayerInfo());
-					t2.setName("GameServer Client Socket Thread");
-					t2.connect();
-					t2.start();
+					// mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
+					// mPlayerServerManager.addClient(t.getClientNodeID(), t2);
+
+					// t2.setGameClientInfo(t.getClientGamePlayerInfo());
+					// t2.setName("GameServer Client Socket Thread");
+					// t2.connect();
+					// t2.start();
 
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
-
+					broadcastNodeList();
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
 
 						System.out.println("Game Start");
-						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
-						broadcastPlayerList();
+						//broadcastNodeCard();
+						
 						try {
 							Thread.sleep(2000);
 						} catch (InterruptedException e) {
 							// TODO Adding error handling
 							e.printStackTrace();
 						}
-						broadcastClientList();
-						broadcastGameReadyToClients(new Boolean(true));
+
+						broadcastGameReadyToNodes(new Boolean(true));
+						
+
+						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
 					}
 
 				}
@@ -229,8 +235,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// then add to the manager's list
 					while (t.getClientNodeID() == -1)
 						;
-					mPlayerClientManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
+					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
+
 				}
 				System.out.println("Slave Connection closed");
 				// Close server port once the server is no longer running
@@ -277,30 +284,30 @@ public final class GameServer implements Runnable, NetworkInterface {
 	/**
 	 * Sends a message to all the clients in the thread pool
 	 */
-	public void broadcastToClients(Object object) {
+	public void broadcastGameResultToNodes(Object object) {
 
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RST);
 	}
 
-	public void broadcastGameReadyToClients(Object object) {
+	public void broadcastGameReadyToNodes(Object object) {
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RDY);
 	}
 
-	public void broadcastCards(Object object) {
+	public void broadcastNodeCard(Object object) {
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_CRD);
 
 	}
 
-	/**
-	 * Sends a player list to the other client server sockets
-	 */
-
-	public void broadcastPlayerList() {
-		mPlayerClientManager.sendPlayerIDList(ClientConnectionState.CONNECTED, MessageType.BCT_LST);
+	public void broadcastNodeList() {
+		mPlayerClientManager.sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_LST);
 	}
 
-	public void broadcastClientList() {
-		mPlayerServerManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
+	public void broadcastUpdateNodeList() {
+		mPlayerClientManager.sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_UPT);
+	}
+
+	public void broadcastCRT() {
+		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
 	}
 
 	/**
@@ -327,9 +334,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayerClientManager.updatePlayerCard(nodeID, c);
 	}
 
-	public synchronized void removeClient(int nodeID) {
-		mPlayerClientManager.removeClient(nodeID);
-		mPlayerClientManager.removePlayer(nodeID);
+	public synchronized void removeNode(int nodeID) {
+		mPlayerClientManager.removeNode(nodeID);
+		// mPlayerClientManager.removePlayer(nodeID);
 		mPlayerServerManager.removeClient(nodeID);
 		mPlayerServerManager.removePlayer(nodeID);
 
@@ -465,17 +472,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public void dealerDrawnCard() {
-		System.out.println("dsdsds");
+		
 		Card c = mPlayerClientManager.dealerDrawnCard();
 		if (c != null) {
 			mMainGameLoginDealerPanel.updateCard(c, nodeID);
 			mMainGameLoginDealerPanel.declareWinner(mPlayerClientManager.checkWinner());
 		}
 
-	}
-
-	public void broadcastCRT() {
-		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
 	}
 
 	public boolean getReply() {
@@ -500,21 +503,19 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public synchronized int getNumofNodes() {
-		return mPlayerServerManager.getNumNodes();
+		return mPlayerClientManager.getPlayerIDList().size();
 	}
 
 	public void startServer() {
 		mConnectionState = ServerConnectionState.DISCONNECTED;
 		DealerPlayer p = new DealerPlayer("Dealer", mPlayer.getGamePlayerInfo(), mMainGameLoginDealerPanel);
-		this.mPlayer = p;
-		((DealerPlayer)mPlayer).restartServer();
-		
-		mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
-		
-		
+
+		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game", p.getGamePlayerInfo().getNodeID());
+		MainGamePanel mainPanel = new MainGamePanel(mainGui, true);
+		((DealerPlayer) mPlayer).restartServer(mainPanel);
 
 	}
-	
+
 	public void resetGameStart(int num) {
 		this.GAME_START = num;
 	}

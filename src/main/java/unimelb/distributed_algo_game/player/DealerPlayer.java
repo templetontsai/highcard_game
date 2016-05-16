@@ -79,12 +79,14 @@ public class DealerPlayer extends Player {
 		gameServer.dealerDrawnCard();
 	}
 	
-	public void restartServer(){
+	public void restartServer(MainGamePanel mainPanel){
 		GameServer newGameServer = GameServer.getInstance();
 		newGameServer.setPlayer(this);
 		Thread gameServerThread = new Thread(newGameServer);
 		newGameServer.connect();
 		gameServerThread.start();
+		//TODO broadcast info to the remaining players regarding player list then init panel
+		//mainPanel.updateGameTable(newGameServer.get.getPlayerList));
 	}
 
 }
