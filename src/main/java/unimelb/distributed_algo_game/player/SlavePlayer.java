@@ -78,6 +78,8 @@ public class SlavePlayer extends Player {
 	}
 	
 	public void rePlay(){
+		gameClient = null;
+		gameClient = GameClient.getInstance();
 		gameClient.setPlayer(this);
 		gameClient.setPanel(mPanel);
 		gameClient.setServerDetails();
@@ -91,7 +93,6 @@ public class SlavePlayer extends Player {
 		gameClient.play();
 	}
 	
-
 
 	/**
 	 * Runs an update

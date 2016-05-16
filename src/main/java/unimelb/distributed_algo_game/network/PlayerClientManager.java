@@ -49,11 +49,13 @@ public final class PlayerClientManager {
 	public synchronized void addClient(int nodeID, PlayerClientThread mPlayerClientThread) {
 		mPlayerClientList.put(nodeID, mPlayerClientThread);
 	}
+
 	public synchronized void addNode(GamePlayerInfo gamePlayerInfo) {
 		
 		mLocalPlayerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
 		mNodeList.add(gamePlayerInfo);
 		
+
 	}
 
 	public synchronized void removeNode(int nodeID) {

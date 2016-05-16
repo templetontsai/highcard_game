@@ -467,6 +467,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 		} catch (IOException ioe) {
 			// Print the details of the exception error
 			isRunning = false;
+			try{
+			mSocket.close();
+			} catch (IOException ioe1) {
+				ioe1.printStackTrace();
+			}
 			System.out.println("Leader has gone haywire");
 			ioe.printStackTrace();
 		}

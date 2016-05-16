@@ -181,13 +181,15 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// t2.connect();
 					// t2.start();
 
+
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 					broadcastNodeList();
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
 
 						System.out.println("Game Start");
-						//broadcastNodeCard();
+
 						
+
 						try {
 							Thread.sleep(2000);
 						} catch (InterruptedException e) {
@@ -507,12 +509,25 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public void startServer() {
-		mConnectionState = ServerConnectionState.DISCONNECTED;
+		mConnectionState = ServerConnectionState.CONNECTED;
 		DealerPlayer p = new DealerPlayer("Dealer", mPlayer.getGamePlayerInfo(), mMainGameLoginDealerPanel);
+
 
 		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game", p.getGamePlayerInfo().getNodeID());
 		MainGamePanel mainPanel = new MainGamePanel(mainGui, true);
 		((DealerPlayer) mPlayer).restartServer(mainPanel);
+/*
+		p.setDealer(true);
+		this.mPlayer = p;
+		System.out.println("The player is "+p.isDealer()+"-"+getIsLeader());
+		((DealerPlayer)mPlayer).restartServer();
+		
+		if(mMainGameLoginDealerPanel!=null)
+		   mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
+		
+		broadcastPlayerList();
+		broadcastClientList();
+*/
 
 	}
 
