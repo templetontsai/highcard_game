@@ -172,18 +172,20 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
 					mPlayerServerManager.addClient(t.getClientNodeID(), t2);
-
 					t2.setGameClientInfo(t.getClientGamePlayerInfo());
 					t2.setName("GameServer Client Socket Thread");
 					t2.connect();
 					t2.start();
 
-					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
+					if(mMainGameLoginDealerPanel!=null)
+					  mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
 
 						System.out.println("Game Start");
-						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
+						if(mMainGameLoginDealerPanel!=null)
+						  mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
+						
 						broadcastPlayerList();
 						try {
 							Thread.sleep(2000);
@@ -504,14 +506,18 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public void startServer() {
-		mConnectionState = ServerConnectionState.DISCONNECTED;
+		mConnectionState = ServerConnectionState.CONNECTED;
 		DealerPlayer p = new DealerPlayer("Dealer", mPlayer.getGamePlayerInfo(), mMainGameLoginDealerPanel);
+		p.setDealer(true);
 		this.mPlayer = p;
+		System.out.println("The player is "+p.isDealer()+"-"+getIsLeader());
 		((DealerPlayer)mPlayer).restartServer();
 		
-		mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
+		if(mMainGameLoginDealerPanel!=null)
+		   mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
 		
-		
+		broadcastPlayerList();
+		broadcastClientList();
 
 	}
 	

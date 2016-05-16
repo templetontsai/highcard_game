@@ -78,7 +78,15 @@ public final class PlayerClientManager {
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
 
 		playerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
-		playerIDList.add(gamePlayerInfo.getNodeID());
+		//Check to ensure that the player ID doesn't already exist in the list
+		boolean exists = false;
+		for(Integer i: playerIDList){
+			if(gamePlayerInfo.getNodeID()==i)
+				exists = true;
+		}
+		
+		if(!exists)
+		    playerIDList.add(gamePlayerInfo.getNodeID());
 
 	}
 

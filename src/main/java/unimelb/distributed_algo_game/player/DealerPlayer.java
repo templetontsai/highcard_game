@@ -80,10 +80,12 @@ public class DealerPlayer extends Player {
 	}
 	
 	public void restartServer(){
-		GameServer newGameServer = GameServer.getInstance();
-		newGameServer.setPlayer(this);
-		Thread gameServerThread = new Thread(newGameServer);
-		newGameServer.connect();
+		gameServer = null;
+		gameServer = GameServer.getInstance();
+		gameServer.setPlayer(this);
+		gameServer.setPanel((MainGamePanel) mMainGameLoginDealerPanel);
+		gameServerThread = new Thread(gameServer);
+		gameServer.connect();
 		gameServerThread.start();
 	}
 
