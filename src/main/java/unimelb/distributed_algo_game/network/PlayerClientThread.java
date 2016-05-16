@@ -180,7 +180,8 @@ public class PlayerClientThread extends Thread {
 			synchronized (mLock) {
 
 				mGameServer.removeClient(clientNodeID);
-				
+				mGameServer.resetGameStart(mGameServer.getNumofNodes());
+				mGameServer.updateGameTable();
 				isRunning = false;
 				System.out.println("Node:" + clientNodeID + " has left the game");
 				timer.cancel();

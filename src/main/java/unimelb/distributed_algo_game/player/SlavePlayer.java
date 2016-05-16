@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 
 import unimelb.distributed_algo_game.network.GameClient;
 import unimelb.distributed_algo_game.network.GameServer;
-import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
+import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.state.GameState;
 
 // TODO: Auto-generated Javadoc
@@ -64,7 +64,7 @@ public class SlavePlayer extends Player {
 		gameServerThread.start();
 
 		gameClient.setPlayer(this);
-		gameClient.setPanel((MainGameLoginClientPanel) mPanel);
+		gameClient.setPanel((MainGamePanel) mPanel);
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
@@ -79,7 +79,7 @@ public class SlavePlayer extends Player {
 	
 	public void rePlay(){
 		gameClient.setPlayer(this);
-		gameClient.setPanel((MainGameLoginClientPanel) mPanel);
+		gameClient.setPanel((MainGamePanel) mPanel);
 		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
@@ -91,13 +91,7 @@ public class SlavePlayer extends Player {
 		gameClient.play();
 	}
 	
-	public void restartServer(){
-		GameServer newGameServer = GameServer.getInstance();
-		gameServer.setPlayer(this);
-		Thread gameServerThread1 = new Thread(gameServer);
-		gameServer.connect();
-		gameServerThread1.start();
-	}
+
 
 	/**
 	 * Runs an update
@@ -109,8 +103,9 @@ public class SlavePlayer extends Player {
 	}
 
 	public void requestCardFromDealer() {
-		//TODO implement recart, do a blocking call 
-		if(gameServer.getNumofNodes() != 0) {
+		//gameClient.requestCard();
+		
+		if(gameServer.getNumofNodes() >= 1) {
 			gameServer.setIsRequested(true);
 			gameServer.broadcastCRT();
 			System.out.println("requestCardFromDealer");

@@ -1,6 +1,7 @@
 package unimelb.distributed_algo_game.network.gui;
 
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -26,30 +27,41 @@ class GameTablePanel extends JPanel {
 	private boolean isDealer = false;
 
 	public GameTablePanel(List<Integer> mPlayerIDList, boolean isDealer, Player mPlayer) {
-		setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+		
 
 		this.mPlayer = mPlayer;
 
 		if (mPlayerIDList.size() == 0)
 			throw new IllegalArgumentException();
-		this.mPlayerCardPanelList = mPlayerCardPanelList;
+		//this.mPlayerCardPanelList = mPlayerCardPanelList;
 
 		this.isDealer = isDealer;
-		initGUI(mPlayerIDList, isDealer);
+		initGUI(mPlayerIDList);
 		
 
 	}
 
-	private void initGUI(List<Integer> mPlayerIDList, boolean isDealer) {
+	private void initGUI(List<Integer> mPlayerIDList) {
+		
+	
 		this.removeAll();
+		
+		GridLayout gridLayoutGameTable = new GridLayout();
+		//gridLayoutGameTable.setRows(3);
+		//gridLayoutGameTable.setColumns(2);
+		
 		mPlayerCardPanelList = new ArrayList<CardPanel>(mPlayerIDList.size());
 		for (Integer i : mPlayerIDList) {
 			CardPanel p = new CardPanel(i);
 			mPlayerCardPanelList.add(p);
 			this.add(p);
 		}
+		
+		
+		
+		
 		btn = new JButton();
-		if (isDealer) {
+		if (this.isDealer) {
 			mDrawButtonActionListener = new DrawButtonActionListener();
 			btn.setText("Draw");
 			btn.addActionListener(mDrawButtonActionListener);
@@ -60,6 +72,7 @@ class GameTablePanel extends JPanel {
 		}
 		
 		this.add(btn);
+		this.setLayout(gridLayoutGameTable);
 		this.revalidate();
 		this.repaint();
 	}
@@ -104,13 +117,14 @@ class GameTablePanel extends JPanel {
 
 	}
 
-	public void updateGameTable(List<Integer> mPlayerIDList, boolean isDealer) {
-		initGUI(mPlayerIDList, isDealer);
-		
-		
+	public void updateGameTable(List<Integer> mPlayerIDList) {
+		initGUI(mPlayerIDList);
+			
 	}
-
+	
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
 	}
+
+
 }

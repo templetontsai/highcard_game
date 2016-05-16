@@ -10,8 +10,8 @@ import java.awt.event.ActionEvent;
 
 public class MainGameFrameGUI extends JFrame {
 	private MainGamePanel mainPanel;
-	private MainGameLoginDealerPanel mainLoginPanel;
-	private MainGameLoginClientPanel mainLoginClientPanel;
+
+
 
 	public MainGameFrameGUI(String name, int nodeID) {
 		super(name + ": Node" + nodeID);
@@ -21,21 +21,19 @@ public class MainGameFrameGUI extends JFrame {
 	public void init(int nodeID) {
 		if (nodeID == 0) {
 
-			mainLoginPanel = new MainGameLoginDealerPanel(this);
-			mainLoginPanel.setNodeID(nodeID);
+			mainPanel = new MainGamePanel(this, true);
+			mainPanel.setNodeID(nodeID);
 
-			this.setContentPane(mainLoginPanel);
-			this.setSize(700, 700);
-			setResizable(false);
-			this.setVisible(true);
+			
 		} else if (nodeID > 0) {
-			mainLoginClientPanel = new MainGameLoginClientPanel(this);
-			mainLoginClientPanel.setClientNodeID(nodeID);
-			this.setContentPane(mainLoginClientPanel);
-			this.setSize(700, 700);
-			setResizable(false);
-			this.setVisible(true);
+			mainPanel = new MainGamePanel(this, false);
+			mainPanel.setNodeID(nodeID);
 		}
+		
+		this.setContentPane(mainPanel);
+		this.setSize(650, 650);
+		setResizable(false);
+		this.setVisible(true);
 	}
 
 

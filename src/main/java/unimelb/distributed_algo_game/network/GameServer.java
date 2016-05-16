@@ -14,8 +14,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
-import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
-import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
+import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
@@ -55,9 +54,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private PlayerClientManager mPlayerClientManager = null;
 
-	private MainGameLoginDealerPanel mMainGameLoginDealerPanel = null;
+	private MainGamePanel mMainGameLoginDealerPanel = null;
 	// This number is the total player number but not including node 0 itself
-	private final int GAME_START = 3;
+	private int GAME_START = 3;
 
 	private PlayerServerManager mPlayerServerManager = null;
 
@@ -343,7 +342,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayer.setDealer(true);
 	}
 
-	public void setPanel(MainGameLoginDealerPanel mMainGameLoginDealerPanel) {
+	public void setPanel(MainGamePanel mMainGameLoginDealerPanel) {
 		this.mMainGameLoginDealerPanel = mMainGameLoginDealerPanel;
 	}
 
@@ -466,6 +465,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public void dealerDrawnCard() {
+		System.out.println("dsdsds");
 		Card c = mPlayerClientManager.dealerDrawnCard();
 		if (c != null) {
 			mMainGameLoginDealerPanel.updateCard(c, nodeID);
@@ -499,16 +499,23 @@ public final class GameServer implements Runnable, NetworkInterface {
 		}
 	}
 
-	public int getNumofNodes() {
+	public synchronized int getNumofNodes() {
 		return mPlayerServerManager.getNumNodes();
 	}
 
 	public void startServer() {
 		mConnectionState = ServerConnectionState.DISCONNECTED;
-		((SlavePlayer) mPlayer).restartServer();
+		DealerPlayer p = new DealerPlayer("Dealer", mPlayer.getGamePlayerInfo(), mMainGameLoginDealerPanel);
+		this.mPlayer = p;
+		((DealerPlayer)mPlayer).restartServer();
 		
-		JPanel panel = ((SlavePlayer) mPlayer).getPanel();
-		((MainGameLoginClientPanel) panel).updateGameTable(mPlayerClientManager.getPlayerIDList(), true);
+		mMainGameLoginDealerPanel.updateGameTable(mPlayerClientManager.getPlayerIDList());
+		
+		
 
+	}
+	
+	public void resetGameStart(int num) {
+		this.GAME_START = num;
 	}
 }

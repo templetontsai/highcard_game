@@ -23,7 +23,7 @@ public final class Deck implements Serializable{
 	private static Deck instance = null;
 
 	/** The Constant DECK_SIZE. */
-	private static final int DECK_SIZE = 13;// For testing changing it to 13
+	private static final int DECK_SIZE = 3;// For testing changing it to 13
 											// from 52
 
 	/** The deck. */
@@ -54,13 +54,16 @@ public final class Deck implements Serializable{
 	 * pattern/suite.
 	 */
 	private void init() {
-		for (CardRank cardRank : CardRank.values()) {
+		/*for (CardRank cardRank : CardRank.values()) {
 			//TODO comment other pattern out for the simplicity of the game to demo
-			deck.add(new Clubs(cardRank));
+			//deck.add(new Clubs(cardRank));
 			//deck.add(new Diamonds(cardRank));
 			//deck.add(new Hearts(cardRank));
 			//deck.add(new Spades(cardRank));
-		}
+		}*/
+		deck.add(new Clubs(CardRank.Ace));
+		deck.add(new Clubs(CardRank.Two));
+		deck.add(new Clubs(CardRank.Three));
 
 	}
 
@@ -119,12 +122,17 @@ public final class Deck implements Serializable{
 	 */
 	private void resetDeck() {
 		deck.clear();
+		/*
 		for (CardRank cardRank : CardRank.values()) {
 			deck.add(new Clubs(cardRank));
 			//deck.add(new Hearts(cardRank));
 			//deck.add(new Diamonds(cardRank));
 			//deck.add(new Spades(cardRank));
-		}
+		}*/
+		deck.add(new Clubs(CardRank.Ace));
+		deck.add(new Clubs(CardRank.Two));
+		deck.add(new Clubs(CardRank.Three));
+
 	}
 
 }

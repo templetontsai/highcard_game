@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 
 import unimelb.distributed_algo_game.network.GameClient;
 import unimelb.distributed_algo_game.network.GameServer;
-import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
-import unimelb.distributed_algo_game.network.gui.MainGameLoginDealerPanel;
+
+import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.state.GameState;
 
 // TODO: Auto-generated Javadoc
@@ -58,7 +58,7 @@ public class DealerPlayer extends Player {
 
 		gameServer.setPlayer(this);
 
-		gameServer.setPanel((MainGameLoginDealerPanel) mMainGameLoginDealerPanel);
+		gameServer.setPanel((MainGamePanel) mMainGameLoginDealerPanel);
 
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
@@ -77,6 +77,14 @@ public class DealerPlayer extends Player {
 
 	public void dealerDrawnCard() {
 		gameServer.dealerDrawnCard();
+	}
+	
+	public void restartServer(){
+		GameServer newGameServer = GameServer.getInstance();
+		newGameServer.setPlayer(this);
+		Thread gameServerThread = new Thread(newGameServer);
+		newGameServer.connect();
+		gameServerThread.start();
 	}
 
 }

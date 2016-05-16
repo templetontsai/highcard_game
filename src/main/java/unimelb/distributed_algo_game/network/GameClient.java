@@ -19,7 +19,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.network.gui.MainGameLoginClientPanel;
+import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
@@ -77,7 +77,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	private boolean isGameReady = false;
 
-	private MainGameLoginClientPanel mMainGameLoginClientPanel = null;
+	private MainGamePanel mMainGameLoginClientPanel = null;
 
 	private List<Integer> playerIDList = null;
 
@@ -280,7 +280,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		case BCT_UPT:
 			playerIDList = (List<Integer>) mBodyMessage.getMessage();
 
-			mMainGameLoginClientPanel.updateGameTable(playerIDList, false);
+			mMainGameLoginClientPanel.updateGameTable(playerIDList);
 			break;
 		case BCT_CRT:
 			System.out.println(mBodyMessage.getMessage());
@@ -538,11 +538,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 		play();
 	}
 
-	public void setPanel(MainGameLoginClientPanel mainGameLoginClientPanel) {
+	public void setPanel(MainGamePanel mainGameLoginClientPanel) {
 		this.mMainGameLoginClientPanel = mainGameLoginClientPanel;
 	}
 
-	public MainGameLoginClientPanel getLoginPanel() {
+	public MainGamePanel getLoginPanel() {
 		return mMainGameLoginClientPanel;
 	}
 
