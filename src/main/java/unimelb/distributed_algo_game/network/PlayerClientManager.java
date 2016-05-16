@@ -78,7 +78,15 @@ public final class PlayerClientManager {
 	public synchronized void addPlayer(GamePlayerInfo gamePlayerInfo) {
 
 		playerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
-		playerIDList.add(gamePlayerInfo.getNodeID());
+		//Check to ensure that the player ID doesn't already exist in the list
+		boolean exists = false;
+		for(Integer i: playerIDList){
+			if(gamePlayerInfo.getNodeID()==i)
+				exists = true;
+		}
+		
+		if(!exists)
+		    playerIDList.add(gamePlayerInfo.getNodeID());
 
 	}
 
@@ -100,12 +108,13 @@ public final class PlayerClientManager {
 	public synchronized void removePlayer(int nodeID) {
 		playerList.remove(nodeID);
 		Integer toRemove = null;
+		//System.out.println("Player List size before update is "+playerIDList.size());
 		for (Integer i : playerIDList) {
 			if (i == nodeID)
 				toRemove = i;
 		}
 		playerIDList.remove(toRemove);
-		System.out.println("Player List size is "+playerIDList.size());
+		System.out.println("Player List size after update is "+playerIDList.size());
 		notifyAllClients(playerIDList, ClientConnectionState.CONNECTED, MessageType.BCT_UPT);
 	}
 
@@ -160,10 +169,13 @@ public final class PlayerClientManager {
 		for (Map.Entry<Integer, PlayerClientThread> t : playerClientList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
 
+			
 			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, playerIDList);
 
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
+			
+			System.out.println("Connection State: "+mConnectionState+", Player list size: "+playerIDList.size()+", message type: "+messageType);
 			t.getValue().sendMessage(mMessage);
 		}
 
@@ -262,6 +274,10 @@ public final class PlayerClientManager {
 	public void updateServerList(ArrayList<String> serverList){
 		this.serverList.clear();
 		this.serverList = serverList;
+	}
+	
+	public void removeClientThreads(){
+		
 	}
 
 }

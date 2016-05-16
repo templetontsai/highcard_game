@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -179,7 +180,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 					t2.connect();
 					t2.start();
 
-					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
+					if(mMainGameLoginDealerPanel!=null)
+					   mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
 
@@ -241,6 +243,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 		}
 
+	}
+	
+	public void removeAllClientThreads(){
+		mPlayerClientManager.removeClientThreads();
 	}
 
 	/**
@@ -503,15 +509,15 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return mPlayerServerManager.getNumNodes();
 	}
 	
-	public int getPlayerListSize(){
-		return mPlayerClientManager.getPlayerIDList().size();
+	public List<Integer> getPlayerListSize(){
+		return mPlayerClientManager.getPlayerIDList();
 	}
 
 	public void startServer() {
-		mConnectionState = ServerConnectionState.DISCONNECTED;
 		JPanel panel = ((SlavePlayer) mPlayer).getPanel();
 		((SlavePlayer) mPlayer).restartServer();
 		((MainGameLoginClientPanel) panel).updateGameTable(mPlayerClientManager.getPlayerIDList(), true);
-
+		broadcastClientList();
+		broadcastPlayerList();
 	}
 }

@@ -106,8 +106,6 @@ class GameTablePanel extends JPanel {
 
 	public void updateGameTable(List<Integer> mPlayerIDList, boolean isDealer) {
 		initGUI(mPlayerIDList, isDealer);
-		
-		
 	}
 
 	public void setDealer(boolean isDealer) {

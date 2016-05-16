@@ -82,7 +82,7 @@ public class PlayerServerManager {
 	 */
 	public synchronized void removeClient(int clientThread) {
 		playerClientServerList.remove(clientThread);
-		System.out.println( playerClientServerList.size() + "sss");
+		System.out.println("A player client thread has been removed. Current size: "+playerClientServerList.size());
 	}
 
 	public synchronized void removePlayer(int nodeID) {

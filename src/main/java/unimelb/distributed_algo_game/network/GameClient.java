@@ -526,17 +526,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 		return mPlayer.getGameServerInfo().getIPAddress() + ":" + mPlayer.getGameServerInfo().getPort();
 	}
 
-	/**
-	 * Re-establishing a connection with the server
-	 */
-	public void reConnect() {
-		mObjectOutputStream = null;
-		mObjectInputStream = null;
-		System.out.println("Attempting to connect to " + getServerDetails());
-		connect();
-		run();
-		play();
-	}
 
 	public void setPanel(MainGameLoginClientPanel mainGameLoginClientPanel) {
 		this.mMainGameLoginClientPanel = mainGameLoginClientPanel;

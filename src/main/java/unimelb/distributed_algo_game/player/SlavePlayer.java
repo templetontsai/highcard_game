@@ -78,9 +78,11 @@ public class SlavePlayer extends Player {
 	}
 	
 	public void rePlay(){
-		gameClient.setPlayer(this);
-		gameClient.setPanel((MainGameLoginClientPanel) mPanel);
-		gameClient.setServerDetails();
+	    gameClient = null;
+	    gameClient = GameClient.getInstance();
+	    gameClient.setPlayer(this);
+	    gameClient.setPanel((MainGameLoginClientPanel) mPanel);
+	    gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
 
@@ -92,11 +94,14 @@ public class SlavePlayer extends Player {
 	}
 	
 	public void restartServer(){
-		GameServer newGameServer = GameServer.getInstance();
+		gameServer = null;
+		gameServer = GameServer.getInstance();
 		gameServer.setPlayer(this);
-		Thread gameServerThread1 = new Thread(gameServer);
+		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
-		gameServerThread1.start();
+		gameServerThread.start();
+		
+		gameServer.setGameClient(gameClient);
 	}
 
 	/**

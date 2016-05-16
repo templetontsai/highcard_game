@@ -155,9 +155,11 @@ public class PlayerClientThread extends Thread {
 			if (timer != null) {
 				timer.cancel();
 				//Only carry out an election if we lose the dealer of the game
-				if(mGameClientInfo.getNodeID()==mGameServer.getPlayer().getGameServerInfo().getNodeID())
+				if(mGameClientInfo.getNodeID()==mGameServer.getPlayer().getGameServerInfo().getNodeID()){
 					startElection();
-				
+					mGameServer.removeClient(0);
+				}
+			    
 			}
 
 			System.out.println("Client closed");
@@ -371,7 +373,9 @@ public class PlayerClientThread extends Thread {
 			// coordinator
 			mGameServer.setPlayerDealer();
 			mGameServer.disconnect();
+			mGameServer.disconnectClient();
 			mGameServer.startServer();
+			
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameDealerInfo);
 			System.out.println("Hell ya I'm in charge now ");
@@ -398,7 +402,7 @@ public class PlayerClientThread extends Thread {
 		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
 			// Update the new server details on the game client
 			mGameServer.setGameServerLeader(newDealer);
-			mGameServer.updateServerDetails();
+			mGameServer.disconnectClient();
 		    mGameServer.reconnectClient();
 
 			JSONObject mMessage = new JSONObject();
