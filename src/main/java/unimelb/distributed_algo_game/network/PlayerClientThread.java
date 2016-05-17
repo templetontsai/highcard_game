@@ -371,13 +371,78 @@ public class PlayerClientThread extends Thread {
 			sendMessage(mMessage);
 			break;
 		case ELE:
-			System.out.println("Received election message from " + mBodyMessage.getNodeID());
-			//sendElectionMessage(mBodyMessage);
+			System.out.println("Received election message from " + mBodyMessage.getGamePlayerInfo().getNodeID());
+			sendElectionMessage(mBodyMessage);
+			break;
+		case COD:
+			System.out.println("Received coordinator message from " + mBodyMessage.getNodeID());
+			setNewCoordinator(mBodyMessage);
 			break;
 		default:
 
 			System.out.println("Uknown Message Type");
 
+		}
+	}
+	
+	/**
+	 * This sends an election message to the node's neighbor after comparing the
+	 * received node ID to it's own
+	 * 
+	 * @param mBodyMessage
+	 */
+	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
+		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
+		// Send message to the next node without changing it
+		if (messageNodeID > this.mGameDealerInfo.getNodeID()) {
+			// System.out.println(mGameDealerInfo.getNodeID()+" cannot be the
+			// new dealer");
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessage(mMessage);
+		} else if (messageNodeID < this.mGameDealerInfo.getNodeID()) {
+			// Don't forward to reduce number of messages
+
+		} else if (messageNodeID == this.mGameDealerInfo.getNodeID()) {
+			// This means i have received my election message and I am the new
+			// coordinator
+
+			mBodyMessage.setMessageType(MessageType.COD);
+			mBodyMessage.setMessage(this.mGameDealerInfo);
+			System.out.println("Hell ya I'm in charge now ");
+
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessage(mMessage);
+		}
+
+	}
+
+	/**
+	 * This sets the new coordinator of the game
+	 * 
+	 * @param mBodyMessage
+	 */
+	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
+
+		GamePlayerInfo newDealer = (GamePlayerInfo) mBodyMessage.getMessage();
+		System.out.println("The new dealer is node " + newDealer.getNodeID());
+		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
+			// Update the new server details on the game client
+			// mGameServer.setGameServerLeader(newDealer);
+
+			JSONObject mMessage = new JSONObject();
+			BodyMessage bodyMessage = mBodyMessage;
+			mBodyMessage.setMessageType(MessageType.COD);
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+			sendMessage(mMessage);
 		}
 	}
 

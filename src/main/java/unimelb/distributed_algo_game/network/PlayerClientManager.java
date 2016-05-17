@@ -140,6 +140,8 @@ public final class PlayerClientManager {
 			}
 		}
 	}
+	
+	
 
 	public synchronized boolean isLockRound() {
 		if (mPlayerClientList.size() >= 1) {

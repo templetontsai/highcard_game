@@ -50,32 +50,8 @@ public class GameClientSocketManager {
 		}
 	}
 
-	/**
-	 * This sends an election message to the node's neighbor after comparing the
-	 * received node ID to it's own
-	 * 
-	 * @param mBodyMessage
-	 */
-	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
-		if (mListClients != null && mListClients.size() > 0) {
-			for (GameClient c : mListClients) {
-				JSONObject mMessage = new JSONObject();
-				mMessage.put("header", ClientConnectionState.CONNECTED);
-				mMessage.put("body", mBodyMessage);
-				c.sendMessage(mMessage);
-			}
-		}
 
-	}
 
-	/**
-	 * This sets the new coordinator of the game
-	 * 
-	 * @param mBodyMessage
-	 */
-	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
-
-	}
 
 	public void broadcastCRT(long timestamp) {
 		if (mListClients != null && mListClients.size() > 0) {

@@ -596,8 +596,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		GamePlayerInfo newDealer = (GamePlayerInfo) mBodyMessage.getMessage();
 		System.out.println("The new dealer is node " + newDealer.getNodeID());
 		if (newDealer.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID()) {
-			// Update the new server details on the game client
-			// mGameServer.setGameServerLeader(newDealer);
+		
 
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
