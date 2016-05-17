@@ -15,12 +15,11 @@ import unimelb.distributed_algo_game.player.Player;
 public class GameClientSocketManager {
 
 	private List<GameClient> mListClients = null;
-	private List<GamePlayerInfo> mClientList = null;
 	private Player mPlayer = null;
+	private boolean isReplied = false;
 
 	public GameClientSocketManager(Player mPlayer) {
 		mListClients = new ArrayList<GameClient>();
-		mClientList = new ArrayList<GamePlayerInfo>();
 		this.mPlayer = mPlayer;
 	}
 
@@ -29,10 +28,10 @@ public class GameClientSocketManager {
 			// c.sendMessage(mGameSendDataObject);
 		}
 	}
-	
-	public void startElection(){
-		System.out.println("Current size of players is "+mListClients.size());
-		if(mListClients != null && mListClients.size() > 0) {
+
+	public void startElection() {
+		System.out.println("Current size of players is " + mListClients.size());
+		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				JSONObject mMessage = new JSONObject();
 				BodyMessage mBodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo().getNodeID(), MessageType.ELE,
@@ -40,77 +39,94 @@ public class GameClientSocketManager {
 				mMessage.put("header", ClientConnectionState.CONNECTED);
 				mMessage.put("body", mBodyMessage);
 				boolean isConnectionActive = false;
-				System.out.println("Sending election message to "+c.getPlayer().getGamePlayerInfo().getNodeID());
+				System.out.println("Sending election message to " + c.getPlayer().getGamePlayerInfo().getNodeID());
 				c.sendMessage(mMessage);
 			}
 		}
 	}
-	
-	public void sendElectionMessage(JSONObject mMessage){
-		if(mListClients != null && mListClients.size() > 0) {
+
+	public void sendElectionMessage(JSONObject mMessage) {
+		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				c.sendMessage(mMessage);
 			}
 		}
 	}
-	
+
 	public void broadcastCRT(long timestamp) {
-		if(mListClients != null && mListClients.size() > 0) {
+		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				JSONObject mMessage = new JSONObject();
 				BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), MessageType.BCT_CRT, timestamp);
 				mMessage.put("header", ClientConnectionState.CONNECTED);
 				mMessage.put("body", bodyMessage);
-				
+
 				c.sendMessage(mMessage);
 			}
 		}
 	}
-	
+
 	public boolean getReply() {
 		boolean isReplied = false;
-		if(mListClients != null && mListClients.size() > 0) {
+		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				isReplied = c.getReply();
 			}
 		} else {
-			
-			isReplied =  true;
+
+			isReplied = true;
 		}
-		
+
 		return isReplied;
 	}
 
-	public void addSocketClient(GameClient gameClient) {
-		mListClients.add(gameClient);
+	public void addSocketClient(GamePlayerInfo gameClientInfo) {
+
+		if (gameClientInfo.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID()
+				&& gameClientInfo.getNodeID() != 0) {
+			GameClient client = new GameClient(this.mPlayer, gameClientInfo.getIPAddress(), gameClientInfo.getPort(),
+					false);
+			client.setClientSocketManager(this);
+			mListClients.add(client);
+		}
 	}
 
 	public void removeSocketClient(GameClient gameClient) {
+		System.out.println("removing gameclient");
 		mListClients.remove(gameClient);
-	
-	}
 
-	public void setClientList(List<GamePlayerInfo> mClientList) {
-		this.mClientList = mClientList;
 	}
 
 	public void initGameClientsConnection() {
-		if (mClientList != null) {
+		if (mListClients != null) {
 			int index = 0;
-			for (GamePlayerInfo info : mClientList) {
-				if (info.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID() && info.getNodeID() != 0) {
-					GameClient client = new GameClient(this.mPlayer, info.getIPAddress(), info.getPort(), false);
-					client.setClientSocketManager(this);
-					client.connect();
-					Thread t = new Thread(client);
-					t.setName("Slave Player Socket Thread" + info.getNodeID());
-					t.start();
-					client.play();
-					mListClients.add(client);
-				}
-				index++;
+			for (GameClient client : mListClients) {
+
+				client.connect();
+				Thread t = new Thread(client);
+				t.setName("Slave Player Socket Thread" + client.getPlayer().getGamePlayerInfo().getNodeID());
+				t.start();
+				client.play();
+				mListClients.add(client);
 			}
+			index++;
 		}
+	}
+	
+	public synchronized boolean isAllCRTReplied() {
+		if(mListClients.size() >= 1) {
+			for (GameClient client : mListClients) {
+				this.isReplied = client.getReply();
+			}
+			
+
+		} else {
+			
+			this.isReplied =  true;
+		}
+		
+		return this.isReplied;
+		
 	}
 
 }

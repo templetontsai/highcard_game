@@ -272,9 +272,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println("Game is ready to play, start request card from dealer");
 			// Init client socket manager here to connect to all the other nodes
 			// before the game starts
-			mGameClientSocketManager.setClientList(mPlayerInfoList);
-			this.mGameClientSocketManager.initGameClientsConnection();
-
+			
 			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			if (isGameReady) {
 				

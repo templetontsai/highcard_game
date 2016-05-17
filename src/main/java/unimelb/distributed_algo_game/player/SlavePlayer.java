@@ -78,9 +78,7 @@ public class SlavePlayer extends Player {
 		// this manager thread once it gets the list of nodes in the network
 		//mGameClientSocketManager.addSocketClient(gameClient);
 		gameClient.setClientSocketManager(mGameClientSocketManager);
-		// TODO check the need for this after refactoring
-		//gameServer.setGameClient(gameClient);
-
+	
 		gameClient.play();
 
 	}

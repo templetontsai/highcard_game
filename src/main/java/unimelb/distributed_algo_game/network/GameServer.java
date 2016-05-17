@@ -59,7 +59,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	// This number is the total player number but not including node 0 itself
 	private int GAME_START = 3;
 
-	private PlayerServerManager mPlayerServerManager = null;
+	private GameClientSocketManager mGameClientSocketManager = null;
 
 	private GameClient mGameClient = null;
 
@@ -73,7 +73,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mLock = new Object();
 		mConnectionState = ServerConnectionState.DISCONNECTED;
 		mPlayerClientManager = new PlayerClientManager(10);
-		mPlayerServerManager = new PlayerServerManager(10);
+		
 	}
 
 	/**
@@ -97,8 +97,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 			nodeID = this.mPlayer.getGamePlayerInfo().getNodeID();
 			mPlayerClientManager.setPlayer(this.mPlayer);
 
-			mPlayerServerManager.setPlayer(this.mPlayer);
-			mPlayerServerManager.addPlayer(mPlayer.getGamePlayerInfo());
+
 
 		} else {
 			System.out.println("Player can't be null");
@@ -233,6 +232,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
+					mGameClientSocketManager.addSocketClient(t.getClientGamePlayerInfo());
 
 				}
 				System.out.println("Slave Connection closed");
@@ -302,9 +302,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mPlayerClientManager.sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_UPT);
 	}
 
-	public void broadcastCRT() {
-		mPlayerServerManager.notifyAllClients("CRT", ClientConnectionState.CONNECTED, MessageType.BCT_CRT);
-	}
 
 	/**
 	 * This methods sends a card from the deck to the player
@@ -332,10 +329,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public synchronized void removeNode(int nodeID) {
 		mPlayerClientManager.removeNode(nodeID);
-
-		mPlayerServerManager.removeClient(nodeID);
-		mPlayerServerManager.removePlayer(nodeID);
-
 	}
 
 	/**
@@ -372,7 +365,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	public void updateServerList(ArrayList<String> gameClients) {
 		// TODO Auto-generated method stub
-		mPlayerServerManager.updateServerList(gameClients);
+		mGameClientSocketManager.updateServerList(gameClients);
 	}
 
 	/**
@@ -381,20 +374,20 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	public void startElection() {
 
-		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
+		GamePlayerInfo nextPlayer = mGameClientSocketManager.getNextNeighbor();
 		if (nextPlayer != null) {
-			mPlayerServerManager.startElection();
+			mGameClientSocketManager.startElection();
 		} else {
 			System.out.println("Not enough players to elect a new leader");
 		}
 	}
 
 	public void connectToNeighbor() {
-		GamePlayerInfo nextPlayer = mPlayerServerManager.getNextNeighbor();
+		GamePlayerInfo nextPlayer = mGameClientSocketManager.getNextNeighbor();
 		if (nextPlayer != null) {
 			PlayerServerThread t = new PlayerServerThread(this, mPlayer.getGamePlayerInfo());
-			mPlayerServerManager.addPlayer(nextPlayer);
-			mPlayerServerManager.addClient(nextPlayer.getNodeID(), t);
+			mGameClientSocketManager.addPlayer(nextPlayer);
+			mGameClientSocketManager.addClient(nextPlayer.getNodeID(), t);
 
 			t.setGameClientInfo(nextPlayer);
 			t.setName("GameServer Election Socket Thread");
@@ -412,7 +405,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * @param mMessage
 	 */
 	public void sendMessageToNext(JSONObject mMessage) {
-		mPlayerServerManager.sendMessageToNeighbor(mMessage);
+		mGameClientSocketManager.sendMessageToNeighbor(mMessage);
 	}
 
 	/**
@@ -471,7 +464,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public boolean getReply() {
-		return mPlayerServerManager.isAllCRTReplied();
+		return mGameClientSocketManager.isAllCRTReplied();
 	}
 
 	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
@@ -522,7 +515,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 	
 	public GamePlayerInfo getNextPlayer(){
-		return mPlayerServerManager.getNextNeighbor();
+		return mGameClientSocketManager.getNextNeighbor();
 	}
 
 	public void resetGameStart(int num) {
@@ -530,7 +523,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public void broadcastClientList() {
-		mPlayerServerManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
+		mGameClientSocketManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
 	}
 	
 	public boolean isDealer() {
