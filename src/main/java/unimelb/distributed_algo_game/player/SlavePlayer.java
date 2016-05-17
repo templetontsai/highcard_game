@@ -46,7 +46,7 @@ public class SlavePlayer extends Player {
 	 */
 	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, MainGamePanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
-		gameClient = new GameClient(this, gameServerInfo.getIPAddress(), gameServerInfo.getPort());
+		gameClient = new GameClient(this, gameServerInfo.getIPAddress(), gameServerInfo.getPort(), true);
 		gameServer = GameServer.getInstance();
 		this.mPanel = panel;
 		mGameClientSocketManager = new GameClientSocketManager(this);

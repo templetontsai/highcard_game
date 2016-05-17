@@ -30,6 +30,30 @@ public class GameClientSocketManager {
 		}
 	}
 	
+	public void startElection(){
+		System.out.println("Current size of players is "+mListClients.size());
+		if(mListClients != null && mListClients.size() > 0) {
+			for (GameClient c : mListClients) {
+				JSONObject mMessage = new JSONObject();
+				BodyMessage mBodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo().getNodeID(), MessageType.ELE,
+						Integer.toString(mPlayer.getGamePlayerInfo().getNodeID()));
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", mBodyMessage);
+				boolean isConnectionActive = false;
+				System.out.println("Sending election message to "+c.getPlayer().getGamePlayerInfo().getNodeID());
+				c.sendMessage(mMessage);
+			}
+		}
+	}
+	
+	public void sendElectionMessage(JSONObject mMessage){
+		if(mListClients != null && mListClients.size() > 0) {
+			for (GameClient c : mListClients) {
+				c.sendMessage(mMessage);
+			}
+		}
+	}
+	
 	public void broadcastCRT(long timestamp) {
 		if(mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
@@ -41,7 +65,6 @@ public class GameClientSocketManager {
 				c.sendMessage(mMessage);
 			}
 		}
-		
 	}
 	
 	public boolean getReply() {
@@ -76,7 +99,7 @@ public class GameClientSocketManager {
 			int index = 0;
 			for (GamePlayerInfo info : mClientList) {
 				if (info.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID() && info.getNodeID() != 0) {
-					GameClient client = new GameClient(this.mPlayer, info.getIPAddress(), info.getPort());
+					GameClient client = new GameClient(this.mPlayer, info.getIPAddress(), info.getPort(), false);
 					client.setClientSocketManager(this);
 					client.connect();
 					Thread t = new Thread(client);

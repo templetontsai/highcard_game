@@ -312,18 +312,6 @@ public class PlayerClientThread extends Thread {
 			// game is no longer locked
 			isClientLockRound = false;
 			break;
-		case LST:
-			System.out.println("Received client list: " + mBodyMessage.getMessage());
-			updateClientList(mBodyMessage);
-			break;
-		case ELE:
-			System.out.println("Received election message from " + mBodyMessage.getNodeID());
-			sendElectionMessage(mBodyMessage);
-			break;
-		case COD:
-			System.out.println("Received coordinator message from " + mBodyMessage.getNodeID());
-			setNewCoordinator(mBodyMessage);
-			break;
 		case BCT_CRT:
 			while (mGameServer.isRequested() && mGameServer.getRequestedTimestamp() > (long) mBodyMessage.getMessage())
 				;// wait till out of critical session
@@ -340,99 +328,8 @@ public class PlayerClientThread extends Thread {
 		}
 	}
 
-	/**
-	 * This updates the current list of players in the game
-	 * 
-	 * @param mBodyMessage
-	 */
-	public void updateClientList(BodyMessage mBodyMessage) {
 
-		String clients = (String) mBodyMessage.getMessage();
-		String[] clientList = clients.split("\n");
-		ArrayList<String> gameClients = new ArrayList();
-
-		for (int i = 0; i < clientList.length; i++) {
-			String[] clientDetails = clientList[i].split(":");
-			// Only maintain list of clients not yourself
-			if (!clientDetails[0].equals(Integer.toString(mGameDealerInfo.getNodeID()))) {
-				// System.out.println(clientDetails[0]+"-"+mGameDealerInfo.getNodeID());
-				gameClients.add(clientList[i]);
-			}
-		}
-		System.out.println("Total added clients: " + gameClients.size());
-		mGameServer.updateServerList(gameClients);
-		mGameServer.connectToNeighbor();
-	}
-
-	/**
-	 * This sends an election message to the node's neighbor after comparing the
-	 * received node ID to it's own
-	 * 
-	 * @param mBodyMessage
-	 */
-	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
-		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
-		// Send message to the next node without changing it
-		if (messageNodeID > this.mGameDealerInfo.getNodeID()) {
-			// System.out.println(mGameDealerInfo.getNodeID()+" cannot be the
-			// new dealer");
-			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = mBodyMessage;
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
-
-			sendMessageToNext(mMessage);
-		} else if (messageNodeID < this.mGameDealerInfo.getNodeID()) {
-			// Don't forward to reduce number of messages
-
-		} else if (messageNodeID == this.mGameDealerInfo.getNodeID()) {
-			// This means i have received my election message and I am the new
-			// coordinator
-			mGameServer.setPlayerDealer();
-			//mGameServer.disconnect();
-
-			mBodyMessage.setMessageType(MessageType.COD);
-			mBodyMessage.setMessage(mGameDealerInfo);
-			System.out.println("Hell ya I'm in charge now ");
-
-			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = mBodyMessage;
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
-
-			sendMessageToNext(mMessage);
-
-			//mGameServer.startServer();
-		}
-
-	}
-
-	/**
-	 * This sets the new coordinator of the game
-	 * 
-	 * @param mBodyMessage
-	 */
-	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
-
-		GamePlayerInfo newDealer = (GamePlayerInfo) mBodyMessage.getMessage();
-		System.out.println("The new dealer is node " + newDealer.getNodeID());
-		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
-			// Update the new server details on the game client
-			mGameServer.setGameServerLeader(newDealer);
-
-			//Only forward the message to the next player if the neighbor isn't the new dealer
-			if(mGameServer.getNextPlayer().getNodeID()!=newDealer.getNodeID()){
-				JSONObject mMessage = new JSONObject();
-				BodyMessage bodyMessage = mBodyMessage;
-				mBodyMessage.setMessageType(MessageType.COD);
-				mMessage.put("header", ClientConnectionState.CONNECTED);
-				mMessage.put("body", bodyMessage);
-				sendMessageToNext(mMessage);
-			}
-
-			mGameServer.reconnectClient();
-		}
-	}
+	
 
 	/**
 	 * Sends message to a client.
