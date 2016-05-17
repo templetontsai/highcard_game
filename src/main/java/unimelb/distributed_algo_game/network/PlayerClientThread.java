@@ -205,7 +205,7 @@ public class PlayerClientThread extends Thread {
 
 		@Override
 		public void run() {
-
+			System.out.println("sending still alve from " + mGameDealerInfo.getNodeID() + " to " + mGameClientInfo.getNodeID());
 			sendStillAliveMessage();
 
 		}
@@ -249,6 +249,9 @@ public class PlayerClientThread extends Thread {
 				mMessage.put("header", connectionState);
 				mMessage.put("body", mBodyMessage);
 				sendMessage(mMessage);
+				// Start the still alive timer beacon to the leader
+				serverStillAliveTimer = new Timer();
+				serverStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 
 			}
 
@@ -260,9 +263,7 @@ public class PlayerClientThread extends Thread {
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
 				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
-				// Start the still alive timer beacon to the leader
-				serverStillAliveTimer = new Timer();
-				serverStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
+				
 				break;
 			case CARD_RECEIVED:
 				Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
