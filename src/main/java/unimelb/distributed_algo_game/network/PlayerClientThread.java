@@ -66,6 +66,8 @@ public class PlayerClientThread extends Thread {
 	private GamePlayerInfo mGameClientInfo = null;
 
 	private Timer timer = null;
+	
+	private Timer serverStillAliveTimer = null;
 
 	private Card c;
 
@@ -154,11 +156,6 @@ public class PlayerClientThread extends Thread {
 
 			if (timer != null) {
 				timer.cancel();
-				// Only carry out an election if we lose the dealer of the game
-/*
-				if (mGameClientInfo.getNodeID() == mGameServer.getPlayer().getGameServerInfo().getNodeID()) {
-					startElection();
-				}*/
 
 			}
 
@@ -175,7 +172,7 @@ public class PlayerClientThread extends Thread {
 	 * This receives a still alive message from the client
 	 *
 	 */
-	final class StillAliveTimerTask extends TimerTask {
+	final class checkClientStillAliveTimerTask extends TimerTask {
 
 		@Override
 		public void run() {
@@ -203,14 +200,16 @@ public class PlayerClientThread extends Thread {
 		}
 
 	}
+	
+	final class StillAliveTimerTask extends TimerTask {
 
-	/**
-	 * This starts an election on the server
-	 */
-	public void startElection() {
-		// Immediately stop running player client
-		//mGameServer.disconnectClient();
-		mGameServer.startElection();
+		@Override
+		public void run() {
+
+			sendStillAliveMessage();
+
+		}
+
 	}
 
 	/**
@@ -261,7 +260,9 @@ public class PlayerClientThread extends Thread {
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
 				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
-
+				// Start the still alive timer beacon to the leader
+				serverStillAliveTimer = new Timer();
+				serverStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 			case CARD_RECEIVED:
 				Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
@@ -275,7 +276,7 @@ public class PlayerClientThread extends Thread {
 				if (timer != null)
 					timer.cancel();
 				timer = new Timer();
-				timer.schedule(new StillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+				timer.schedule(new checkClientStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 
 				// System.out.println("Node: " +
 				// this.mGameClientInfo.getNodeID() + " is still playing");
@@ -327,9 +328,6 @@ public class PlayerClientThread extends Thread {
 
 		}
 	}
-
-
-	
 
 	/**
 	 * Sends message to a client.

@@ -71,6 +71,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 
 	private Timer timer = null;
+	
+	private Timer checkServerTimer = null;
 
 	private boolean isGameReady = false;
 
@@ -163,9 +165,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 				mObjectInputStream.close();
 				mSocket.close();
 				System.out.println("conection closed");
-				//Trigger election is this connection belongs to the dealer thread
-				if(isDealer)
-				   startElection();
 
 			} catch (IOException ioe) {
 				// TODO Adding error handling
@@ -226,7 +225,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 			case CARD_RECEIVED:
 				break;
 			case STILL_ALIVE:
-
+				if (checkServerTimer != null)
+					checkServerTimer.cancel();
+				checkServerTimer = new Timer();
+				checkServerTimer.schedule(new checkServerStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 				break;
 			case CRT_RPY:
 				System.out.println("CRT is replied");
@@ -340,6 +342,24 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			sendStillAliveMessage();
 
+		}
+
+	}
+	
+	/**
+	 * This receives a still alive message from the client
+	 *
+	 */
+	final class checkServerStillAliveTimerTask extends TimerTask {
+
+		@Override
+		public void run() {
+
+			synchronized (mLock) {
+                System.out.println("The server left the game");
+				checkServerTimer.cancel();
+				//startElection();
+			}
 		}
 
 	}
