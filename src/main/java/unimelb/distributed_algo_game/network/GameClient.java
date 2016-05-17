@@ -69,9 +69,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
 
+	private Timer sendStillAliveTimer = null;
 
-	private Timer timer = null;
-	
 	private Timer checkServerTimer = null;
 
 	private boolean isGameReady = false;
@@ -83,14 +82,15 @@ public final class GameClient implements Runnable, NetworkInterface {
 	private List<GamePlayerInfo> mPlayerInfoList = null;
 
 	private GameClientSocketManager mGameClientSocketManager = null;
-	
+
 	private boolean isReplied = false;
-	
+
 	private String ipAddress = null;
-	
+
 	private String port = null;
 
 	private boolean isDealer = false;
+
 	/**
 	 * Instantiates a new game client.
 	 */
@@ -161,6 +161,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 				 * is no longer running
 				 */
 
+				if(sendStillAliveTimer != null)
+					sendStillAliveTimer.cancel();
 				mObjectOutputStream.close();
 				mObjectInputStream.close();
 				mSocket.close();
@@ -203,7 +205,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			default:
 				System.out.println("Uknown State");
 			}
-		} 
+		}
 
 	}
 
@@ -218,17 +220,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID());
 				this.clientConnectionState = ClientConnectionState.CONNECTED;
 				// Start the still alive timer beacon to the leader
-				timer = new Timer();
-				timer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
+				sendStillAliveTimer = new Timer();
+				sendStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 
 			case CARD_RECEIVED:
 				break;
-			case STILL_ALIVE:
+			case SERVER_STILL_ALIVE:
 				if (checkServerTimer != null)
 					checkServerTimer.cancel();
 				checkServerTimer = new Timer();
-				checkServerTimer.schedule(new checkServerStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+				checkServerTimer.schedule(new checkServerStillAliveTimerTask(),
+						NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 				break;
 			case CRT_RPY:
 				System.out.println("CRT is replied");
@@ -272,26 +275,27 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println("Game is ready to play, start request card from dealer");
 			// Init client socket manager here to connect to all the other nodes
 			// before the game starts
-			
+
 			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			if (isGameReady) {
-				
+
 				mMainGameLoginClientPanel.showGameTable(true, mNodeIDList);
 			}
 			break;
-		case BCT_LST:
+		case BCT_NODE_LST:
 
 			mPlayerInfoList = (List<GamePlayerInfo>) mBodyMessage.getMessage();
 			updateNodeList(mPlayerInfoList);
-			System.out.println("node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
+			System.out.println("BCT_NODE_LST: node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
 
 			break;
-		case BCT_UPT:
+		case BCT_NODE_UPT:
 			mPlayerInfoList = (List<GamePlayerInfo>) mBodyMessage.getMessage();
 			updateNodeList(mPlayerInfoList);
-			System.out.println("update list");
+			System.out.println("BCT_NODE_UPT: node" + mPlayer.getGamePlayerInfo().getNodeID() + " update list");
 			mMainGameLoginClientPanel.updateGameTable(mNodeIDList);
 			break;
+
 		case BCT_CRT:
 			System.out.println(mBodyMessage.getMessage());
 			mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -327,7 +331,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
 		BodyMessage mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK,
-				ACKCode.STILL_ALIVE);
+				ACKCode.CLIENT_STILL_ALIVE);
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", mBodyMessage);
 		sendMessage(mMessage);
@@ -339,11 +343,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 		public void run() {
 
 			sendStillAliveMessage();
+			
 
 		}
 
 	}
-	
+
 	/**
 	 * This receives a still alive message from the client
 	 *
@@ -354,7 +359,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		public void run() {
 
 			synchronized (mLock) {
-                System.out.println("The server left the game");
+				System.out.println("The server left the game");
 				checkServerTimer.cancel();
 				startElection();
 			}
@@ -439,11 +444,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			mObjectOutputStream.close();
 			mObjectInputStream.close();
 			mSocket.close();
-			timer.cancel();
+			sendStillAliveTimer.cancel();
 		} catch (IOException ioe) {
 			// TODO Adding error handling
 			ioe.printStackTrace();
-			timer.cancel();
+			sendStillAliveTimer.cancel();
 		}
 
 	}
@@ -472,9 +477,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			}
 		} catch (IOException ioe) {
 
-			timer.cancel();
+			
 			isRunning = false;
 			mGameClientSocketManager.removeSocketClient(this);
+			if(sendStillAliveTimer != null)
+				sendStillAliveTimer.cancel();
 			System.out.println("node has left game");
 
 		}
@@ -497,13 +504,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 			return null;
 
 		} catch (ClassNotFoundException e) {
-			
+
 			System.out.println("ClassNotFoundException");
 		} catch (IOException ioe) {
-			
+
 			isRunning = false;
+			mGameClientSocketManager.removeSocketClient(this);
+			if(sendStillAliveTimer != null)
+				sendStillAliveTimer.cancel();
 			System.out.println("node has left game");
-			
+
+
 		}
 
 		return message;
@@ -551,14 +562,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
-
 	/**
 	 * Returns the details of the server the client connects to
 	 * 
 	 * @return
 	 */
 	public String getServerDetails() {
-		return mPlayer.getGameServerInfo().getIPAddress() + ":" + mPlayer.getGameServerInfo().getPort();
+		StringBuilder sb = new StringBuilder();
+		sb.append(mPlayer.getGameServerInfo().getNodeID() + ":" + mPlayer.getGameServerInfo().getIPAddress() + ":"
+				+ mPlayer.getGameServerInfo().getPort() + "\n");
+		return sb.toString();
+
 	}
 
 	/**
@@ -594,18 +608,19 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public void setClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
 		this.mGameClientSocketManager = mGameClientSocketManager;
 	}
+
 	public boolean getReply() {
 		return this.isReplied;
 	}
-	
+
 	/**
 	 * Starts a new leader election
 	 */
-	public void startElection(){
+	public void startElection() {
 		System.out.println("Starting election");
 		mGameClientSocketManager.startElection();
 	}
-	
+
 	/**
 	 * This sends an election message to the node's neighbor after comparing the
 	 * received node ID to it's own
@@ -630,8 +645,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 		} else if (messageNodeID == this.mPlayer.getGamePlayerInfo().getNodeID()) {
 			// This means i have received my election message and I am the new
 			// coordinator
-			//mGameServer.setPlayerDealer();
-			//mGameServer.disconnect();
+			// mGameServer.setPlayerDealer();
+			// mGameServer.disconnect();
 
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(this.mPlayer.getGamePlayerInfo());
@@ -646,7 +661,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 
 	}
-	
+
 	/**
 	 * This sets the new coordinator of the game
 	 * 
@@ -658,7 +673,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		System.out.println("The new dealer is node " + newDealer.getNodeID());
 		if (newDealer.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID()) {
 			// Update the new server details on the game client
-			//mGameServer.setGameServerLeader(newDealer);
+			// mGameServer.setGameServerLeader(newDealer);
 
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
@@ -668,8 +683,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 			mGameClientSocketManager.sendElectionMessage(mMessage);
 		}
 	}
-	
-	public Player getPlayer(){
+
+	public Player getPlayer() {
 		return mPlayer;
 	}
 }

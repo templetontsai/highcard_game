@@ -12,6 +12,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
+import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
@@ -29,7 +30,8 @@ public final class PlayerClientManager {
 	private Map<Integer, PlayerClientThread> mPlayerClientList = null;
 	private Map<Integer, Player> mLocalPlayerList = null;
 	private boolean isLockRound = false;
-
+	private MainGamePanel mMainGamePanel = null;
+	private GameServer mGameServer = null;
 
 	private static final int GAME_SIZE = 3;
 
@@ -47,15 +49,27 @@ public final class PlayerClientManager {
 
 	}
 
+	public PlayerClientManager(int playerClientNum, Player mPlayer, GameServer mGameServer) {
+
+		mPlayerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
+		mLocalPlayerList = new HashMap<Integer, Player>();
+		mNodeList = new ArrayList<GamePlayerInfo>();
+		this.mPlayer = mPlayer;
+		mLocalPlayerList.put(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer);
+		mNodeList.add(mPlayer.getGamePlayerInfo());
+		this.mGameServer = mGameServer;
+
+	}
+
 	public synchronized void addClient(int nodeID, PlayerClientThread mPlayerClientThread) {
 		mPlayerClientList.put(nodeID, mPlayerClientThread);
 	}
 
 	public synchronized void addNode(GamePlayerInfo gamePlayerInfo) {
-		
+
 		mLocalPlayerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
 		mNodeList.add(gamePlayerInfo);
-		
+		mMainGamePanel.updatePlayerList(gamePlayerInfo.getNodeID());
 
 	}
 
@@ -65,25 +79,15 @@ public final class PlayerClientManager {
 		for (GamePlayerInfo gamePlayerInfo : mNodeList) {
 			if (gamePlayerInfo.getNodeID() == nodeID) {
 				toRemove = index;
-				
+
 			}
 			index++;
 		}
-		if(toRemove!=-1){
-		   mNodeList.remove(toRemove);
-		   mLocalPlayerList.remove(toRemove);
-		   mPlayerClientList.remove(toRemove);
+		if (toRemove != -1) {
+			mNodeList.remove(toRemove);
+			mLocalPlayerList.remove(toRemove);
+			mPlayerClientList.remove(toRemove);
 		}
-	}
-	
-
-	/**
-	 * This sets the player acting as the server of this client manager
-	 */
-	public void setPlayer(Player mPlayer) {
-		this.mPlayer = mPlayer;
-		mLocalPlayerList.put(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer);
-		mNodeList.add(mPlayer.getGamePlayerInfo());
 	}
 
 	/**
@@ -93,7 +97,7 @@ public final class PlayerClientManager {
 			MessageType messageType) {
 		for (Map.Entry<Integer, PlayerClientThread> t : mPlayerClientList.entrySet()) {
 			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, object);
+			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), messageType, object);
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
 			t.getValue().sendMessage(mMessage);
@@ -108,7 +112,8 @@ public final class PlayerClientManager {
 
 		if (mPlayerClientList.size() > 0) {
 			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo().getNodeID(), messageType, message);
+			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo().getNodeID(), messageType,
+					message);
 			mMessage.put("header", mConnectionState);
 			mMessage.put("body", bodyMessage);
 			mPlayerClientList.get(clientID).sendMessage(mMessage);
@@ -116,16 +121,16 @@ public final class PlayerClientManager {
 	}
 
 	public synchronized void sendNodeList(ClientConnectionState mConnectionState, MessageType messageType) {
-		
+
 		if (mNodeList != null && mNodeList.size() > 0) {
 			for (Map.Entry<Integer, PlayerClientThread> t : mPlayerClientList.entrySet()) {
 				JSONObject mMessage = new JSONObject();
-				
-				BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), messageType, mNodeList);
+
+				BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), messageType, mNodeList);
 
 				mMessage.put("header", mConnectionState);
 				mMessage.put("body", bodyMessage);
-				
+
 				t.getValue().sendMessage(mMessage);
 			}
 		}
@@ -146,7 +151,7 @@ public final class PlayerClientManager {
 
 	}
 
-	public String getPlayersSockets() {
+	public synchronized String getPlayersSockets() {
 		StringBuilder sb = new StringBuilder();
 		for (Map.Entry<Integer, PlayerClientThread> t : mPlayerClientList.entrySet()) {
 			GamePlayerInfo playerInfo = t.getValue().getClientGamePlayerInfo();
@@ -184,7 +189,7 @@ public final class PlayerClientManager {
 		return winnerNodeID;
 	}
 
-	public Card dealerDrawnCard() {
+	public synchronized void dealerDrawnCard() {
 		Card c = null;
 		if (isLockRound()) {
 			// Dealer draw a card
@@ -193,9 +198,13 @@ public final class PlayerClientManager {
 			Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
 			playerCard.put(mPlayer.getGamePlayerInfo().getNodeID(), c);
 			notifyAllClients(playerCard, ClientConnectionState.CONNECTED, MessageType.BCT_CRD);
+
+			if (c != null) {
+				mMainGamePanel.updateCard(c, mPlayer.getGamePlayerInfo().getNodeID());
+				mMainGamePanel.declareWinner(checkWinner());
+			}
 		}
 
-		return c;
 	}
 
 	public synchronized List<Integer> getPlayerIDList() {
@@ -207,7 +216,76 @@ public final class PlayerClientManager {
 		System.out.println(mLocalPlayerList.size());
 		return playerIDList;
 	}
-	
 
+	public synchronized void broadcastGameResultToNodes(Object object) {
+
+		notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RST);
+	}
+
+	public synchronized void broadcastGameReadyToNodes(Object object) {
+		notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RDY);
+	}
+
+	public synchronized void broadcastNodeCard(Object object) {
+		notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_CRD);
+
+	}
+
+	public synchronized void broadcastNodeList() {
+		sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_NODE_LST);
+	}
+
+	public synchronized void broadcastUpdateNodeList() {
+		sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_NODE_UPT);
+	}
+
+	public synchronized int getNumOfNodes() {
+		return getPlayerIDList().size();
+	}
+
+	public void setPanel(MainGamePanel mMainGamePanel) {
+		this.mMainGamePanel = mMainGamePanel;
+	}
+
+	public synchronized void updateGameTable() {
+		if (mMainGamePanel == null) {
+			System.out.println("mMainGamePanel == null");
+
+		} else {
+			mMainGamePanel.updateGameTable(getPlayerIDList());
+		}
+	}
+
+	public boolean isDealer() {
+		return mPlayer.isDealer();
+	}
+
+	public synchronized Card getCard(int index) {
+		return mPlayer.getCard(index);
+	}
+
+	public synchronized void resetGameStart(int num) {
+		mGameServer.resetGameStart(num);
+	}
+
+	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
+		mGameServer.setIsRequested(isRequested, requestedTimestamp);
+	}
+
+	public long getRequestedTimestamp() {
+		return mGameServer.getRequestedTimestamp();
+	}
+
+	public boolean isRequested() {
+		return mGameServer.isRequested();
+	}
+
+	public synchronized void updateCard(Card c, int nodeID) {
+		this.mMainGamePanel.updateCard(c, nodeID);
+	}
+
+	public synchronized void showGameTable() {
+		this.mMainGamePanel.showGameTable(true, getPlayerIDList());
+	}
 
 }

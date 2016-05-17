@@ -86,6 +86,9 @@ public class GameClientSocketManager {
 				&& gameClientInfo.getNodeID() != 0) {
 			GameClient client = new GameClient(this.mPlayer, gameClientInfo.getIPAddress(), gameClientInfo.getPort(),
 					false);
+			// Adding to the first gameclient and pass ref for manager later run
+			// this manager thread once it gets the list of nodes in the network
+			//mGameClientSocketManager.addSocketClient(gameClient);
 			client.setClientSocketManager(this);
 			mListClients.add(client);
 		}
@@ -126,7 +129,19 @@ public class GameClientSocketManager {
 		}
 		
 		return this.isReplied;
-		
 	}
+	
+	public synchronized void broadcastClientsList(){
+		for (GameClient client : mListClients) {
+			JSONObject mMessage = new JSONObject();
+			
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), MessageType.BCT_CLIENT_LST, client.getServerDetails());
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+			client.sendMessage(mMessage);
+		}
+	}
+	
+
 
 }

@@ -67,6 +67,7 @@ public class SlavePlayer extends Player {
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
+		gameServer.setClientSocketManager(mGameClientSocketManager);
 
 		gameClient.setPanel(mPanel);
 		gameClientThread = new Thread(gameClient);
@@ -74,10 +75,7 @@ public class SlavePlayer extends Player {
 
 		gameClientThread.setName("Slave Player Socket Thread0");
 		gameClientThread.start();
-		// Adding to the first gameclient and pass ref for manager later run
-		// this manager thread once it gets the list of nodes in the network
-		//mGameClientSocketManager.addSocketClient(gameClient);
-		gameClient.setClientSocketManager(mGameClientSocketManager);
+	
 	
 		gameClient.play();
 

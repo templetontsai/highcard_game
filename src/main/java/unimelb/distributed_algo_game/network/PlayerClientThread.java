@@ -22,7 +22,7 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
-import unimelb.distributed_algo_game.network.PlayerServerThread.StillAliveTimerTask;
+import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.pokers.Card;
 
@@ -52,8 +52,8 @@ public class PlayerClientThread extends Thread {
 	/** The boolean for running the client thread */
 	private boolean isRunning = false;
 
-	/** The game server object */
-	private GameServer mGameServer = null;
+
+	private PlayerClientManager mPlayerClientManager = null;
 
 	private int clientNodeID = -1;
 
@@ -65,11 +65,13 @@ public class PlayerClientThread extends Thread {
 
 	private GamePlayerInfo mGameClientInfo = null;
 
-	private Timer timer = null;
+	private Timer checkStillAliveTimer = null;
 	
 	private Timer serverStillAliveTimer = null;
 
 	private Card c;
+	
+
 
 	/**
 	 * Instantiates a new player client thread.
@@ -79,7 +81,7 @@ public class PlayerClientThread extends Thread {
 	 * @param clientID
 	 *            the client id
 	 */
-	public PlayerClientThread(Socket mSocket, GameServer mGameServer, GamePlayerInfo mGameDealerInfo) {
+	public PlayerClientThread(Socket mSocket, PlayerClientManager mPlayerClientManager, GamePlayerInfo mGameDealerInfo) {
 		if (mSocket != null) {
 			this.mSocket = mSocket;
 		} else
@@ -87,7 +89,7 @@ public class PlayerClientThread extends Thread {
 
 		mLock = new Object();
 		mMessage = new JSONObject();
-		this.mGameServer = mGameServer;
+		this.mPlayerClientManager = mPlayerClientManager;
 		this.mGameDealerInfo = mGameDealerInfo;
 		this.mGameClientInfo = new GamePlayerInfo();
 	}
@@ -149,22 +151,19 @@ public class PlayerClientThread extends Thread {
 
 		// Close the input and output streams to the server
 		try {
+
 			mObjectInputStream.close();
 			mObjectOutputStream.close();
 
 			mSocket.close();
 
-			if (timer != null) {
-				timer.cancel();
-
-			}
-
+			
+			updateListAndGUI();
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
-			// Print out the details of the exception error
-			if (timer != null)
-				timer.cancel();
-			ioe.printStackTrace();
+			System.out.println("Client closed");
+			updateListAndGUI();
+			
 		}
 	}
 
@@ -176,29 +175,28 @@ public class PlayerClientThread extends Thread {
 
 		@Override
 		public void run() {
-
-			synchronized (mLock) {
-
-				timer.cancel();
-				isRunning = false;
-				if(mGameServer.isDealer()) {
-					
-					mGameServer.removeNode(clientNodeID);
-					mGameServer.broadcastUpdateNodeList();
-
-					mGameServer.resetGameStart(mGameServer.getNumofNodes());
-					mGameServer.updateGameTable();
-
-					System.out.println("Node:" + clientNodeID + " has left the game");
-				} else {
-					mGameServer.removeNode(clientNodeID);
-					mGameServer.broadcastUpdateNodeList();
-				}
 			
-
+			synchronized (mLock) {
+				isRunning = false;
 			}
 		}
 
+	}
+	
+	private void updateListAndGUI() {
+		if(mPlayerClientManager.isDealer()) {
+			
+			mPlayerClientManager.removeNode(clientNodeID);
+			mPlayerClientManager.broadcastUpdateNodeList();
+
+			mPlayerClientManager.resetGameStart(mPlayerClientManager.getNumOfNodes());
+			mPlayerClientManager.updateGameTable();
+
+			System.out.println("Node:" + clientNodeID + " has left the game");
+		} else {
+			mPlayerClientManager.removeNode(clientNodeID);
+			mPlayerClientManager.broadcastUpdateNodeList();
+		}
 	}
 	
 	final class StillAliveTimerTask extends TimerTask {
@@ -217,7 +215,7 @@ public class PlayerClientThread extends Thread {
 	 */
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
-		BodyMessage mBodyMessage = new BodyMessage(this.mGameDealerInfo, MessageType.ACK, ACKCode.STILL_ALIVE);
+		BodyMessage mBodyMessage = new BodyMessage(this.mGameDealerInfo, MessageType.ACK, ACKCode.SERVER_STILL_ALIVE);
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", mBodyMessage);
 		sendMessage(mMessage);
@@ -268,19 +266,18 @@ public class PlayerClientThread extends Thread {
 			case CARD_RECEIVED:
 				Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
 				playerCard.put(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
-				mGameServer.broadcastNodeCard(playerCard);
-				mGameServer.updateCard(c, mBodyMessage.getGamePlayerInfo().getNodeID());
+				mPlayerClientManager.broadcastNodeCard(playerCard);
+				mPlayerClientManager.updateCard(c, mBodyMessage.getGamePlayerInfo().getNodeID());
 				isClientLockRound = true;
 
 				break;
-			case STILL_ALIVE:
-				if (timer != null)
-					timer.cancel();
-				timer = new Timer();
-				timer.schedule(new checkClientStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+			case CLIENT_STILL_ALIVE:
+				if (checkStillAliveTimer != null)
+					checkStillAliveTimer.cancel();
+				checkStillAliveTimer = new Timer();
+				checkStillAliveTimer.schedule(new checkClientStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 
-				// System.out.println("Node: " +
-				// this.mGameClientInfo.getNodeID() + " is still playing");
+				System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
 				break;
 			default:
 				System.out.println("Uknown ACK code");
@@ -298,8 +295,8 @@ public class PlayerClientThread extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			c = mGameServer.getCard(1);
-			mGameServer.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
+			c = mPlayerClientManager.getCard(1);
+			mPlayerClientManager.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
 			// mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
 			mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.CRD, c);
 
@@ -315,7 +312,7 @@ public class PlayerClientThread extends Thread {
 			isClientLockRound = false;
 			break;
 		case BCT_CRT:
-			while (mGameServer.isRequested() && mGameServer.getRequestedTimestamp() > (long) mBodyMessage.getMessage())
+			while (mPlayerClientManager.isRequested() && mPlayerClientManager.getRequestedTimestamp() > (long) mBodyMessage.getMessage())
 				;// wait till out of critical session
 
 			mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -352,21 +349,13 @@ public class PlayerClientThread extends Thread {
 		} catch (IOException ioe) {
 
 			isRunning = false;
-			if (timer != null)
-				timer.cancel();
-			mGameServer.removeNode(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in sendMessage, node: " + this.mGameClientInfo.getNodeID());
 
 		}
 
 	}
 
-	/**
-	 * This sends a message to the next player in the logical ring
-	 */
-	public synchronized void sendMessageToNext(JSONObject mMessage) {
-		mGameServer.sendMessageToNext(mMessage);
-	}
+
 
 	/**
 	 * Receive message from the client.
@@ -390,12 +379,8 @@ public class PlayerClientThread extends Thread {
 		} catch (IOException ioe) {
 
 			isRunning = false;
-			if (timer != null)
-				timer.cancel();
-			mGameServer.removeNode(this.mGameClientInfo.getNodeID());
 			System.out.println("Connection lost in receiveMessage client, node: " + this.mGameClientInfo.getNodeID());
 
-			// ioe.printStackTrace();
 		}
 
 		return message;
