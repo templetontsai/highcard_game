@@ -64,8 +64,10 @@ public class PlayerClientThread extends Thread {
 	private GamePlayerInfo mGameDealerInfo = null;
 
 	private GamePlayerInfo mGameClientInfo = null;
-
-	private Timer checkStillAliveTimer = null;
+	
+	private Timer checkNodeStillAliveTimer = null;
+	
+	private Timer checkClientStillAliveTimer = null;
 	
 	private Timer serverStillAliveTimer = null;
 
@@ -166,7 +168,18 @@ public class PlayerClientThread extends Thread {
 			
 		}
 	}
+	
+	final class checkNodeStillAliveTimerTask extends TimerTask {
 
+		@Override
+		public void run() {
+			
+			synchronized (mLock) {
+				isRunning = false;
+			}
+		}
+
+	}
 	/**
 	 * This receives a still alive message from the client
 	 *
@@ -271,11 +284,19 @@ public class PlayerClientThread extends Thread {
 				isClientLockRound = true;
 
 				break;
+			case NODE_STILL_ALIVE:
+				if (checkNodeStillAliveTimer != null)
+					checkNodeStillAliveTimer.cancel();
+				checkNodeStillAliveTimer = new Timer();
+				checkNodeStillAliveTimer.schedule(new checkNodeStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+
+				System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
+				break;
 			case CLIENT_STILL_ALIVE:
-				if (checkStillAliveTimer != null)
-					checkStillAliveTimer.cancel();
-				checkStillAliveTimer = new Timer();
-				checkStillAliveTimer.schedule(new checkClientStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+				if (checkClientStillAliveTimer != null)
+					checkClientStillAliveTimer.cancel();
+				checkClientStillAliveTimer = new Timer();
+				checkClientStillAliveTimer.schedule(new checkClientStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 
 				System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still playing");
 				break;

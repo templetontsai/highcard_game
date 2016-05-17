@@ -15,7 +15,7 @@ public class BodyMessage implements Serializable {
 	private Object message;
 
 	public enum ACKCode {
-		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), CLIENT_STILL_ALIVE(2), SERVER_STILL_ALIVE(3), CRT_RPY(4);
+		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), NODE_STILL_ALIVE(2), CLIENT_STILL_ALIVE(3), SERVER_STILL_ALIVE(4), CRT_RPY(5);
 		/** The code. */
 		private int code;
 
