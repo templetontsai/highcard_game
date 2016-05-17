@@ -67,9 +67,10 @@ public class SlavePlayer extends Player {
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
-		gameServer.setClientSocketManager(mGameClientSocketManager);
+		
 
 		gameClient.setPanel(mPanel);
+		gameClient.setClientSocketManager(mGameClientSocketManager);
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
 

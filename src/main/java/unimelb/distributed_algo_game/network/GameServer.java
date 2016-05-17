@@ -120,6 +120,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 			// This runs if the player is a client
 		} else {
 			try {
+				
 				runSlaveState();
 			} catch (IOException ioe) {
 				// Display the details of the exception error
@@ -150,7 +151,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// Listen for messages from clients and add them to the
 					// thread pool
 					mSocket = mServerSocket.accept();
-					System.out.println("a client connected");
+					System.out.println("a client connected to node" + mPlayer.getGamePlayerInfo().getNodeID());
 					PlayerClientThread t = new PlayerClientThread(mSocket, mPlayerClientManager, mPlayer.getGamePlayerInfo());
 					
 					t.setName("GameServer Socket Thread");
@@ -208,7 +209,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// thread pool
 					System.out.println("Waiting for new server clients");
 					mSocket = mServerSocket.accept();
-					System.out.println("a client connected in slave state");
+					System.out.println("a client connected to node" + mPlayer.getGamePlayerInfo().getNodeID());
 					PlayerClientThread t = new PlayerClientThread(mSocket, mPlayerClientManager, mPlayer.getGamePlayerInfo());
 
 					t.setName("GameServer Socket Thread");
@@ -219,7 +220,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
-					mGameClientSocketManager.addSocketClient(t.getClientGamePlayerInfo());
+					
 					//mGameClientSocketManager.broadcastClientsList();
 
 				}
@@ -424,7 +425,4 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	
 
-	public void setClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
-		this.mGameClientSocketManager = mGameClientSocketManager;
-	}
 }

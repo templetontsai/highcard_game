@@ -23,23 +23,19 @@ public class GameClientSocketManager {
 		this.mPlayer = mPlayer;
 	}
 
-	public void broadcastToAllServers() {
-		for (GameClient c : mListClients) {
-			// c.sendMessage(mGameSendDataObject);
-		}
-	}
+
 
 	public void startElection() {
 		System.out.println("Current size of players is " + mListClients.size());
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				JSONObject mMessage = new JSONObject();
-				BodyMessage mBodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo().getNodeID(), MessageType.ELE,
+				BodyMessage mBodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), MessageType.ELE,
 						Integer.toString(mPlayer.getGamePlayerInfo().getNodeID()));
 				mMessage.put("header", ClientConnectionState.CONNECTED);
 				mMessage.put("body", mBodyMessage);
-				boolean isConnectionActive = false;
-				System.out.println("Sending election message to " + c.getPlayer().getGamePlayerInfo().getNodeID());
+
+				System.out.println("Sending start election message to " + c.getPlayerSSNodeID());
 				c.sendMessage(mMessage);
 			}
 		}
@@ -48,9 +44,37 @@ public class GameClientSocketManager {
 	public void sendElectionMessage(JSONObject mMessage) {
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
+				System.out.println("Sending election message to " + c.getPlayerSSNodeID());
 				c.sendMessage(mMessage);
 			}
 		}
+	}
+
+	/**
+	 * This sends an election message to the node's neighbor after comparing the
+	 * received node ID to it's own
+	 * 
+	 * @param mBodyMessage
+	 */
+	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
+		if (mListClients != null && mListClients.size() > 0) {
+			for (GameClient c : mListClients) {
+				JSONObject mMessage = new JSONObject();
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", mBodyMessage);
+				c.sendMessage(mMessage);
+			}
+		}
+
+	}
+
+	/**
+	 * This sets the new coordinator of the game
+	 * 
+	 * @param mBodyMessage
+	 */
+	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
+
 	}
 
 	public void broadcastCRT(long timestamp) {
@@ -81,28 +105,31 @@ public class GameClientSocketManager {
 	}
 
 	public void addSocketClient(GamePlayerInfo gameClientInfo) {
-
+		System.out.println("Socket Client Size:" + mListClients.size());
 		if (gameClientInfo.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID()
 				&& gameClientInfo.getNodeID() != 0) {
 			GameClient client = new GameClient(this.mPlayer, gameClientInfo.getIPAddress(), gameClientInfo.getPort(),
 					false);
+			client.setPlayerSSNodeID(gameClientInfo.getNodeID());
 			// Adding to the first gameclient and pass ref for manager later run
 			// this manager thread once it gets the list of nodes in the network
-			//mGameClientSocketManager.addSocketClient(gameClient);
+			// mGameClientSocketManager.addSocketClient(gameClient);
 			client.setClientSocketManager(this);
 			mListClients.add(client);
+			System.out.println("Socket Client Size:" + mListClients.size());
 		}
 	}
 
 	public void removeSocketClient(GameClient gameClient) {
-		System.out.println("removing gameclient");
+
 		mListClients.remove(gameClient);
+		System.out.println("removing gameclient, Socket Client Size: " + mListClients.size());
 
 	}
 
 	public void initGameClientsConnection() {
 		if (mListClients != null) {
-			int index = 0;
+
 			for (GameClient client : mListClients) {
 
 				client.connect();
@@ -110,38 +137,36 @@ public class GameClientSocketManager {
 				t.setName("Slave Player Socket Thread" + client.getPlayer().getGamePlayerInfo().getNodeID());
 				t.start();
 				client.play();
-				mListClients.add(client);
+
 			}
-			index++;
+
 		}
 	}
-	
+
 	public synchronized boolean isAllCRTReplied() {
-		if(mListClients.size() >= 1) {
+		if (mListClients.size() >= 1) {
 			for (GameClient client : mListClients) {
 				this.isReplied = client.getReply();
 			}
-			
 
 		} else {
-			
-			this.isReplied =  true;
+
+			this.isReplied = true;
 		}
-		
+
 		return this.isReplied;
 	}
-	
-	public synchronized void broadcastClientsList(){
+
+	public synchronized void broadcastClientsList() {
 		for (GameClient client : mListClients) {
 			JSONObject mMessage = new JSONObject();
-			
-			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), MessageType.BCT_CLIENT_LST, client.getServerDetails());
+
+			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), MessageType.BCT_CLIENT_LST,
+					client.getServerDetails());
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 			client.sendMessage(mMessage);
 		}
 	}
-	
-
 
 }

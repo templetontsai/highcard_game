@@ -208,6 +208,7 @@ public class MainGamePanel extends JPanel {
 
 				p = new SlavePlayer("Node" + nodeID, new GamePlayerInfo(gamePlayerInfo, false),
 						new GamePlayerInfo(gameServerInfo, false), self);
+				p.setDealer(false);
 				p.play();
 				btnStart.setEnabled(false);
 

@@ -33,23 +33,11 @@ import unimelb.distributed_algo_game.pokers.Card;
  */
 public final class GameClient implements Runnable, NetworkInterface {
 
-	/** The instance. */
-	private static GameClient instance = null;
-
 	/** The m player. */
 	private Player mPlayer = null;
 
 	/** The m socket. */
 	private Socket mSocket = null;
-
-	/** The game send data object. */
-	private Object gameSendDataObject = null;
-
-	/** The game reveice data object. */
-	private Object gameReveiceDataObject = null;
-
-	/** The observers. */
-	private List<NetworkObserver> observers = new ArrayList<NetworkObserver>();
 
 	/** The m object output stream. */
 	private ObjectOutputStream mObjectOutputStream = null;
@@ -59,7 +47,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/** The m lock. */
 	private Object mLock;
-
 
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
@@ -86,6 +73,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	private boolean isDealerCS = false;
 
+	private int playerSSNodeID = -1;
+
 	/**
 	 * Instantiates a new game client.
 	 */
@@ -98,7 +87,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			throw new NullPointerException();
 		}
 		mLock = new Object();
-		
+
 		mNodeIDList = new ArrayList<Integer>();
 		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
 
@@ -113,7 +102,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			throw new NullPointerException();
 		}
 		mLock = new Object();
-		
+
 		mNodeIDList = new ArrayList<Integer>();
 		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
 		this.ipAddress = ipAddress;
@@ -138,14 +127,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 				/** Main while loop for the thread */
 				while (isRunning) {
-					/**
-					 * Distinguish the function of the leader in game client and
-					 * slave to the server
-					 */
-			
-						runState();
-				
 
+					runState();
 					Thread.sleep(100);
 				}
 
@@ -153,22 +136,27 @@ public final class GameClient implements Runnable, NetworkInterface {
 				 * Close socket connection and data streams once the main thread
 				 * is no longer running
 				 */
-				if(sendStillAliveTimer != null)
+				if (sendStillAliveTimer != null)
 					sendStillAliveTimer.cancel();
-		
+
 				mObjectOutputStream.close();
 				mObjectInputStream.close();
 				mSocket.close();
 				System.out.println("conection closed");
 
 			} catch (IOException ioe) {
-				if(!isDealerCS) {
+				if (!isDealerCS) {
 					System.out.println("player cient socket closed due to player server socket is gone");
 					mGameClientSocketManager.removeSocketClient(this);
-				} 
+				} else
+					System.out.println("conection closed");
 
 			} catch (InterruptedException e) {
-				
+				if (!isDealerCS) {
+					System.out.println("player cient socket closed due to player server socket is gone");
+					mGameClientSocketManager.removeSocketClient(this);
+				} else
+					System.out.println("conection closed");
 			}
 
 		}
@@ -211,10 +199,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
 				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID());
-				
+
 				// Start the still alive timer beacon to the leader
 				sendStillAliveTimer = new Timer();
-				sendStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
+				sendStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0,
+						NetworkInterface.STILL_ALIVE_TIME_OUT);
 				break;
 
 			case CARD_RECEIVED:
@@ -225,6 +214,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 				checkServerTimer = new Timer();
 				checkServerTimer.schedule(new checkServerStillAliveTimerTask(),
 						NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+				// if(!isDealerCS)
+				// System.out.println(mBodyMessage.getGamePlayerInfo().getPort()
+				// + " am still alive");
 				break;
 			case CRT_RPY:
 				System.out.println("CRT is replied");
@@ -268,7 +260,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println("Game is ready to play, start request card from dealer");
 			// Init client socket manager here to connect to all the other nodes
 			// before the game starts
-
+			if (isDealerCS) {
+				System.out.println("Game is ready, initGameClientsConnection");
+				mGameClientSocketManager.initGameClientsConnection();
+			}
 			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			if (isGameReady) {
 
@@ -279,7 +274,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			mPlayerInfoList = (List<GamePlayerInfo>) mBodyMessage.getMessage();
 			updateNodeList(mPlayerInfoList);
-			System.out.println("BCT_NODE_LST: node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
+			System.out
+					.println("BCT_NODE_LST: node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
+
+			for (GamePlayerInfo info : mPlayerInfoList) {
+				mGameClientSocketManager.addSocketClient(info);
+			}
 
 			break;
 		case BCT_NODE_UPT:
@@ -322,7 +322,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	private void sendStillAliveMessage() {
-		if(isDealerCS) {
+		if (isDealerCS) {
 			JSONObject mMessage = new JSONObject();
 			BodyMessage mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK,
 					ACKCode.NODE_STILL_ALIVE);
@@ -346,7 +346,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 		public void run() {
 
 			sendStillAliveMessage();
-			
 
 		}
 
@@ -362,21 +361,19 @@ public final class GameClient implements Runnable, NetworkInterface {
 		public void run() {
 
 			synchronized (mLock) {
-				if(isDealerCS) {
+				if (isDealerCS) {
 					System.out.println("The dealer server socket left the game");
 					checkServerTimer.cancel();
 					startElection();
 				} else {
 					System.out.println("The player server socket left the game");
-					
+
 				}
-	
+
 			}
 		}
 
 	}
-
-
 
 	/*
 	 * Establishes connection with the server on the defined post on the local
@@ -385,7 +382,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public boolean connect() {
 
 		try {
-
+			System.out.println("Port is " + new Integer(this.port));
 			mSocket = new Socket(this.ipAddress, new Integer(this.port));
 			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
@@ -419,26 +416,24 @@ public final class GameClient implements Runnable, NetworkInterface {
 			if (mObjectOutputStream != null) {
 				GamePlayerInfo info = (GamePlayerInfo) ((BodyMessage) ((JSONObject) mGameSendDataObject).get("body"))
 						.getGamePlayerInfo();
-				if (info != null) {
-					// System.out.println("Client send message, timeStamp: " +
-					// info.getTimeStamp());
-					((BodyMessage) ((JSONObject) mGameSendDataObject).get("body")).getGamePlayerInfo().setTimeStamp();
-					mObjectOutputStream.writeObject(mGameSendDataObject);
-					mObjectOutputStream.flush();
-					mObjectOutputStream.reset();
-				}
+
+				// System.out.println("Client send message, timeStamp: " +
+				// info.getTimeStamp());
+				info.setTimeStamp();
+				mObjectOutputStream.writeObject(mGameSendDataObject);
+				mObjectOutputStream.flush();
+				mObjectOutputStream.reset();
 
 			} else {
 				System.out.println("mObjectOutputStream is null");
 			}
 		} catch (IOException ioe) {
 
-			
 			isRunning = false;
-			if(isDealerCS)
-				System.out.println("A player node has left game");
-			else
+			if (isDealerCS)
 				System.out.println("dealer node has left game");
+			else
+				System.out.println("A player node has left game");
 
 		}
 
@@ -463,21 +458,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			System.out.println("ClassNotFoundException");
 		} catch (IOException ioe) {
-			
-			isRunning = false;
-			if(isDealerCS)
-				System.out.println("A player node has left game");
-			else
-				System.out.println("dealer node has left game");
 
+			isRunning = false;
+			if (isDealerCS)
+				System.out.println("dealer node has left game");
+			else
+				System.out.println("A player node has left game");
 
 		}
 
 		return message;
 
 	}
-
-
 
 	/**
 	 * This plays the game with the server
@@ -551,7 +543,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * Starts a new leader election
 	 */
 	public void startElection() {
-		System.out.println("Starting election");
+
 		mGameClientSocketManager.startElection();
 	}
 
@@ -579,8 +571,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 		} else if (messageNodeID == this.mPlayer.getGamePlayerInfo().getNodeID()) {
 			// This means i have received my election message and I am the new
 			// coordinator
-			// mGameServer.setPlayerDealer();
-			// mGameServer.disconnect();
 
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(this.mPlayer.getGamePlayerInfo());
@@ -621,4 +611,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public Player getPlayer() {
 		return mPlayer;
 	}
+
+	public void setPlayerSSNodeID(int playerSSNodeID) {
+		this.playerSSNodeID = playerSSNodeID;
+	}
+
+	public int getPlayerSSNodeID() {
+		return this.playerSSNodeID;
+	}
+
 }

@@ -32,6 +32,7 @@ public final class PlayerClientManager {
 	private boolean isLockRound = false;
 	private MainGamePanel mMainGamePanel = null;
 	private GameServer mGameServer = null;
+	private boolean isDealerSS = false;
 
 	private static final int GAME_SIZE = 3;
 
@@ -58,6 +59,7 @@ public final class PlayerClientManager {
 		mLocalPlayerList.put(mPlayer.getGamePlayerInfo().getNodeID(), mPlayer);
 		mNodeList.add(mPlayer.getGamePlayerInfo());
 		this.mGameServer = mGameServer;
+		this.isDealerSS = mPlayer.isDealer();
 
 	}
 
@@ -69,7 +71,10 @@ public final class PlayerClientManager {
 
 		mLocalPlayerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
 		mNodeList.add(gamePlayerInfo);
-		mMainGamePanel.updatePlayerList(gamePlayerInfo.getNodeID());
+		if(isDealerSS) {
+			mMainGamePanel.updatePlayerList(gamePlayerInfo.getNodeID());
+		}
+	
 
 	}
 
@@ -286,6 +291,10 @@ public final class PlayerClientManager {
 
 	public synchronized void showGameTable() {
 		this.mMainGamePanel.showGameTable(true, getPlayerIDList());
+	}
+	
+	public boolean isDealerSS() {
+		return this.isDealerSS;
 	}
 
 }
