@@ -358,7 +358,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			synchronized (mLock) {
                 System.out.println("The server left the game");
 				checkServerTimer.cancel();
-				//startElection();
+				startElection();
 			}
 		}
 
