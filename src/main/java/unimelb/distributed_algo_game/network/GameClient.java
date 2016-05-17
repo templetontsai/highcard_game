@@ -69,9 +69,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** The boolean for the client thread */
 	private boolean isRunning = false;
 
-	private int serverPort;
-
-	private String serverIPAddress;
 
 	private Timer timer = null;
 
@@ -86,6 +83,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 	private GameClientSocketManager mGameClientSocketManager = null;
 	
 	private boolean isReplied = false;
+	
+	private String ipAddress = null;
+	
+	private String port = null;
 
 	/**
 	 * Instantiates a new game client.
@@ -105,7 +106,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	}
 
-	public GameClient(Player mPlayer, String serverIPAddress, int serverPort) {
+	public GameClient(Player mPlayer, String ipAddress, String port) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
 
@@ -117,8 +118,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 		clientConnectionState = ClientConnectionState.DISCONNECTED;
 		mNodeIDList = new ArrayList<Integer>();
 		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
-		this.serverIPAddress = serverIPAddress;
-		this.serverPort = serverPort;
+		this.ipAddress = ipAddress;
+		this.port = port;
 
 	}
 
@@ -199,10 +200,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			default:
 				System.out.println("Uknown State");
 			}
-		} else {
-			System.out.println("No longer communicating with " + mPlayer.getGameServerInfo().getIPAddress() + ":"
-					+ mPlayer.getGameServerInfo().getPort());
-		}
+		} 
 
 	}
 
@@ -273,6 +271,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			isGameReady = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			if (isGameReady) {
+				
 				mMainGameLoginClientPanel.showGameTable(true, mNodeIDList);
 			}
 			break;
@@ -383,7 +382,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		try {
 
-			mSocket = new Socket(serverIPAddress, serverPort);
+			mSocket = new Socket(this.ipAddress, new Integer(this.port));
 			mObjectOutputStream = new ObjectOutputStream(mSocket.getOutputStream());
 			mObjectInputStream = new ObjectInputStream(mSocket.getInputStream());
 			clientConnectionState = ClientConnectionState.INIT;
@@ -444,9 +443,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		} catch (IOException ioe) {
 
 			timer.cancel();
-			isRunning = false;	
-			System.out.println("Leader has gone haywire");
-			// ioe.printStackTrace();
+			isRunning = false;
+			mGameClientSocketManager.removeSocketClient(this);
+			System.out.println("node has left game");
 
 		}
 
@@ -468,13 +467,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 			return null;
 
 		} catch (ClassNotFoundException e) {
-			// Print the details of the exception error
-			e.printStackTrace();
+			
+			System.out.println("ClassNotFoundException");
 		} catch (IOException ioe) {
-			// Print the details of the exception error
+			
 			isRunning = false;
-			System.out.println("Leader has gone haywire");
-			// ioe.printStackTrace();
+			System.out.println("node has left game");
+			
 		}
 
 		return message;
@@ -522,15 +521,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
-	/**
-	 * This sets the port and IP address for the server stored in the player
-	 * object
-	 */
-	public void setServerDetails() {
-
-		serverPort = Integer.parseInt(mPlayer.getGameServerInfo().getPort());
-		serverIPAddress = mPlayer.getGameServerInfo().getIPAddress();
-	}
 
 	/**
 	 * Returns the details of the server the client connects to

@@ -64,6 +64,7 @@ public class GameClientSocketManager {
 
 	public void removeSocketClient(GameClient gameClient) {
 		mListClients.remove(gameClient);
+	
 	}
 
 	public void setClientList(List<GamePlayerInfo> mClientList) {
@@ -75,7 +76,7 @@ public class GameClientSocketManager {
 			int index = 0;
 			for (GamePlayerInfo info : mClientList) {
 				if (info.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID() && info.getNodeID() != 0) {
-					GameClient client = new GameClient(this.mPlayer, info.getIPAddress(), new Integer(info.getPort()));
+					GameClient client = new GameClient(this.mPlayer, info.getIPAddress(), info.getPort());
 					client.setClientSocketManager(this);
 					client.connect();
 					Thread t = new Thread(client);

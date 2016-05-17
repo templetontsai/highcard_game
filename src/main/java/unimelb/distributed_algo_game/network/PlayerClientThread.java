@@ -155,10 +155,10 @@ public class PlayerClientThread extends Thread {
 			if (timer != null) {
 				timer.cancel();
 				// Only carry out an election if we lose the dealer of the game
-
+/*
 				if (mGameClientInfo.getNodeID() == mGameServer.getPlayer().getGameServerInfo().getNodeID()) {
 					startElection();
-				}
+				}*/
 
 			}
 
@@ -184,13 +184,20 @@ public class PlayerClientThread extends Thread {
 
 				timer.cancel();
 				isRunning = false;
-				mGameServer.removeNode(clientNodeID);
-				mGameServer.broadcastUpdateNodeList();
+				if(mGameServer.isDealer()) {
+					
+					mGameServer.removeNode(clientNodeID);
+					mGameServer.broadcastUpdateNodeList();
 
-				mGameServer.resetGameStart(mGameServer.getNumofNodes());
-				mGameServer.updateGameTable();
+					mGameServer.resetGameStart(mGameServer.getNumofNodes());
+					mGameServer.updateGameTable();
 
-				System.out.println("Node:" + clientNodeID + " has left the game");
+					System.out.println("Node:" + clientNodeID + " has left the game");
+				} else {
+					mGameServer.removeNode(clientNodeID);
+					mGameServer.broadcastUpdateNodeList();
+				}
+			
 
 			}
 		}
@@ -452,9 +459,8 @@ public class PlayerClientThread extends Thread {
 			if (timer != null)
 				timer.cancel();
 			mGameServer.removeNode(this.mGameClientInfo.getNodeID());
-			System.out.println("Connection lost in sendMessage, node: " + this.mGameDealerInfo.getNodeID());
+			System.out.println("Connection lost in sendMessage, node: " + this.mGameClientInfo.getNodeID());
 
-			// ioe.printStackTrace();
 		}
 
 	}

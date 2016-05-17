@@ -46,17 +46,16 @@ public class SlavePlayer extends Player {
 	 */
 	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, MainGamePanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
-		gameClient = new GameClient(this);
+		gameClient = new GameClient(this, gameServerInfo.getIPAddress(), gameServerInfo.getPort());
 		gameServer = GameServer.getInstance();
 		this.mPanel = panel;
 		mGameClientSocketManager = new GameClientSocketManager(this);
+		
 	}
 
 	public SlavePlayer(GamePlayerInfo gamePlayerInfo) {
 		super("Slave", gamePlayerInfo, GameState.NONE);
-		gameClient = new GameClient(this);
 		gameServer = GameServer.getInstance();
-		mGameClientSocketManager = new GameClientSocketManager(this);
 	}
 
 	/**
@@ -70,7 +69,6 @@ public class SlavePlayer extends Player {
 		gameServerThread.start();
 
 		gameClient.setPanel(mPanel);
-		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
 
@@ -91,7 +89,6 @@ public class SlavePlayer extends Player {
 		gameClient = null;
 		gameClient = new GameClient(this);
 		gameClient.setPanel(mPanel);
-		gameClient.setServerDetails();
 		gameClientThread = new Thread(gameClient);
 		gameClient.connect();
 

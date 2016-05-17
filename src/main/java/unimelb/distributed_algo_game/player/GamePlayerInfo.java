@@ -48,7 +48,7 @@ public class GamePlayerInfo implements Serializable{
 		return this.timeStamp;
 	}
 	
-	public void setDealer() {
+	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
 	}
 	public boolean isDealer() {
