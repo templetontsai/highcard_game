@@ -69,11 +69,11 @@ public final class PlayerClientManager {
 			}
 			index++;
 		}
-		mNodeList.remove(toRemove);
-		mLocalPlayerList.remove(toRemove);
-		mPlayerClientList.remove(toRemove);
-		
-		
+		if(toRemove!=-1){
+		   mNodeList.remove(toRemove);
+		   mLocalPlayerList.remove(toRemove);
+		   mPlayerClientList.remove(toRemove);
+		}
 	}
 	
 

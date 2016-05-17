@@ -172,6 +172,12 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
+					mPlayerServerManager.addPlayer(t.getClientGamePlayerInfo());
+					mPlayerServerManager.addClient(t.getClientNodeID(), t2);
+					t2.setGameClientInfo(t.getClientGamePlayerInfo());
+					t2.setName("GameServer Client Socket Thread");
+					t2.connect();
+					t2.start();
 
 					mMainGameLoginDealerPanel.updatePlayerList(t.getClientNodeID());
 					broadcastNodeList();
@@ -185,7 +191,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 							// TODO Adding error handling
 							e.printStackTrace();
 						}
-
+						broadcastClientList();
 						broadcastGameReadyToNodes(new Boolean(true));
 
 						mMainGameLoginDealerPanel.showGameTable(true, mPlayerClientManager.getPlayerIDList());
@@ -428,13 +434,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * This updates the server details for the client
-	 */
-	public void updateServerDetails() {
-		mGameClient.setServerDetails();
-	}
-
-	/**
 	 * This returns the server details of the game client
 	 * 
 	 * @return
@@ -521,9 +520,16 @@ public final class GameServer implements Runnable, NetworkInterface {
 		 */
 
 	}
+	
+	public GamePlayerInfo getNextPlayer(){
+		return mPlayerServerManager.getNextNeighbor();
+	}
 
 	public void resetGameStart(int num) {
 		this.GAME_START = num;
 	}
 
+	public void broadcastClientList() {
+		mPlayerServerManager.sendClientList(ClientConnectionState.CONNECTED, MessageType.LST);
+	}
 }

@@ -155,11 +155,10 @@ public class PlayerClientThread extends Thread {
 			if (timer != null) {
 				timer.cancel();
 				// Only carry out an election if we lose the dealer of the game
-/*
+
 				if (mGameClientInfo.getNodeID() == mGameServer.getPlayer().getGameServerInfo().getNodeID()) {
 					startElection();
-
-				}*/
+				}
 
 			}
 
@@ -203,7 +202,7 @@ public class PlayerClientThread extends Thread {
 	 */
 	public void startElection() {
 		// Immediately stop running player client
-		mGameServer.disconnectClient();
+		//mGameServer.disconnectClient();
 		mGameServer.startElection();
 	}
 
@@ -383,7 +382,7 @@ public class PlayerClientThread extends Thread {
 			// This means i have received my election message and I am the new
 			// coordinator
 			mGameServer.setPlayerDealer();
-			mGameServer.disconnect();
+			//mGameServer.disconnect();
 
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(mGameDealerInfo);
@@ -396,7 +395,7 @@ public class PlayerClientThread extends Thread {
 
 			sendMessageToNext(mMessage);
 
-			mGameServer.startServer();
+			//mGameServer.startServer();
 		}
 
 	}
@@ -413,14 +412,16 @@ public class PlayerClientThread extends Thread {
 		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
 			// Update the new server details on the game client
 			mGameServer.setGameServerLeader(newDealer);
-			mGameServer.updateServerDetails();
 
-			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = mBodyMessage;
-			mBodyMessage.setMessageType(MessageType.COD);
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
-			sendMessageToNext(mMessage);
+			//Only forward the message to the next player if the neighbor isn't the new dealer
+			if(mGameServer.getNextPlayer().getNodeID()!=newDealer.getNodeID()){
+				JSONObject mMessage = new JSONObject();
+				BodyMessage bodyMessage = mBodyMessage;
+				mBodyMessage.setMessageType(MessageType.COD);
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", bodyMessage);
+				sendMessageToNext(mMessage);
+			}
 
 			mGameServer.reconnectClient();
 		}
