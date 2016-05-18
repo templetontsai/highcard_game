@@ -271,10 +271,13 @@ public class MainGamePanel extends JPanel {
 	
 	public void setPlayer(Player mPlayer) {
 		System.out.println("MainGamePanel" + mPlayer.getName());
+		p = mPlayer;
 		gameTable.setPlayer(mPlayer);
 	}
 	
 	public void updateGameTable(GameTablePanel mGameTablePanel) {
+		mMainGameFrameGUI.validate();
+		mMainGameFrameGUI.remove(gameTable);
 		System.out.println( "updateGameTable" + ((SlavePlayer)p).getGamePlayerInfo().getNodeID());
 		this.gameTable = null;
 		this.gameTable = mGameTablePanel;

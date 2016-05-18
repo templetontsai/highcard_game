@@ -449,10 +449,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 			e.printStackTrace();
 		}
 		System.out.println("2reInitGameAsPlayer");
-		
 		player.setDealer(false);
 		newDealer.setDealer(true);
 		mMainGamePanel.setDealer(false);
+		System.out.println("Before the bug 1");
 		Player p = new SlavePlayer("REPlayer", player, newDealer, mMainGamePanel);
 		List<Integer> mPlayerIDList = new ArrayList<Integer>();
 		mPlayerIDList.add(p.getGamePlayerInfo().getNodeID());

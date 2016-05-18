@@ -94,6 +94,7 @@ public class GameTablePanel extends JPanel {
 
 			System.out.println("GameTable, actionPerformed" + mPlayer.getName());
 			((SlavePlayer) mPlayer).requestCardFromDealer();
+			System.out.println("Requesting from "+mPlayer.getGameServerInfo().getIPAddress()+":"+mPlayer.getGameServerInfo().getPort());
 			btn.setEnabled(false);
 
 		}

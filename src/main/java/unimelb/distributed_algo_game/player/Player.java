@@ -234,4 +234,8 @@ public abstract class Player implements Serializable, NetworkObserver {
 	}
 
 	public abstract void play();
+	
+	public void setDealerInfo(GamePlayerInfo mGameServerInfo){
+		this.mGameServerInfo = mGameServerInfo;
+	}
 }
