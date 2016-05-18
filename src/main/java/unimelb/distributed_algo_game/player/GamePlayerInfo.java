@@ -10,6 +10,7 @@ public class GamePlayerInfo implements Serializable{
 	private String mGamePlayerInfo[] = {"-1", "", ""};
 	private long timeStamp = -1;
 	private boolean isDealer = false;
+	private long csReturnTimeStamp = -1;
 	
 	public GamePlayerInfo() {
 		
@@ -40,12 +41,19 @@ public class GamePlayerInfo implements Serializable{
 		return mGamePlayerInfo[0]+","+mGamePlayerInfo[1]+","+mGamePlayerInfo[2];
 	}
 	
-	public void setTimeStamp() {
-		this.timeStamp = Utils.getProcessTimestamp();
+	public void setServerTimeStamp(long timestamp) {
+		this.timeStamp = timestamp;
+	}
+
+	public long getServerTimeStamp() {
+		return this.timeStamp;
 	}
 	
-	public long getTimeStamp() {
-		return this.timeStamp;
+	public void setCSReturnTimeStamp(long csReturnTimeStamp){
+		this.csReturnTimeStamp = csReturnTimeStamp;
+	}
+	public long getCSReturnTimeStamp() {
+		return this.csReturnTimeStamp;
 	}
 	
 	public void setDealer(boolean isDealer) {

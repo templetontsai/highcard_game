@@ -62,7 +62,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private boolean isRequested = false;
 	private long requestedTimestamp = -1;
 	
-	private boolean isPlaying = false;
+
 
 	/**
 	 * Instantiates a new game server.
@@ -167,6 +167,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 					System.out.println("GameServer: getPlayerIDList size: " + mPlayerClientManager.getPlayerIDList().size());
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
+						
 						broadcastNodeList();
 						System.out.println("Game Start");
 
@@ -374,14 +375,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 
 
-	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
-		this.isRequested = isRequested;
-		this.requestedTimestamp = requestedTimestamp;
+	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
+		mPlayerClientManager.setIsCRTRequested(isRequested, requestedTimestamp);
+	}
+	public void broadcastCRTisFree() {
+		mPlayerClientManager.broadcastCRTIsFree();
 	}
 
-	public long getRequestedTimestamp() {
-		return this.requestedTimestamp;
-	}
 
 	public boolean isRequested() {
 		return this.isRequested;

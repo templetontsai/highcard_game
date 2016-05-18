@@ -19,10 +19,9 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
+import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
-import unimelb.distributed_algo_game.player.NetworkObserver;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.pokers.Card;
 
@@ -76,6 +75,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	private int playerSSNodeID = -1;
 
+
+	private long csTimestampStart = -1;
+
+	private long csTimestampReturn = -1;
+
+	private long serverTimeStamp = -1;
+
 	/**
 	 * Instantiates a new game client.
 	 */
@@ -91,6 +97,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		mNodeIDList = new ArrayList<Integer>();
 		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
+	
 
 	}
 
@@ -109,6 +116,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 		this.ipAddress = ipAddress;
 		this.port = port;
 		this.isDealerCS = isDealerCS;
+		this.csTimestampStart = Utils.getProcessTimestamp();
 	}
 
 	/*
@@ -202,8 +210,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 			case NODE_ID_RECEIVED:
 				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID()
 						+ " NODE_ID_RECEIVED");
-	
-				
+			
+		
 				// Start the still alive timer beacon to the leader
 				sendStillAliveTimer = new Timer();
 				sendStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0,
@@ -226,6 +234,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 				System.out.println("CRT is replied");
 				this.isReplied = true;
 				break;
+			case SRV_TIME_ACK:
+				if(isDealerCS) {
+					this.serverTimeStamp = mBodyMessage.getGamePlayerInfo().getServerTimeStamp();
+					this.csTimestampReturn = Utils.getProcessTimestamp();
+					long delta = this.serverTimeStamp + ( this.csTimestampStart - this.csTimestampReturn)/2;
+					System.out.println("Server Time Received: " + this.serverTimeStamp);
+					long csRequestedTimestamp = Utils.getProcessTimestamp() - delta; 
+			
+					mGameClientSocketManager.setIsCRTRequested(true, csRequestedTimestamp);
+					mGameClientSocketManager.broadcastCRT(csRequestedTimestamp);
+				}
+				break;
 			default:
 				System.out.println("Uknown ACK code");
 
@@ -244,6 +264,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 					new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CARD_RECEIVED));
 
 			sendMessage(mMessage);
+			//Client Socket1 to reply I am out of CRT, broadcast message to all the deferred node in list
+			mGameClientSocketManager.broadcastCRTisFree();
 
 			break;
 		case BCT_CRD:
@@ -282,7 +304,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 					+ mPlayerInfoList.size());
 
 			for (GamePlayerInfo info : mPlayerInfoList) {
-				
+
 				mGameClientSocketManager.addSocketClient(info);
 			}
 
@@ -300,6 +322,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 			mMessage.put("body", new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CRT_RPY));
 
 			sendMessage(mMessage);
+			break;
+		case BCT_CRT_FREE:
+			System.out.println(mBodyMessage.getMessage());
 			break;
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
@@ -321,11 +346,22 @@ public final class GameClient implements Runnable, NetworkInterface {
 					+ this.mPlayer.getGamePlayerInfo().getPort());
 			mGameClientSocketManager.reInitGameAsDealer(this.mPlayer.getGamePlayerInfo());
 			break;
+		
 		default:
 
 			System.out.println("Uknown Message Type");
 
 		}
+	}
+	
+	public void sendRequestServerTime() {
+		this.csTimestampStart = Utils.getProcessTimestamp();
+		JSONObject mMessage = new JSONObject();
+		BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.SRV_TIME, "Request Server Time");
+		mMessage.put("header", ClientConnectionState.CONNECTED);
+		mMessage.put("body", bodyMessage);
+		
+		sendMessage(mMessage);
 	}
 
 	private synchronized void updateNodeList(List<GamePlayerInfo> mPlayerInfoList) {
@@ -440,7 +476,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 				// System.out.println("Client send message, timeStamp: " +
 				// info.getTimeStamp());
-				info.setTimeStamp();
+
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
 				mObjectOutputStream.reset();
@@ -499,6 +535,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		if (isRunning) {
 
+			this.csTimestampStart = Utils.getProcessTimestamp();
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CON, "init");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -639,6 +676,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	public int getPlayerSSNodeID() {
 		return this.playerSSNodeID;
+	}
+
+	public synchronized long getLogicClock() {
+		return this.serverTimeStamp + ((this.csTimestampStart - this.csTimestampReturn) / 2);
 	}
 
 }

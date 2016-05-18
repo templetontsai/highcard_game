@@ -13,9 +13,11 @@ public class BodyMessage implements Serializable {
 	private GamePlayerInfo mGamePlayerInfo;
 	private MessageType messageType;
 	private Object message;
+	private long timestamp;
 
 	public enum ACKCode {
-		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), NODE_STILL_ALIVE(2), CLIENT_STILL_ALIVE(3), SERVER_STILL_ALIVE(4), CRT_RPY(5), LEADER_ELE_ACK(6);
+		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), NODE_STILL_ALIVE(2), CLIENT_STILL_ALIVE(3), SERVER_STILL_ALIVE(
+				4), CRT_RPY(5), LEADER_ELE_ACK(6), SRV_TIME_ACK(7);
 		/** The code. */
 		private int code;
 
@@ -33,12 +35,11 @@ public class BodyMessage implements Serializable {
 		}
 	}
 
-	
-
 	public enum MessageType {
-		CON(0), ACK(1), BCT_RST(2), BCT_NODE_LST(3), BCT_CLIENT_LST(4), BCT_NODE_UPT(5), BCT_CLIENT_UPT(6), BCT_RDY(7), BCT_CRD(8), BCT_CRT(9),
+		CON(0), ACK(1), BCT_RST(2), BCT_NODE_LST(3), BCT_CLIENT_LST(4), BCT_NODE_UPT(5), BCT_CLIENT_UPT(6), BCT_RDY(
+				7), BCT_CRD(8), BCT_CRT(9), BCT_CRT_FREE(10),
 
-		CRD(10), DSC(11), BCT(12), LST(13), ELE(14), COD(15), REINIT(16), GAME_SRT(17);
+		CRD(10), DSC(11), BCT(12), LST(13), ELE(14), COD(15), REINIT(16), GAME_SRT(17), SRV_TIME(18);
 
 		/** The code. */
 		private int code;
@@ -113,5 +114,13 @@ public class BodyMessage implements Serializable {
 
 	public void setGamePlayerInfo(GamePlayerInfo gamePlayerInfo) {
 		this.mGamePlayerInfo = gamePlayerInfo;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public long getTimestamp(long timestamp) {
+		return this.timestamp;
 	}
 }

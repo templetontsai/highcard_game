@@ -34,6 +34,15 @@ public final class PlayerClientManager {
 	private MainGamePanel mMainGamePanel = null;
 	private GameServer mGameServer = null;
 	private boolean isDealerSS = false;
+	
+	private long serverTime = -1;
+	
+	private long requestedTimestamp = -1;
+	
+	private boolean isCRTRequested = false;
+	
+	private List<Integer> requestedCRTQueue = null;
+	
 
 
 	private static final int GAME_SIZE = 3;
@@ -49,6 +58,8 @@ public final class PlayerClientManager {
 		mPlayerClientList = new HashMap<Integer, PlayerClientThread>(playerClientNum);
 		mLocalPlayerList = new HashMap<Integer, Player>();
 		mNodeList = new ArrayList<GamePlayerInfo>();
+		this.serverTime = Utils.getProcessTimestamp();
+		this.requestedCRTQueue = new ArrayList<Integer>();
 
 	}
 
@@ -62,6 +73,8 @@ public final class PlayerClientManager {
 		mNodeList.add(mPlayer.getGamePlayerInfo());
 		this.mGameServer = mGameServer;
 		this.isDealerSS = mPlayer.isDealer();
+		this.serverTime = Utils.getProcessTimestamp();
+		this.requestedCRTQueue = new ArrayList<Integer>();
 
 	}
 
@@ -156,7 +169,25 @@ public final class PlayerClientManager {
 		}
 	}
 	
+	public synchronized void addCRTRequestedQueue(int nodeID) {
+		requestedCRTQueue.add(nodeID);
+	}
 	
+	public synchronized void broadcastCRTIsFree() {
+		if (requestedCRTQueue.size() > 0) {
+			for (Integer i : requestedCRTQueue) {
+				JSONObject mMessage = new JSONObject();
+				BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo().getNodeID(), MessageType.BCT_CRT_FREE,
+						"CRT is Free");
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", bodyMessage);
+				mPlayerClientList.get(i).sendMessage(mMessage);
+			}
+		}
+		
+	}
+	
+
 
 	public synchronized boolean isLockRound() {
 		if (mPlayerClientList.size() >= 1) {
@@ -293,16 +324,14 @@ public final class PlayerClientManager {
 		mGameServer.resetGameStart(num);
 	}
 
-	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
-		mGameServer.setIsRequested(isRequested, requestedTimestamp);
-	}
+
 
 	public long getRequestedTimestamp() {
-		return mGameServer.getRequestedTimestamp();
+		return this.requestedTimestamp;
 	}
 
 	public boolean isRequested() {
-		return mGameServer.isRequested();
+		return this.isCRTRequested;
 	}
 
 	public synchronized void updateCard(Card c, int nodeID) {
@@ -322,6 +351,16 @@ public final class PlayerClientManager {
 		mGameServer.reInitGameAsPlayer(player, newDealer);
 	}
 	
+	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
+		this.isCRTRequested = isRequested;
+		this.requestedTimestamp = requestedTimestamp;
+	}
+	
+	
+	
+	public long getServerTime() {
+		return this.serverTime;
+	}
 
 
 }

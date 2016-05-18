@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
+import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 
@@ -18,6 +19,8 @@ public class GameClientSocketManager {
 	private GameServer mGameServer = null;
 	private boolean isReplied = false;
 	private MainGamePanel mMainGamePanel;
+	private long logicClock = -1;
+	private GameClient mGameClientDealer = null;
 
 	public GameClientSocketManager(Player mPlayer) {
 		mListClients = new ArrayList<GameClient>();
@@ -57,6 +60,7 @@ public class GameClientSocketManager {
 	public void broadcastCRT(long timestamp) {
 		System.out.println("broadcastCRT, mListClients: " + mListClients.size());
 		System.out.println(mPlayer.getGamePlayerInfo().getPort());
+		mGameServer.setIsCRTRequested(true, Utils.getProcessTimestamp());
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				JSONObject mMessage = new JSONObject();
@@ -108,6 +112,24 @@ public class GameClientSocketManager {
 		}
 
 		System.out.println("3Socket Client Size:" + mListClients.size());
+	}
+	
+	public void setSocketClientToDealer(GameClient mCameClient) {
+		this.mGameClientDealer = mCameClient;
+	}
+	
+	
+	
+	public void sendRequestServerTime() {
+		this.mGameClientDealer.sendRequestServerTime();
+	}
+	
+	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
+		mGameServer.setIsCRTRequested(isRequested, requestedTimestamp);
+	}
+	
+	public void broadcastCRTisFree() {
+		mGameServer.broadcastCRTisFree();
 	}
 
 	public void removeSocketClient(GameClient gameClient) {
@@ -188,6 +210,13 @@ public class GameClientSocketManager {
 	public void setPanel(MainGamePanel mMainPanel) {
 		this.mMainGamePanel = mMainPanel;
 	}
-
+	
+	public void setLogicClock(long logicClock) {
+		this.logicClock = logicClock;
+	}
+	
+	public long getLogicClock() {
+		return this.logicClock;
+	}
 
 }

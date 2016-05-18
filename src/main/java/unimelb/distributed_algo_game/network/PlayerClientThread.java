@@ -8,12 +8,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,9 +20,7 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
-import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
-import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
@@ -74,8 +70,8 @@ public class PlayerClientThread extends Thread {
 	private boolean isDealerSS = false;
 
 	private GamePlayerInfo newDealer = null;
-	
-	
+
+	private boolean isCSWaiting = false;
 
 	/**
 	 * Instantiates a new player client thread.
@@ -98,6 +94,7 @@ public class PlayerClientThread extends Thread {
 		this.mGameDealerInfo = mGameDealerInfo;
 		this.mGameClientInfo = new GamePlayerInfo();
 		this.isDealerSS = mPlayerClientManager.isDealerSS();
+
 	}
 
 	/**
@@ -267,12 +264,13 @@ public class PlayerClientThread extends Thread {
 					clientNodeID = this.mGameClientInfo.getNodeID();
 
 					connectionState = ClientConnectionState.CONNECTED;
+					mGameDealerInfo.setServerTimeStamp(mPlayerClientManager.getServerTime());
 
 					mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.NODE_ID_RECEIVED);
 					mMessage.put("header", connectionState);
 					mMessage.put("body", mBodyMessage);
 					sendMessage(mMessage);
-					
+
 					// Start the still alive timer beacon to the leader
 
 					serverStillAliveTimer = new Timer();
@@ -309,7 +307,7 @@ public class PlayerClientThread extends Thread {
 			case NODE_ID_RECEIVED:
 				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID()
 						+ " numOfNode: " + mPlayerClientManager.getNumOfNodes());
-		
+
 				break;
 			case CARD_RECEIVED:
 				Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
@@ -349,7 +347,6 @@ public class PlayerClientThread extends Thread {
 				mMessage.put("header", ClientConnectionState.CONNECTED);
 				mMessage.put("body", mBodyMessage);
 				sendMessage(mMessage);
-	
 
 				break;
 			default:
@@ -361,12 +358,7 @@ public class PlayerClientThread extends Thread {
 		case CRD:
 
 			connectionState = ClientConnectionState.CONNECTED;
-			// Player specifies the card to, blocking for a bit to test ricart
-			// algo
-			/*
-			 * try { Thread.sleep(5000); } catch (InterruptedException e) { //
-			 * TODO Auto-generated catch block e.printStackTrace(); }
-			 */
+			
 			c = mPlayerClientManager.getCard(1);
 			mPlayerClientManager.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
 			// mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
@@ -384,18 +376,44 @@ public class PlayerClientThread extends Thread {
 			isClientLockRound = false;
 			break;
 		case BCT_CRT:
-			while (mPlayerClientManager.isRequested()
-					&& mPlayerClientManager.getRequestedTimestamp() > (long) mBodyMessage.getMessage())
-				;// wait till out of critical session
-			System.out.println("BCT_CRT");
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.CRT_RPY));
+			if (!mPlayerClientManager.isRequested()) {
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.CRT_RPY));
+				sendMessage(mMessage);
+				System.out.println("Received BCT_CRT and not requested for CST, Reply right away");
+			} else {
+				long broadcastTimestamp = (long) mBodyMessage.getMessage();
+				System.out.println("Received broadcast timestamp: " + broadcastTimestamp
+						+ "start to compare the timestamp with my requested timestamp");
+				long requestedCSTimestamp = mPlayerClientManager.getRequestedTimestamp();
+				if (broadcastTimestamp > requestedCSTimestamp) {
+					// defer the reply and store in queue
+					System.out.println("I request first add to queue and broadcast to them once I am done");
+					mPlayerClientManager.addCRTRequestedQueue(mBodyMessage.getGamePlayerInfo().getNodeID());
+				} else {
+					mMessage.put("header", ClientConnectionState.CONNECTED);
+					mMessage.put("body", new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.CRT_RPY));
+					sendMessage(mMessage);
+					System.out.println("node" + mBodyMessage.getGamePlayerInfo().getNodeID()
+							+ "request CRT before me, Reply right away");
 
-			sendMessage(mMessage);
+				}
+
+			}
+
 			break;
 		case ELE:
 			System.out.println("Received election message from " + mBodyMessage.getGamePlayerInfo().getNodeID());
 			sendElectionMessage(mBodyMessage);
+			break;
+		case SRV_TIME:
+			JSONObject mMessage = new JSONObject();
+			mGameDealerInfo.setServerTimeStamp(mPlayerClientManager.getServerTime());
+			BodyMessage bodyMessage = new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.SRV_TIME_ACK);
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", bodyMessage);
+
+			sendMessage(mMessage);
 			break;
 
 		default:
@@ -403,6 +421,14 @@ public class PlayerClientThread extends Thread {
 			System.out.println("Uknown Message Type");
 
 		}
+	}
+
+	public synchronized boolean isCSWaiting() {
+		return isCSWaiting;
+	}
+
+	public synchronized void setIsCSWaiting(boolean isCSWaiting) {
+		this.isCSWaiting = isCSWaiting;
 	}
 
 	/**
