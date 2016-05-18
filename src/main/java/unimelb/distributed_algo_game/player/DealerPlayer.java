@@ -32,8 +32,10 @@ public class DealerPlayer extends Player {
 	/** The game server thread. */
 	private Thread gameServerThread = null;
 
+	/** The m main game login dealer panel. */
 	private JPanel mMainGameLoginDealerPanel = null;
 
+	/** The game size. */
 	private int gameSize = -1;
 
 	/**
@@ -42,8 +44,10 @@ public class DealerPlayer extends Player {
 	 *
 	 * @param name
 	 *            the name
-	 * @param id
-	 *            the id
+	 * @param gamePlayerInfo
+	 *            the game player info
+	 * @param panel
+	 *            the panel
 	 */
 	public DealerPlayer(String name, GamePlayerInfo gamePlayerInfo, JPanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, new PlayerScore());
@@ -53,6 +57,11 @@ public class DealerPlayer extends Player {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see unimelb.distributed_algo_game.player.Player#play()
+	 */
 	public void play() {
 
 		gameServer.setPlayer(this);
@@ -68,7 +77,7 @@ public class DealerPlayer extends Player {
 	}
 
 	/**
-	 * Runs an update
+	 * Runs an update.
 	 */
 	@Override
 	public void update() {
@@ -76,10 +85,19 @@ public class DealerPlayer extends Player {
 
 	}
 
+	/**
+	 * Dealer drawn card.
+	 */
 	public void dealerDrawnCard() {
 		gameServer.dealerDrawnCard();
 	}
 
+	/**
+	 * Sets the game size.
+	 *
+	 * @param gameSize
+	 *            the new game size
+	 */
 	public void setGameSize(int gameSize) {
 		this.gameSize = gameSize;
 	}

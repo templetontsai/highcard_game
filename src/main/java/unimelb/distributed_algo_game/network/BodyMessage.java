@@ -4,30 +4,62 @@ import java.io.Serializable;
 
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
+ * The Class BodyMessage.
+ *
  * @author Lupiya This class is generic type to carry JSON data in messages
  */
 public class BodyMessage implements Serializable {
+
+	/** The node id. */
 	// Initialize all the variables
 	private int nodeID;
+
+	/** The m game player info. */
 	private GamePlayerInfo mGamePlayerInfo;
+
+	/** The message type. */
 	private MessageType messageType;
+
+	/** The message. */
 	private Object message;
+
+	/** The timestamp. */
 	private long timestamp;
 
 	/**
-	 * Acknowledgement codes enumeration
-	 * 
-	 * @author Lupiya
+	 * Acknowledgement codes enumeration.
 	 *
+	 * @author Lupiya
 	 */
 	public enum ACKCode {
-		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), NODE_STILL_ALIVE(2), CLIENT_STILL_ALIVE(3), SERVER_STILL_ALIVE(
-				4), CRT_RPY(5), LEADER_ELE_ACK(6), SRV_TIME_ACK(7);
+
+		/** The node id received. */
+		NODE_ID_RECEIVED(0),
+		/** The card received. */
+		CARD_RECEIVED(1),
+		/** The node still alive. */
+		NODE_STILL_ALIVE(2),
+		/** The client still alive. */
+		CLIENT_STILL_ALIVE(3),
+		/** The server still alive. */
+		SERVER_STILL_ALIVE(4),
+		/** The crt rpy. */
+		CRT_RPY(5),
+		/** The leader ele ack. */
+		LEADER_ELE_ACK(6),
+		/** The srv time ack. */
+		SRV_TIME_ACK(7);
 		/** The code. */
 		private int code;
 
+		/**
+		 * Instantiates a new ACK code.
+		 *
+		 * @param c
+		 *            the c
+		 */
 		private ACKCode(int c) {
 			code = c;
 		}
@@ -43,21 +75,64 @@ public class BodyMessage implements Serializable {
 	}
 
 	/**
-	 * Message type enumerations
-	 * 
-	 * @author Lupiya
+	 * Message type enumerations.
 	 *
+	 * @author Lupiya
 	 */
 
 	public enum MessageType {
-		CON(0), ACK(1), BCT_RST(2), BCT_NODE_LST(3), BCT_CLIENT_LST(4), BCT_NODE_UPT(5), BCT_CLIENT_UPT(6), BCT_RDY(
-				7), BCT_CRD(8), BCT_CRT(9), BCT_CRT_FREE(10),
 
-		CRD(10), DSC(11), BCT(12), LST(13), ELE(14), COD(15), REINIT(16), GAME_SRT(17), SRV_TIME(18);
+		/** The con. */
+		CON(0),
+		/** The ack. */
+		ACK(1),
+		/** The bct rst. */
+		BCT_RST(2),
+		/** The bct node lst. */
+		BCT_NODE_LST(3),
+		/** The bct client lst. */
+		BCT_CLIENT_LST(4),
+		/** The bct node upt. */
+		BCT_NODE_UPT(5),
+		/** The bct client upt. */
+		BCT_CLIENT_UPT(6),
+		/** The bct rdy. */
+		BCT_RDY(7),
+		/** The bct crd. */
+		BCT_CRD(8),
+		/** The bct crt. */
+		BCT_CRT(9),
+		/** The bct crt free. */
+		BCT_CRT_FREE(10),
+
+		/** The crd. */
+		CRD(10),
+		/** The dsc. */
+		DSC(11),
+		/** The bct. */
+		BCT(12),
+		/** The lst. */
+		LST(13),
+		/** The ele. */
+		ELE(14),
+		/** The cod. */
+		COD(15),
+		/** The reinit. */
+		REINIT(16),
+		/** The game srt. */
+		GAME_SRT(17),
+		/** The srv time. */
+		SRV_TIME(18);
 
 		/** The code. */
 		private int code;
 
+		/**
+		 * Instantiates a new message type.
+		 *
+		 * @param c
+		 *            the c
+		 */
 		private MessageType(int c) {
 			code = c;
 		}
@@ -73,7 +148,14 @@ public class BodyMessage implements Serializable {
 	}
 
 	/**
-	 * Main constructor for this class
+	 * Main constructor for this class.
+	 *
+	 * @param nodeID
+	 *            the node id
+	 * @param messageType
+	 *            the message type
+	 * @param message
+	 *            the message
 	 */
 	public BodyMessage(int nodeID, MessageType messageType, Object message) {
 		this.nodeID = nodeID;
@@ -82,11 +164,14 @@ public class BodyMessage implements Serializable {
 	}
 
 	/**
-	 * Second constructor for this class
-	 * 
+	 * Second constructor for this class.
+	 *
 	 * @param gamePlayerInfo
+	 *            the game player info
 	 * @param messageType
+	 *            the message type
 	 * @param message
+	 *            the message
 	 */
 	public BodyMessage(GamePlayerInfo gamePlayerInfo, MessageType messageType, Object message) {
 		this.mGamePlayerInfo = gamePlayerInfo;
@@ -95,62 +180,88 @@ public class BodyMessage implements Serializable {
 	}
 
 	/**
-	 * Returns the client ID
+	 * Returns the client ID.
+	 *
+	 * @return the node id
 	 */
 	public int getNodeID() {
 		return nodeID;
 	}
 
 	/**
-	 * Returns the message type
+	 * Returns the message type.
+	 *
+	 * @return the message type
 	 */
 	public MessageType getMessageType() {
 		return messageType;
 	}
 
 	/**
-	 * Returns the generic message
+	 * Returns the generic message.
+	 *
+	 * @return the message
 	 */
 	public Object getMessage() {
 		return message;
 	}
 
 	/**
-	 * Sets the message type
+	 * Sets the message type.
+	 *
+	 * @param messageType
+	 *            the new message type
 	 */
 	public void setMessageType(MessageType messageType) {
 		this.messageType = messageType;
 	}
 
 	/**
-	 * Sets the message to be sent
+	 * Sets the message to be sent.
+	 *
+	 * @param message
+	 *            the new message
 	 */
 	public void setMessage(Object message) {
 		this.message = message;
 	}
 
 	/**
-	 * Returns the player info of this message
-	 * 
-	 * @return
+	 * Returns the player info of this message.
+	 *
+	 * @return the game player info
 	 */
 	public GamePlayerInfo getGamePlayerInfo() {
 		return this.mGamePlayerInfo;
 	}
 
 	/**
-	 * Sets the player info of this message
-	 * 
+	 * Sets the player info of this message.
+	 *
 	 * @param gamePlayerInfo
+	 *            the new game player info
 	 */
 	public void setGamePlayerInfo(GamePlayerInfo gamePlayerInfo) {
 		this.mGamePlayerInfo = gamePlayerInfo;
 	}
 
+	/**
+	 * Sets the timestamp.
+	 *
+	 * @param timestamp
+	 *            the new timestamp
+	 */
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 
+	/**
+	 * Gets the timestamp.
+	 *
+	 * @param timestamp
+	 *            the timestamp
+	 * @return the timestamp
+	 */
 	public long getTimestamp(long timestamp) {
 		return this.timestamp;
 	}

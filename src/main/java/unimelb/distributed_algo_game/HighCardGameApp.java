@@ -26,7 +26,10 @@ public class HighCardGameApp {
 	}
 
 	/**
-	 * This runs the game server of the game
+	 * This runs the game server of the game.
+	 *
+	 * @param id
+	 *            the id
 	 */
 	public static void runGame(int id) {
 		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game", id);

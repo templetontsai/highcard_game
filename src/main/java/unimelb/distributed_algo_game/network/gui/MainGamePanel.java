@@ -18,47 +18,85 @@ import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
-
+// TODO: Auto-generated Javadoc
 /**
- * This is the game panel that manages the login for the player into the game
- * 
- * @author Lupiya
+ * This is the game panel that manages the login for the player into the game.
  *
+ * @author Lupiya
  */
 public class MainGamePanel extends JPanel {
+
+	/** The ip text field. */
 	// Initialize the variables
 	private JTextField ipTextField = null;
+
+	/** The port text field. */
 	private JTextField portTextField = null;
+
+	/** The node field. */
 	private JTextField nodeField = null;
+
+	/** The server ip text field. */
 	private JTextField serverIPTextField = null;
+
+	/** The server port text field. */
 	private JTextField serverPortTextField = null;
+
+	/** The text area. */
 	private JTextArea textArea = null;
+
+	/** The node id. */
 	private int nodeID = -1;
 
+	/** The btn start. */
 	private JButton btnStart = null;
+
+	/** The self. */
 	private MainGamePanel self = null;
+
+	/** The m main game frame gui. */
 	private MainGameFrameGUI mMainGameFrameGUI = null;
 
+	/** The m dealer start button action listerner. */
 	private DealerStartButtonActionListerner mDealerStartButtonActionListerner = null;
+
+	/** The c. */
 	private Card c = null;
+
+	/** The p. */
 	private Player p = null;
+
+	/** The m player panel list. */
 	private List<CardPanel> mPlayerPanelList = null;
+
+	/** The game table. */
 	private GameTablePanel gameTable = null;
+
+	/** The is dealer. */
 	private boolean isDealer = false;
 
+	/** The lbl new label_0. */
 	private JLabel lblNewLabel_0;
+
+	/** The lbl new label. */
 	private JLabel lblNewLabel;
+
+	/** The server port label. */
 	private JLabel lblNewLabel_1, serverIPLabel, serverPortLabel;
 
+	/** The m player start button action listerner. */
 	private PlayerStartButtonActionListerner mPlayerStartButtonActionListerner = null;
 
+	/** The is new leader. */
 	private boolean isNewLeader = false;
 
 	/**
-	 * Main constructor of the game panel
-	 * 
+	 * Main constructor of the game panel.
+	 *
 	 * @param mainGameFrameGUI
+	 *            the main game frame gui
 	 * @param isDealer
+	 *            the is dealer
 	 */
 	public MainGamePanel(MainGameFrameGUI mainGameFrameGUI, boolean isDealer) {
 
@@ -77,7 +115,7 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Initializes the dealer login panel
+	 * Initializes the dealer login panel.
 	 */
 	public void initDealerPanel() {
 		ipTextField = new JTextField();
@@ -119,7 +157,7 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Initializes the player login panel
+	 * Initializes the player login panel.
 	 */
 	public void initPlayerPanel() {
 		nodeField = new JTextField();
@@ -180,12 +218,18 @@ public class MainGamePanel extends JPanel {
 
 	/**
 	 * Creates an action listener for the dealer's start button to initialize
-	 * the game
-	 * 
-	 * @author Lupiya
+	 * the game.
 	 *
+	 * @author Lupiya
 	 */
 	final class DealerStartButtonActionListerner implements ActionListener {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.
+		 * ActionEvent)
+		 */
 		public void actionPerformed(ActionEvent action) {
 			// TODO get ip and port from textfield and set init server
 			// socket
@@ -214,12 +258,18 @@ public class MainGamePanel extends JPanel {
 
 	/**
 	 * Creates an action listener for the player's start button to initialize
-	 * the game
-	 * 
-	 * @author Lupiya
+	 * the game.
 	 *
+	 * @author Lupiya
 	 */
 	final class PlayerStartButtonActionListerner implements ActionListener {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.
+		 * ActionEvent)
+		 */
 		public void actionPerformed(ActionEvent action) {
 			// TODO get ip and port from textfield and set init server
 			// socket
@@ -252,9 +302,10 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Updates the player list for the dealer game panel
-	 * 
+	 * Updates the player list for the dealer game panel.
+	 *
 	 * @param nodeID
+	 *            the node id
 	 */
 	public synchronized void updatePlayerList(int nodeID) {
 		if (!isNewLeader)
@@ -262,19 +313,22 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Sets the node ID for this panel
-	 * 
+	 * Sets the node ID for this panel.
+	 *
 	 * @param nodeID
+	 *            the new node id
 	 */
 	public void setNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}
 
 	/**
-	 * Displays the game table on the game panel
-	 * 
+	 * Displays the game table on the game panel.
+	 *
 	 * @param isEnable
+	 *            the is enable
 	 * @param mPlayerIDList
+	 *            the m player id list
 	 */
 	public void showGameTable(boolean isEnable, List<Integer> mPlayerIDList) {
 
@@ -292,19 +346,22 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Updates the card drawn by the player on the game table
-	 * 
+	 * Updates the card drawn by the player on the game table.
+	 *
 	 * @param c
+	 *            the c
 	 * @param nodeID
+	 *            the node id
 	 */
 	public void updateCard(Card c, int nodeID) {
 		gameTable.updateCard(c, nodeID);
 	}
 
 	/**
-	 * Shows a dialog box declaring the winner of the round
-	 * 
+	 * Shows a dialog box declaring the winner of the round.
+	 *
 	 * @param nodeID
+	 *            the node id
 	 */
 	public void declareWinner(int nodeID) {
 		if (nodeID == this.nodeID)
@@ -316,18 +373,20 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Updates the game table with the new list of players
-	 * 
+	 * Updates the game table with the new list of players.
+	 *
 	 * @param mPlayerIDList
+	 *            the m player id list
 	 */
 	public void updateGameTable(List<Integer> mPlayerIDList) {
 		gameTable.updateGameTable(mPlayerIDList);
 	}
 
 	/**
-	 * Sets the dealer of this game panel
-	 * 
+	 * Sets the dealer of this game panel.
+	 *
 	 * @param isDealer
+	 *            the new dealer
 	 */
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
@@ -335,19 +394,21 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Sets the leader status of this panel
-	 * 
+	 * Sets the leader status of this panel.
+	 *
 	 * @param isNewLeader
-	 * @return
+	 *            the is new leader
+	 * @return true, if successful
 	 */
 	public boolean setNewLeader(boolean isNewLeader) {
 		return this.isNewLeader = isNewLeader;
 	}
 
 	/**
-	 * Sets the player of this game panel
-	 * 
+	 * Sets the player of this game panel.
+	 *
 	 * @param mPlayer
+	 *            the new player
 	 */
 	public void setPlayer(Player mPlayer) {
 		System.out.println("MainGamePanel" + mPlayer.getName());
@@ -356,9 +417,10 @@ public class MainGamePanel extends JPanel {
 	}
 
 	/**
-	 * Updates the existing game table with a new game table
-	 * 
+	 * Updates the existing game table with a new game table.
+	 *
 	 * @param mGameTablePanel
+	 *            the m game table panel
 	 */
 	public void updateGameTable(GameTablePanel mGameTablePanel) {
 		mMainGameFrameGUI.validate();

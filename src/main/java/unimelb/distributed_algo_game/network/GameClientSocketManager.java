@@ -12,26 +12,38 @@ import unimelb.distributed_algo_game.network.utils.Utils;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 
+// TODO: Auto-generated Javadoc
 /**
- * Client socket manager class
- * 
- * @author Lupiya
+ * Client socket manager class.
  *
+ * @author Lupiya
  */
 public class GameClientSocketManager {
 
+	/** The m list clients. */
 	// Initialize all the client socket manager vaiables
 	private List<GameClient> mListClients = null;
+
+	/** The m player. */
 	private Player mPlayer = null;
+
+	/** The m game server. */
 	private GameServer mGameServer = null;
+
+	/** The is replied. */
 	private boolean isReplied = false;
+
+	/** The m main game panel. */
 	private MainGamePanel mMainGamePanel;
+
+	/** The m game client dealer. */
 	private GameClient mGameClientDealer = null;
 
 	/**
-	 * Default constructor for client socket manager
-	 * 
+	 * Default constructor for client socket manager.
+	 *
 	 * @param mPlayer
+	 *            the m player
 	 */
 	public GameClientSocketManager(Player mPlayer) {
 		mListClients = new ArrayList<GameClient>();
@@ -40,18 +52,20 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * This sets the game server reference
-	 * 
+	 * This sets the game server reference.
+	 *
 	 * @param mGameServer
+	 *            the new game server
 	 */
 	public void setGameServer(GameServer mGameServer) {
 		this.mGameServer = mGameServer;
 	}
 
 	/**
-	 * This sends an election message to the neighbor of the current player
-	 * 
+	 * This sends an election message to the neighbor of the current player.
+	 *
 	 * @param neighborID
+	 *            the neighbor id
 	 */
 	public void startElection(int neighborID) {
 		System.out.println("Current size of players is " + mListClients.size());
@@ -72,9 +86,12 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * This forwards a message to a player's neighbor
-	 * 
+	 * This forwards a message to a player's neighbor.
+	 *
 	 * @param mMessage
+	 *            the m message
+	 * @param neighborID
+	 *            the neighbor id
 	 */
 	public void sendElectionMessage(JSONObject mMessage, int neighborID) {
 		if (mListClients != null && mListClients.size() > 0) {
@@ -92,9 +109,10 @@ public class GameClientSocketManager {
 
 	/**
 	 * Broadcasts a coordinator message to all the players to announce the new
-	 * leader
-	 * 
+	 * leader.
+	 *
 	 * @param mMessage
+	 *            the m message
 	 */
 	public void sendCoordinatorMessage(JSONObject mMessage) {
 		if (mListClients != null && mListClients.size() > 0) {
@@ -105,9 +123,10 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * This broadcasts a card request to all the other players in a game
-	 * 
+	 * This broadcasts a card request to all the other players in a game.
+	 *
 	 * @param timestamp
+	 *            the timestamp
 	 */
 	public void broadcastCRT(long timestamp) {
 		System.out.println("broadcastCRT, mListClients: " + mListClients.size());
@@ -126,9 +145,9 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * This confirms that all players have replied to the player's card request
-	 * 
-	 * @return
+	 * This confirms that all players have replied to the player's card request.
+	 *
+	 * @return the reply
 	 */
 	public boolean getReply() {
 		boolean isReplied = false;
@@ -147,16 +166,17 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * This removes all the clients from the list
+	 * This removes all the clients from the list.
 	 */
 	public synchronized void removeAll() {
 		mListClients.clear();
 	}
 
 	/**
-	 * This creates a new client server socket thread
-	 * 
+	 * This creates a new client server socket thread.
+	 *
 	 * @param gameClientInfo
+	 *            the game client info
 	 */
 	public void addSocketClient(GamePlayerInfo gameClientInfo) {
 		System.out.println("1Socket Client Size:" + mListClients.size());
@@ -179,26 +199,47 @@ public class GameClientSocketManager {
 		System.out.println("3Socket Client Size:" + mListClients.size());
 	}
 
+	/**
+	 * Sets the socket client to dealer.
+	 *
+	 * @param mCameClient
+	 *            the new socket client to dealer
+	 */
 	public void setSocketClientToDealer(GameClient mCameClient) {
 		this.mGameClientDealer = mCameClient;
 	}
 
+	/**
+	 * Send request server time.
+	 */
 	public void sendRequestServerTime() {
 		this.mGameClientDealer.sendRequestServerTime();
 	}
 
+	/**
+	 * Sets the is crt requested.
+	 *
+	 * @param isRequested
+	 *            the is requested
+	 * @param requestedTimestamp
+	 *            the requested timestamp
+	 */
 	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
 		mGameServer.setIsCRTRequested(isRequested, requestedTimestamp);
 	}
 
+	/**
+	 * Broadcast cr tis free.
+	 */
 	public void broadcastCRTisFree() {
 		mGameServer.broadcastCRTisFree();
 	}
 
 	/**
-	 * This removes a player socket server thread
-	 * 
+	 * This removes a player socket server thread.
+	 *
 	 * @param gameClient
+	 *            the game client
 	 */
 	public void removeSocketClient(GameClient gameClient) {
 
@@ -208,7 +249,7 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * This initializes the client socket manager
+	 * This initializes the client socket manager.
 	 */
 	public synchronized void initGameClientsConnection() {
 		System.out.println("1 initGameClientsConnection Socket Client Size:" + mListClients.size());
@@ -228,9 +269,9 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * This returns the replied status of all the clients
-	 * 
-	 * @return
+	 * This returns the replied status of all the clients.
+	 *
+	 * @return true, if is all crt replied
 	 */
 	public synchronized boolean isAllCRTReplied() {
 		if (mListClients != null && mListClients.size() > 0) {
@@ -247,7 +288,7 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * Broadcasts the client list to all the players in the game
+	 * Broadcasts the client list to all the players in the game.
 	 */
 	public synchronized void broadcastClientsList() {
 		if (mListClients != null && mListClients.size() > 0) {
@@ -265,7 +306,7 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * Closes all the existing client connections
+	 * Closes all the existing client connections.
 	 */
 	public synchronized void closeAllClientConnection() {
 		if (mListClients != null && mListClients.size() > 0) {
@@ -280,9 +321,10 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * Reinitializes the game as the dealer
-	 * 
+	 * Reinitializes the game as the dealer.
+	 *
 	 * @param newDealer
+	 *            the new dealer
 	 */
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		closeAllClientConnection();
@@ -290,18 +332,19 @@ public class GameClientSocketManager {
 	}
 
 	/**
-	 * Returns the game panel
-	 * 
-	 * @return
+	 * Returns the game panel.
+	 *
+	 * @return the panel
 	 */
 	public MainGamePanel getPanel() {
 		return this.mMainGamePanel;
 	}
 
 	/**
-	 * Sets the game panel
-	 * 
+	 * Sets the game panel.
+	 *
 	 * @param mMainPanel
+	 *            the new panel
 	 */
 	public void setPanel(MainGamePanel mMainPanel) {
 		this.mMainGamePanel = mMainPanel;

@@ -13,23 +13,40 @@ import javax.swing.JPanel;
 
 import unimelb.distributed_algo_game.pokers.Card;
 
+// TODO: Auto-generated Javadoc
 /**
- * This class draws the cards on the game table
- * 
- * @author Lupiya
+ * This class draws the cards on the game table.
  *
+ * @author Lupiya
  */
 public class CardPanel extends JPanel {
+
+	/** The message. */
 	// Initialize all the variables
 	private String message; // A message drawn on the canvas, which changes
+
+	/** The big font. */
 	private Font bigFont; // Font that will be used to display the message.
+
+	/** The card images. */
 	private Image cardImages; // Contains the image of all 52 cards
+
+	/** The board x coords. */
 	private int boardXCoords;
+
+	/** The boards y coords. */
 	private int boardsYCoords;
+
+	/** The card passed. */
 	private Card cardPassed;
+
+	/** The game in progress. */
 	private Boolean gameInProgress = false;
+
+	/** The id label. */
 	private JLabel idLabel;
 
+	/** The node id. */
 	private int nodeID = -1;
 
 	/**
@@ -37,6 +54,9 @@ public class CardPanel extends JPanel {
 	 * starts the first game. It also sets a "preferred size" for the panel.
 	 * This size is respected when the program is run as an application, since
 	 * the pack() method is used to set the size of the window.
+	 *
+	 * @param nodeID
+	 *            the node id
 	 */
 	public CardPanel(int nodeID) {
 		loadImage();
@@ -51,9 +71,10 @@ public class CardPanel extends JPanel {
 	} // end constructor
 
 	/**
-	 * Sets the game in progress boolean
-	 * 
+	 * Sets the game in progress boolean.
+	 *
 	 * @param gameInProgress
+	 *            the new game in progress
 	 */
 	public void setGameInProgress(boolean gameInProgress) {
 		this.gameInProgress = gameInProgress;
@@ -73,7 +94,10 @@ public class CardPanel extends JPanel {
 	}
 
 	/**
-	 * Paints the card on the table
+	 * Paints the card on the table.
+	 *
+	 * @param g
+	 *            the g
 	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -93,12 +117,16 @@ public class CardPanel extends JPanel {
 	}
 
 	/**
-	 * Set the dimensions of the card to be drawn
-	 * 
+	 * Set the dimensions of the card to be drawn.
+	 *
 	 * @param c
+	 *            the c
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 * @param gameState
+	 *            the game state
 	 */
 	public void setParameters(Card c, int x, int y, boolean gameState) {
 		boardXCoords = x;
@@ -108,10 +136,12 @@ public class CardPanel extends JPanel {
 	}
 
 	/**
-	 * Sets the dimensions of the card to be drawn
-	 * 
+	 * Sets the dimensions of the card to be drawn.
+	 *
 	 * @param c
+	 *            the c
 	 * @param gameState
+	 *            the game state
 	 */
 	public void setParameters(Card c, boolean gameState) {
 		boardXCoords = 79;
@@ -121,12 +151,16 @@ public class CardPanel extends JPanel {
 	}
 
 	/**
-	 * Draws the card on the table
-	 * 
+	 * Draws the card on the table.
+	 *
 	 * @param g
+	 *            the g
 	 * @param card
+	 *            the card
 	 * @param x
+	 *            the x
 	 * @param y
+	 *            the y
 	 */
 	public void drawCard(Graphics g, Card card, int x, int y) {
 		int cx; // x-coord of upper left corner of the card inside cardsImage
@@ -169,9 +203,9 @@ public class CardPanel extends JPanel {
 	}
 
 	/**
-	 * Returns the node ID of the card panel
-	 * 
-	 * @return
+	 * Returns the node ID of the card panel.
+	 *
+	 * @return the node id
 	 */
 	public int getNodeID() {
 		return nodeID;

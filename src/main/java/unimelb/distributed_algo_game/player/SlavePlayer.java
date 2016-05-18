@@ -31,8 +31,10 @@ public class SlavePlayer extends Player {
 	/** The game server thread. */
 	private Thread gameServerThread = null;
 
+	/** The m panel. */
 	private MainGamePanel mPanel = null;
 
+	/** The m game client socket manager. */
 	private GameClientSocketManager mGameClientSocketManager = null;
 
 	/**
@@ -41,8 +43,12 @@ public class SlavePlayer extends Player {
 	 *
 	 * @param name
 	 *            the name
-	 * @param id
-	 *            the id
+	 * @param gamePlayerInfo
+	 *            the game player info
+	 * @param gameServerInfo
+	 *            the game server info
+	 * @param panel
+	 *            the panel
 	 */
 	public SlavePlayer(String name, GamePlayerInfo gamePlayerInfo, GamePlayerInfo gameServerInfo, MainGamePanel panel) {
 		super(name, gamePlayerInfo, GameState.NONE, gameServerInfo);
@@ -54,13 +60,19 @@ public class SlavePlayer extends Player {
 
 	}
 
+	/**
+	 * Instantiates a new slave player.
+	 *
+	 * @param gamePlayerInfo
+	 *            the game player info
+	 */
 	public SlavePlayer(GamePlayerInfo gamePlayerInfo) {
 		super("Slave", gamePlayerInfo, GameState.NONE);
 		gameServer = GameServer.getInstance();
 	}
 
 	/**
-	 * Runs the main thread of the AI player
+	 * Runs the main thread of the AI player.
 	 */
 	public void play() {
 
@@ -90,7 +102,7 @@ public class SlavePlayer extends Player {
 	}
 
 	/**
-	 * Runs an update
+	 * Runs an update.
 	 */
 	@Override
 	public void update() {
@@ -98,6 +110,9 @@ public class SlavePlayer extends Player {
 
 	}
 
+	/**
+	 * Request card from dealer.
+	 */
 	public void requestCardFromDealer() {
 		// gameClient.requestCard();
 
@@ -117,10 +132,18 @@ public class SlavePlayer extends Player {
 
 	}
 
+	/**
+	 * Disconnect client.
+	 */
 	public void disconnectClient() {
 		gameClient.disconnect();
 	}
 
+	/**
+	 * Gets the panel.
+	 *
+	 * @return the panel
+	 */
 	public JPanel getPanel() {
 		return mPanel;
 	}

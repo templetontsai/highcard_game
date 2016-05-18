@@ -43,34 +43,46 @@ public class PlayerClientThread extends Thread {
 	/** The m lock. */
 	private Object mLock = null;
 
-	/** The JSON body message */
+	/** The JSON body message. */
 	private JSONObject mMessage = null;
 
-	/** The boolean for running the client thread */
+	/** The boolean for running the client thread. */
 	private boolean isRunning = false;
 
+	/** The m player client manager. */
 	private PlayerClientManager mPlayerClientManager = null;
 
+	/** The client node id. */
 	private int clientNodeID = -1;
 
+	/** The is client lock round. */
 	private boolean isClientLockRound;
 
+	/** The m game dealer info. */
 	private GamePlayerInfo mGameDealerInfo = null;
 
+	/** The m game client info. */
 	private GamePlayerInfo mGameClientInfo = null;
 
+	/** The check node still alive timer. */
 	private Timer checkNodeStillAliveTimer = null;
 
+	/** The check client still alive timer. */
 	private Timer checkClientStillAliveTimer = null;
 
+	/** The server still alive timer. */
 	private Timer serverStillAliveTimer = null;
 
+	/** The c. */
 	private Card c = null;
 
+	/** The is dealer ss. */
 	private boolean isDealerSS = false;
 
+	/** The new dealer. */
 	private GamePlayerInfo newDealer = null;
 
+	/** The is cs waiting. */
 	private boolean isCSWaiting = false;
 
 	/**
@@ -78,8 +90,10 @@ public class PlayerClientThread extends Thread {
 	 *
 	 * @param mSocket
 	 *            the m socket
-	 * @param clientID
-	 *            the client id
+	 * @param mPlayerClientManager
+	 *            the m player client manager
+	 * @param mGameDealerInfo
+	 *            the m game dealer info
 	 */
 	public PlayerClientThread(Socket mSocket, PlayerClientManager mPlayerClientManager,
 			GamePlayerInfo mGameDealerInfo) {
@@ -98,7 +112,7 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * Runs the main method of the client thread
+	 * Runs the main method of the client thread.
 	 */
 	public void run() {
 
@@ -173,13 +187,17 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * Starts a timer task to check if a node is still alive
-	 * 
-	 * @author Lupiya
+	 * Starts a timer task to check if a node is still alive.
 	 *
+	 * @author Lupiya
 	 */
 	final class checkNodeStillAliveTimerTask extends TimerTask {
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.TimerTask#run()
+		 */
 		@Override
 		public void run() {
 
@@ -191,11 +209,15 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * This receives a still alive message from the client
-	 *
+	 * This receives a still alive message from the client.
 	 */
 	final class checkClientStillAliveTimerTask extends TimerTask {
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.TimerTask#run()
+		 */
 		@Override
 		public void run() {
 
@@ -207,7 +229,7 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * Updates the list used by the GUI
+	 * Updates the list used by the GUI.
 	 */
 	private void updateListAndGUI() {
 		if (mPlayerClientManager.isDealer()) {
@@ -226,13 +248,17 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * Starts a still alive message timer task
-	 * 
-	 * @author Lupiya
+	 * Starts a still alive message timer task.
 	 *
+	 * @author Lupiya
 	 */
 	final class StillAliveTimerTask extends TimerTask {
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.TimerTask#run()
+		 */
 		@Override
 		public void run() {
 			// if(!isDealerSS)
@@ -246,7 +272,7 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * Sends still alive message to the client
+	 * Sends still alive message to the client.
 	 */
 	private void sendStillAliveMessage() {
 		JSONObject mMessage = new JSONObject();
@@ -258,9 +284,10 @@ public class PlayerClientThread extends Thread {
 
 	/**
 	 * This method checks the type of JSON body message and carries out the
-	 * necessary action for each message type
-	 * 
+	 * necessary action for each message type.
+	 *
 	 * @param mBodyMessage
+	 *            the m body message
 	 */
 	private synchronized void checkMessageType(BodyMessage mBodyMessage) {
 		ClientConnectionState connectionState;
@@ -438,19 +465,31 @@ public class PlayerClientThread extends Thread {
 		}
 	}
 
+	/**
+	 * Checks if is CS waiting.
+	 *
+	 * @return true, if is CS waiting
+	 */
 	public synchronized boolean isCSWaiting() {
 		return isCSWaiting;
 	}
 
+	/**
+	 * Sets the checks if is cs waiting.
+	 *
+	 * @param isCSWaiting
+	 *            the new checks if is cs waiting
+	 */
 	public synchronized void setIsCSWaiting(boolean isCSWaiting) {
 		this.isCSWaiting = isCSWaiting;
 	}
 
 	/**
 	 * This sends an election message to the node's neighbor after comparing the
-	 * received node ID to it's own
-	 * 
+	 * received node ID to it's own.
+	 *
 	 * @param mBodyMessage
+	 *            the m body message
 	 */
 	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
 		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
@@ -484,7 +523,7 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * Closes all the thread connections
+	 * Closes all the thread connections.
 	 */
 	public synchronized void closeConnection() {
 		if (checkNodeStillAliveTimer != null) {
@@ -545,6 +584,8 @@ public class PlayerClientThread extends Thread {
 
 	/**
 	 * Receive message from the client.
+	 *
+	 * @return the object
 	 */
 	public Object receiveMessage() {
 
@@ -575,36 +616,37 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * This returns the client ID of this thread
-	 * 
-	 * @return
+	 * This returns the client ID of this thread.
+	 *
+	 * @return the client node id
 	 */
 	public synchronized int getClientNodeID() {
 		return mGameClientInfo.getNodeID();
 	}
 
 	/**
-	 * This returns the lock round status of this thread
-	 * 
-	 * @return
+	 * This returns the lock round status of this thread.
+	 *
+	 * @return the client status
 	 */
 	public synchronized boolean getClientStatus() {
 		return isClientLockRound;
 	}
 
 	/**
-	 * This sets the status of the client thread
-	 * 
+	 * This sets the status of the client thread.
+	 *
 	 * @param isClientLockRound
+	 *            the new client status
 	 */
 	public synchronized void setClientStatus(boolean isClientLockRound) {
 		this.isClientLockRound = isClientLockRound;
 	}
 
 	/**
-	 * This returns the player information of this thread
-	 * 
-	 * @return
+	 * This returns the player information of this thread.
+	 *
+	 * @return the client game player info
 	 */
 	public synchronized GamePlayerInfo getClientGamePlayerInfo() {
 		return this.mGameClientInfo;

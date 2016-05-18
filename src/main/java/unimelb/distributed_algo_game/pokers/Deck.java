@@ -77,9 +77,10 @@ public final class Deck implements Serializable {
 
 	/**
 	 * Returns a card from the deck at the given index.
-	 * 
+	 *
 	 * @param cardIndex
-	 * @return
+	 *            the card index
+	 * @return the card
 	 */
 	public Card getCard(int cardIndex) {
 		Card card = null;

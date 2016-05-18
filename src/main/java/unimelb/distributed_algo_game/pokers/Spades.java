@@ -17,8 +17,6 @@ public final class Spades extends Card {
 	 *
 	 * @param cardRank
 	 *            the card rank
-	 * @param cardPattern
-	 *            the card pattern
 	 */
 	public Spades(CardRank cardRank) {
 		super(cardRank, CardPattern.Spades);

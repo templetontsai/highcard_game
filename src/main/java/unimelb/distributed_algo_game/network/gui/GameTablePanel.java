@@ -15,29 +15,45 @@ import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
+// TODO: Auto-generated Javadoc
 /**
- * This draws the table of cards for the game
- * 
- * @author Lupiya
+ * This draws the table of cards for the game.
  *
+ * @author Lupiya
  */
 public class GameTablePanel extends JPanel {
 
+	/** The m player card panel list. */
 	// Initialize all the variables
 	private List<CardPanel> mPlayerCardPanelList = null;
+
+	/** The btn. */
 	private JButton btn = null;
+
+	/** The m get card button listener. */
 	private GetCardButtonActionListener mGetCardButtonListener = null;
+
+	/** The m draw button action listener. */
 	private DrawButtonActionListener mDrawButtonActionListener = null;
+
+	/** The m player. */
 	private Player mPlayer = null;
+
+	/** The m player panel list. */
 	private List<CardPanel> mPlayerPanelList = null;
+
+	/** The is dealer. */
 	private boolean isDealer = false;
 
 	/**
-	 * Main constructor for this class
-	 * 
+	 * Main constructor for this class.
+	 *
 	 * @param mPlayerIDList
+	 *            the m player id list
 	 * @param isDealer
+	 *            the is dealer
 	 * @param mPlayer
+	 *            the m player
 	 */
 	public GameTablePanel(List<Integer> mPlayerIDList, boolean isDealer, Player mPlayer) {
 
@@ -53,9 +69,10 @@ public class GameTablePanel extends JPanel {
 	}
 
 	/**
-	 * Initializes the table using the list of players
-	 * 
+	 * Initializes the table using the list of players.
+	 *
 	 * @param mPlayerIDList
+	 *            the m player id list
 	 */
 	private void initGUI(List<Integer> mPlayerIDList) {
 
@@ -90,13 +107,18 @@ public class GameTablePanel extends JPanel {
 	}
 
 	/**
-	 * Creates an action listener for the draw card button
-	 * 
-	 * @author Lupiya
+	 * Creates an action listener for the draw card button.
 	 *
+	 * @author Lupiya
 	 */
 	final class DrawButtonActionListener implements ActionListener {
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.
+		 * ActionEvent)
+		 */
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			((DealerPlayer) mPlayer).dealerDrawnCard();
@@ -106,13 +128,18 @@ public class GameTablePanel extends JPanel {
 	}
 
 	/**
-	 * Creates am action listener for the get card button
-	 * 
-	 * @author Lupiya
+	 * Creates am action listener for the get card button.
 	 *
+	 * @author Lupiya
 	 */
 	final class GetCardButtonActionListener implements ActionListener {
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.
+		 * ActionEvent)
+		 */
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 
@@ -127,10 +154,12 @@ public class GameTablePanel extends JPanel {
 	}
 
 	/**
-	 * Updates the table with the card drawn by a player
-	 * 
+	 * Updates the table with the card drawn by a player.
+	 *
 	 * @param c
+	 *            the c
 	 * @param nodeID
+	 *            the node id
 	 */
 	public void updateCard(Card c, int nodeID) {
 		int pos = -1;
@@ -148,7 +177,7 @@ public class GameTablePanel extends JPanel {
 	}
 
 	/**
-	 * Resets the table when a new round begins
+	 * Resets the table when a new round begins.
 	 */
 	public void newRound() {
 
@@ -162,9 +191,10 @@ public class GameTablePanel extends JPanel {
 	}
 
 	/**
-	 * Updates the game table with the new list of players
-	 * 
+	 * Updates the game table with the new list of players.
+	 *
 	 * @param mPlayerIDList
+	 *            the m player id list
 	 */
 	public void updateGameTable(List<Integer> mPlayerIDList) {
 		initGUI(mPlayerIDList);
@@ -172,18 +202,20 @@ public class GameTablePanel extends JPanel {
 	}
 
 	/**
-	 * Sets if the owner of the table is the dealer
-	 * 
+	 * Sets if the owner of the table is the dealer.
+	 *
 	 * @param isDealer
+	 *            the new dealer
 	 */
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
 	}
 
 	/**
-	 * Sets the reference to the player that the table belongs to
-	 * 
+	 * Sets the reference to the player that the table belongs to.
+	 *
 	 * @param mPlayer
+	 *            the new player
 	 */
 	public void setPlayer(Player mPlayer) {
 		System.out.println("1GameTable " + mPlayer.getName());

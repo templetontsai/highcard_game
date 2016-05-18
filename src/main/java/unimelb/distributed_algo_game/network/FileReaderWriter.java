@@ -11,19 +11,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @author Arjun
+ * The Class FileReaderWriter.
  *
+ * @author Arjun
  */
 public class FileReaderWriter {
+
+	/** The total nodes. */
 	public int totalNodes = 0;
+
+	/** The map. */
 	public Map<String, List<String>> map = new HashMap<String, List<String>>();
 
 	/**
 	 * This method is used to read config file and then print its content after
-	 * storing it in a map and then returns total number of nodes
-	 **/
+	 * storing it in a map and then returns total number of nodes.
+	 *
+	 * @return the int
+	 */
 	public int readConfig() {
 		try (BufferedReader br = new BufferedReader(new FileReader("playersMachineParameters.txt"))) {
 			String sCurrentLine;
@@ -59,10 +66,11 @@ public class FileReaderWriter {
 	}
 
 	/**
-	 * Returns the socket connection details for the client
-	 * 
+	 * Returns the socket connection details for the client.
+	 *
 	 * @param id
-	 * @return
+	 *            the id
+	 * @return the client details
 	 */
 	public List getClientDetails(int id) {
 		List<String> valueList = new ArrayList<String>();

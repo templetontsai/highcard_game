@@ -48,41 +48,59 @@ public final class GameClient implements Runnable, NetworkInterface {
 	/** The m lock. */
 	private Object mLock;
 
-	/** The boolean for the client thread */
+	/** The boolean for the client thread. */
 	private boolean isRunning = false;
 
+	/** The send still alive timer. */
 	private Timer sendStillAliveTimer = null;
 
+	/** The check server timer. */
 	private Timer checkServerTimer = null;
 
+	/** The is game ready. */
 	private boolean isGameReady = false;
 
+	/** The m main game login client panel. */
 	private MainGamePanel mMainGameLoginClientPanel = null;
 
+	/** The m node id list. */
 	private List<Integer> mNodeIDList = null;
 
+	/** The m player info list. */
 	private List<GamePlayerInfo> mPlayerInfoList = null;
 
+	/** The m game client socket manager. */
 	private GameClientSocketManager mGameClientSocketManager = null;
 
+	/** The is replied. */
 	private boolean isReplied = false;
 
+	/** The ip address. */
 	private String ipAddress = null;
 
+	/** The port. */
 	private String port = null;
 
+	/** The is dealer cs. */
 	private boolean isDealerCS = false;
 
+	/** The player ss node id. */
 	private int playerSSNodeID = -1;
 
+	/** The cs timestamp start. */
 	private long csTimestampStart = -1;
 
+	/** The cs timestamp return. */
 	private long csTimestampReturn = -1;
 
+	/** The server time stamp. */
 	private long serverTimeStamp = -1;
 
 	/**
 	 * Instantiates a new game client.
+	 *
+	 * @param mPlayer
+	 *            the m player
 	 */
 	public GameClient(Player mPlayer) {
 		if (mPlayer != null) {
@@ -100,12 +118,16 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Constructor for the game client
-	 * 
+	 * Constructor for the game client.
+	 *
 	 * @param mPlayer
+	 *            the m player
 	 * @param ipAddress
+	 *            the ip address
 	 * @param port
+	 *            the port
 	 * @param isDealerCS
+	 *            the is dealer cs
 	 */
 	public GameClient(Player mPlayer, String ipAddress, String port, boolean isDealerCS) {
 		if (mPlayer != null) {
@@ -125,6 +147,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 		this.csTimestampStart = Utils.getProcessTimestamp();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	/*
 	 * Runs the thread for the game client
 	 */
@@ -177,7 +204,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
-	/** This runs the game client as a slave to the server */
+	/**
+	 * This runs the game client as a slave to the server.
+	 *
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
 	private void runState() throws IOException {
 
 		JSONObject mMessage = (JSONObject) receiveMessage();
@@ -205,6 +237,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	}
 
+	/**
+	 * Check message type.
+	 *
+	 * @param mBodyMessage
+	 *            the m body message
+	 */
 	private void checkMessageType(BodyMessage mBodyMessage) {
 		JSONObject mMessage = new JSONObject();
 		MessageType messageType = mBodyMessage.getMessageType();
@@ -356,6 +394,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
+	/**
+	 * Send request server time.
+	 */
 	public void sendRequestServerTime() {
 		this.csTimestampStart = Utils.getProcessTimestamp();
 		JSONObject mMessage = new JSONObject();
@@ -368,9 +409,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * This updates the node list
-	 * 
+	 * This updates the node list.
+	 *
 	 * @param mPlayerInfoList
+	 *            the m player info list
 	 */
 	private synchronized void updateNodeList(List<GamePlayerInfo> mPlayerInfoList) {
 		mNodeIDList.clear();
@@ -380,7 +422,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * This method sends a still alive message to the dealer
+	 * This method sends a still alive message to the dealer.
 	 */
 	private void sendStillAliveMessage() {
 		if (isDealerCS) {
@@ -402,13 +444,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Creates a new still alive timer task
-	 * 
-	 * @author Lupiya
+	 * Creates a new still alive timer task.
 	 *
+	 * @author Lupiya
 	 */
 	final class StillAliveTimerTask extends TimerTask {
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.TimerTask#run()
+		 */
 		@Override
 		public void run() {
 
@@ -419,11 +465,15 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * This receives a still alive message from the client
-	 *
+	 * This receives a still alive message from the client.
 	 */
 	final class checkServerStillAliveTimerTask extends TimerTask {
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.TimerTask#run()
+		 */
 		@Override
 		public void run() {
 
@@ -442,6 +492,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see unimelb.distributed_algo_game.network.NetworkInterface#connect()
+	 */
 	/*
 	 * Establishes connection with the server on the defined post on the local
 	 * host
@@ -466,7 +521,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/**
 	 * Changes state of the client in order to stop receiving messages from the
-	 * server and be removed from the server thread pool
+	 * server and be removed from the server thread pool.
 	 */
 	public void disconnect() {
 		System.out.println("Disconnecting from the game");
@@ -481,7 +536,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * This method sends a generic message object to the game server
+	 * This method sends a generic message object to the game server.
+	 *
+	 * @param mGameSendDataObject
+	 *            the m game send data object
 	 */
 	public void sendMessage(Object mGameSendDataObject) {
 
@@ -514,7 +572,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * This method receives messages sent by the server of generic object type
+	 * This method receives messages sent by the server of generic object type.
+	 *
+	 * @return the object
 	 */
 	public Object receiveMessage() {
 
@@ -546,7 +606,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * This plays the game with the server
+	 * This plays the game with the server.
 	 */
 	public void play() {
 
@@ -564,9 +624,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Returns the details of the server the client connects to
-	 * 
-	 * @return
+	 * Returns the details of the server the client connects to.
+	 *
+	 * @return the server details
 	 */
 	public String getServerDetails() {
 		StringBuilder sb = new StringBuilder();
@@ -577,7 +637,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Re-establishing a connection with the server
+	 * Re-establishing a connection with the server.
 	 */
 	public void reConnect() {
 		mObjectOutputStream = null;
@@ -589,9 +649,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Sets the client login panel
-	 * 
+	 * Sets the client login panel.
+	 *
 	 * @param mainGameLoginClientPanel
+	 *            the new panel
 	 */
 	public void setPanel(MainGamePanel mainGameLoginClientPanel) {
 
@@ -599,16 +660,16 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Returns the client login panel
-	 * 
-	 * @return
+	 * Returns the client login panel.
+	 *
+	 * @return the login panel
 	 */
 	public MainGamePanel getLoginPanel() {
 		return mMainGameLoginClientPanel;
 	}
 
 	/**
-	 * Sends a card request message to all the players in the game
+	 * Sends a card request message to all the players in the game.
 	 */
 	public void requestCard() {
 		JSONObject mMessage = new JSONObject();
@@ -620,25 +681,26 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Sets the client socket manager for this game client
-	 * 
+	 * Sets the client socket manager for this game client.
+	 *
 	 * @param mGameClientSocketManager
+	 *            the new client socket manager
 	 */
 	public void setClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
 		this.mGameClientSocketManager = mGameClientSocketManager;
 	}
 
 	/**
-	 * Returns the reply status of the mutual exclusion algorithm
-	 * 
-	 * @return
+	 * Returns the reply status of the mutual exclusion algorithm.
+	 *
+	 * @return the reply
 	 */
 	public boolean getReply() {
 		return this.isReplied;
 	}
 
 	/**
-	 * Starts a new leader election
+	 * Starts a new leader election.
 	 */
 	public void startElection() {
 		int pos = (getMyPositionInList() % mPlayerInfoList.size());
@@ -650,9 +712,10 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	/**
 	 * This sends an election message to the node's neighbor after comparing the
-	 * received node ID to it's own
-	 * 
+	 * received node ID to it's own.
+	 *
 	 * @param mBodyMessage
+	 *            the m body message
 	 */
 	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
 
@@ -689,36 +752,37 @@ public final class GameClient implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Returns the player of this game client
-	 * 
-	 * @return
+	 * Returns the player of this game client.
+	 *
+	 * @return the player
 	 */
 	public Player getPlayer() {
 		return mPlayer;
 	}
 
 	/**
-	 * Sets the node ID for the game client server socket connection
-	 * 
+	 * Sets the node ID for the game client server socket connection.
+	 *
 	 * @param playerSSNodeID
+	 *            the new player ss node id
 	 */
 	public void setPlayerSSNodeID(int playerSSNodeID) {
 		this.playerSSNodeID = playerSSNodeID;
 	}
 
 	/**
-	 * Returns the ID node of the game client socket server connection
-	 * 
-	 * @return
+	 * Returns the ID node of the game client socket server connection.
+	 *
+	 * @return the player ss node id
 	 */
 	public int getPlayerSSNodeID() {
 		return this.playerSSNodeID;
 	}
 
 	/**
-	 * This method returns the player's position in the client list
-	 * 
-	 * @return
+	 * This method returns the player's position in the client list.
+	 *
+	 * @return the my position in list
 	 */
 	public int getMyPositionInList() {
 		int pos = 0;
@@ -731,6 +795,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 		return pos + 1;
 	}
 
+	/**
+	 * Gets the logic clock.
+	 *
+	 * @return the logic clock
+	 */
 	public synchronized long getLogicClock() {
 		return this.serverTimeStamp + ((this.csTimestampStart - this.csTimestampReturn) / 2);
 	}

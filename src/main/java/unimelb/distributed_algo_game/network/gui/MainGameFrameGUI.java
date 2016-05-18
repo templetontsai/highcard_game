@@ -8,22 +8,26 @@ import javax.swing.JFrame;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+// TODO: Auto-generated Javadoc
 /**
  * This is the main GUI for the entire game that manages both the login panel
- * and the game tabel
- * 
- * @author Lupiya
+ * and the game tabel.
  *
+ * @author Lupiya
  */
 public class MainGameFrameGUI extends JFrame {
+
+	/** The main panel. */
 	// Initialize the main panel
 	private MainGamePanel mainPanel;
 
 	/**
-	 * Consstructor for the GUI
-	 * 
+	 * Consstructor for the GUI.
+	 *
 	 * @param name
+	 *            the name
 	 * @param nodeID
+	 *            the node id
 	 */
 	public MainGameFrameGUI(String name, int nodeID) {
 		super(name + ": Node" + nodeID);
@@ -31,9 +35,10 @@ public class MainGameFrameGUI extends JFrame {
 	}
 
 	/**
-	 * Sets the node ID
-	 * 
+	 * Sets the node ID.
+	 *
 	 * @param nodeID
+	 *            the node id
 	 */
 	public void init(int nodeID) {
 		// Sets a different login panel based on the node ID passed

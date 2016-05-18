@@ -26,23 +26,43 @@ import unimelb.distributed_algo_game.pokers.Card;
  */
 public final class PlayerClientManager {
 
+	/** The m player. */
 	private Player mPlayer = null;
+
+	/** The m node list. */
 	private List<GamePlayerInfo> mNodeList = null;
+
+	/** The m player client list. */
 	private Map<Integer, PlayerClientThread> mPlayerClientList = null;
+
+	/** The m local player list. */
 	private Map<Integer, Player> mLocalPlayerList = null;
+
+	/** The is lock round. */
 	private boolean isLockRound = false;
+
+	/** The m main game panel. */
 	private MainGamePanel mMainGamePanel = null;
+
+	/** The m game server. */
 	private GameServer mGameServer = null;
+
+	/** The is dealer ss. */
 	private boolean isDealerSS = false;
 
+	/** The server time. */
 	private long serverTime = -1;
 
+	/** The requested timestamp. */
 	private long requestedTimestamp = -1;
 
+	/** The is crt requested. */
 	private boolean isCRTRequested = false;
 
+	/** The requested crt queue. */
 	private List<Integer> requestedCRTQueue = null;
 
+	/** The Constant GAME_SIZE. */
 	private static final int GAME_SIZE = 3;
 
 	/**
@@ -62,11 +82,14 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Instantiates a new player client manager
-	 * 
+	 * Instantiates a new player client manager.
+	 *
 	 * @param playerClientNum
+	 *            the player client num
 	 * @param mPlayer
+	 *            the m player
 	 * @param mGameServer
+	 *            the m game server
 	 */
 	public PlayerClientManager(int playerClientNum, Player mPlayer, GameServer mGameServer) {
 
@@ -84,19 +107,22 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Adds a new client to the manager
-	 * 
+	 * Adds a new client to the manager.
+	 *
 	 * @param nodeID
+	 *            the node id
 	 * @param mPlayerClientThread
+	 *            the m player client thread
 	 */
 	public synchronized void addClient(int nodeID, PlayerClientThread mPlayerClientThread) {
 		mPlayerClientList.put(nodeID, mPlayerClientThread);
 	}
 
 	/**
-	 * Adds a new node to the manager
-	 * 
+	 * Adds a new node to the manager.
+	 *
 	 * @param gamePlayerInfo
+	 *            the game player info
 	 */
 	public synchronized void addNode(GamePlayerInfo gamePlayerInfo) {
 
@@ -110,7 +136,7 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Closes all existing client connections
+	 * Closes all existing client connections.
 	 */
 	public synchronized void closeAllClientConnection() {
 		for (Map.Entry<Integer, PlayerClientThread> t : mPlayerClientList.entrySet()) {
@@ -119,9 +145,10 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Removes a node from all the lists in the manager
-	 * 
+	 * Removes a node from all the lists in the manager.
+	 *
 	 * @param nodeID
+	 *            the node id
 	 */
 	public synchronized void removeNode(int nodeID) {
 		int index = 0;
@@ -141,7 +168,7 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Removes all the clients from all the lists
+	 * Removes all the clients from all the lists.
 	 */
 	public synchronized void removeAll() {
 		mNodeList.clear();
@@ -151,6 +178,13 @@ public final class PlayerClientManager {
 
 	/**
 	 * Notify all clients.
+	 *
+	 * @param object
+	 *            the object
+	 * @param mConnectionState
+	 *            the m connection state
+	 * @param messageType
+	 *            the message type
 	 */
 	public synchronized void notifyAllClients(Object object, ClientConnectionState mConnectionState,
 			MessageType messageType) {
@@ -164,7 +198,16 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * This method sends a message to a client in the thread pool
+	 * This method sends a message to a client in the thread pool.
+	 *
+	 * @param message
+	 *            the message
+	 * @param clientID
+	 *            the client id
+	 * @param mConnectionState
+	 *            the m connection state
+	 * @param messageType
+	 *            the message type
 	 */
 	public synchronized void sendMessageToClient(Object message, int clientID, ClientConnectionState mConnectionState,
 			MessageType messageType) {
@@ -180,10 +223,12 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Sends the node list to all the clients
-	 * 
+	 * Sends the node list to all the clients.
+	 *
 	 * @param mConnectionState
+	 *            the m connection state
 	 * @param messageType
+	 *            the message type
 	 */
 	public synchronized void sendNodeList(ClientConnectionState mConnectionState, MessageType messageType) {
 
@@ -201,10 +246,19 @@ public final class PlayerClientManager {
 		}
 	}
 
+	/**
+	 * Adds the crt requested queue.
+	 *
+	 * @param nodeID
+	 *            the node id
+	 */
 	public synchronized void addCRTRequestedQueue(int nodeID) {
 		requestedCRTQueue.add(nodeID);
 	}
 
+	/**
+	 * Broadcast crt is free.
+	 */
 	public synchronized void broadcastCRTIsFree() {
 		if (requestedCRTQueue.size() > 0) {
 			for (Integer i : requestedCRTQueue) {
@@ -220,9 +274,9 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Checks if all the clients are currently in a game round
-	 * 
-	 * @return
+	 * Checks if all the clients are currently in a game round.
+	 *
+	 * @return true, if is lock round
 	 */
 
 	public synchronized boolean isLockRound() {
@@ -241,9 +295,9 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Returns the complete player information of all the clients
-	 * 
-	 * @return
+	 * Returns the complete player information of all the clients.
+	 *
+	 * @return the players sockets
 	 */
 	public synchronized String getPlayersSockets() {
 		StringBuilder sb = new StringBuilder();
@@ -255,10 +309,12 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Updates the card requested by the player
-	 * 
+	 * Updates the card requested by the player.
+	 *
 	 * @param nodeID
+	 *            the node id
 	 * @param c
+	 *            the c
 	 */
 	public synchronized void updatePlayerCard(int nodeID, Card c) {
 		Player p = mLocalPlayerList.get(nodeID);
@@ -268,7 +324,9 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Checks all the player statuses in the game
+	 * Checks all the player statuses in the game.
+	 *
+	 * @return the int
 	 */
 	public synchronized int checkWinner() {
 
@@ -284,7 +342,7 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Used to notify all the clients of the card drawn by the dealer
+	 * Used to notify all the clients of the card drawn by the dealer.
 	 */
 	public synchronized void dealerDrawnCard() {
 		Card c = null;
@@ -305,9 +363,9 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Returns the list of player IDs in the game
-	 * 
-	 * @return
+	 * Returns the list of player IDs in the game.
+	 *
+	 * @return the player id list
 	 */
 	public synchronized List<Integer> getPlayerIDList() {
 
@@ -320,9 +378,10 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Broadcasts the winner to the all the clients
-	 * 
+	 * Broadcasts the winner to the all the clients.
+	 *
 	 * @param object
+	 *            the object
 	 */
 	public synchronized void broadcastGameResultToNodes(Object object) {
 
@@ -330,18 +389,20 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Broadcasts the game is ready to play to all the clients
-	 * 
+	 * Broadcasts the game is ready to play to all the clients.
+	 *
 	 * @param object
+	 *            the object
 	 */
 	public synchronized void broadcastGameReadyToNodes(Object object) {
 		notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RDY);
 	}
 
 	/**
-	 * Broadcasts the card selected by a node to all the clients
-	 * 
+	 * Broadcasts the card selected by a node to all the clients.
+	 *
 	 * @param object
+	 *            the object
 	 */
 	public synchronized void broadcastNodeCard(Object object) {
 		notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_CRD);
@@ -349,39 +410,40 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Broadcasts the list of nodes to all the clients
+	 * Broadcasts the list of nodes to all the clients.
 	 */
 	public synchronized void broadcastNodeList() {
 		sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_NODE_LST);
 	}
 
 	/**
-	 * Broadcasts the updated node list to all the clients
+	 * Broadcasts the updated node list to all the clients.
 	 */
 	public synchronized void broadcastUpdateNodeList() {
 		sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_NODE_UPT);
 	}
 
 	/**
-	 * Returns the number of nodes in the game
-	 * 
-	 * @return
+	 * Returns the number of nodes in the game.
+	 *
+	 * @return the num of nodes
 	 */
 	public synchronized int getNumOfNodes() {
 		return getPlayerIDList().size();
 	}
 
 	/**
-	 * Sets the game panel
-	 * 
+	 * Sets the game panel.
+	 *
 	 * @param mMainGamePanel
+	 *            the new panel
 	 */
 	public void setPanel(MainGamePanel mMainGamePanel) {
 		this.mMainGamePanel = mMainGamePanel;
 	}
 
 	/**
-	 * Updates the game panel
+	 * Updates the game panel.
 	 */
 	public synchronized void updateGameTable() {
 		if (!isDealerSS) {
@@ -393,111 +455,132 @@ public final class PlayerClientManager {
 	}
 
 	/**
-	 * Returns if the player is the dealer
-	 * 
-	 * @return
+	 * Returns if the player is the dealer.
+	 *
+	 * @return true, if is dealer
 	 */
 	public boolean isDealer() {
 		return mPlayer.isDealer();
 	}
 
 	/**
-	 * Returns a card from the dealer's deck
-	 * 
+	 * Returns a card from the dealer's deck.
+	 *
 	 * @param index
-	 * @return
+	 *            the index
+	 * @return the card
 	 */
 	public synchronized Card getCard(int index) {
 		return mPlayer.getCard(index);
 	}
 
 	/**
-	 * Resets the game
-	 * 
+	 * Resets the game.
+	 *
 	 * @param num
+	 *            the num
 	 */
 	public synchronized void resetGameStart(int num) {
 		mGameServer.resetGameStart(num);
 	}
 
 	/**
-	 * Sets the card requested boolean
-	 * 
+	 * Sets the card requested boolean.
+	 *
 	 * @param isRequested
+	 *            the is requested
 	 * @param requestedTimestamp
+	 *            the requested timestamp
 	 */
 	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
 		mGameServer.setIsRequested(isRequested, requestedTimestamp);
 	}
 
 	/**
-	 * Returns the timestamp of the server
-	 * 
-	 * @return
+	 * Returns the timestamp of the server.
+	 *
+	 * @return the requested timestamp
 	 */
 	public long getRequestedTimestamp() {
 		return this.requestedTimestamp;
 	}
 
 	/**
-	 * Returns the requested state of the server
-	 * 
-	 * @return
+	 * Returns the requested state of the server.
+	 *
+	 * @return true, if is requested
 	 */
 	public boolean isRequested() {
 		return this.isCRTRequested;
 	}
 
 	/**
-	 * Updates the card drawn by a player
-	 * 
+	 * Updates the card drawn by a player.
+	 *
 	 * @param c
+	 *            the c
 	 * @param nodeID
+	 *            the node id
 	 */
 	public synchronized void updateCard(Card c, int nodeID) {
 		this.mMainGamePanel.updateCard(c, nodeID);
 	}
 
 	/**
-	 * draws the game table
+	 * draws the game table.
 	 */
 	public synchronized void showGameTable() {
 		this.mMainGamePanel.showGameTable(true, getPlayerIDList());
 	}
 
 	/**
-	 * Returns if this is a dealer client thread
-	 * 
-	 * @return
+	 * Returns if this is a dealer client thread.
+	 *
+	 * @return true, if is dealer ss
 	 */
 	public boolean isDealerSS() {
 		return this.isDealerSS;
 	}
 
 	/**
-	 * Reinitializes the game as a player
-	 * 
+	 * Reinitializes the game as a player.
+	 *
 	 * @param player
+	 *            the player
 	 * @param newDealer
+	 *            the new dealer
 	 */
 	public void reInitGameAsPlayer(GamePlayerInfo player, GamePlayerInfo newDealer) {
 		closeAllClientConnection();
 		mGameServer.reInitGameAsPlayer(player, newDealer);
 	}
 
+	/**
+	 * Sets the is crt requested.
+	 *
+	 * @param isRequested
+	 *            the is requested
+	 * @param requestedTimestamp
+	 *            the requested timestamp
+	 */
 	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
 		this.isCRTRequested = isRequested;
 		this.requestedTimestamp = requestedTimestamp;
 	}
 
+	/**
+	 * Gets the server time.
+	 *
+	 * @return the server time
+	 */
 	public long getServerTime() {
 		return this.serverTime;
 	}
 
 	/**
-	 * Returns the list of player information
-	 * 
-	 * @return
+	 * Returns the list of player information.
+	 *
+	 * @return the node list
 	 */
 	public List<GamePlayerInfo> getNodeList() {
 		return mNodeList;

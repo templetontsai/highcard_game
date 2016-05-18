@@ -72,6 +72,12 @@ public abstract class Card implements Serializable {
 			return this.code;
 		}
 
+		/**
+		 * Sets the code.
+		 *
+		 * @param code
+		 *            the new code
+		 */
 		public void setCode(int code) {
 			this.code = code;
 		}
@@ -131,6 +137,12 @@ public abstract class Card implements Serializable {
 			return this.code;
 		}
 
+		/**
+		 * Sets the code.
+		 *
+		 * @param code
+		 *            the new code
+		 */
 		public void setCode(int code) {
 			this.code = code;
 		}

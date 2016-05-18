@@ -51,15 +51,23 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private PlayerClientManager mPlayerClientManager = null;
 
+	/** The m main game panel. */
 	private MainGamePanel mMainGamePanel = null;
+
+	/** The game start. */
 	// This number is the total player number but not including node 0 itself
 	private int GAME_START = 3;
 
+	/** The m game client socket manager. */
 	private GameClientSocketManager mGameClientSocketManager = null;
 
+	/** The m game client. */
 	private GameClient mGameClient = null;
 
+	/** The is requested. */
 	private boolean isRequested = false;
+
+	/** The requested timestamp. */
 	private long requestedTimestamp = -1;
 
 	/**
@@ -74,6 +82,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	/**
 	 * Gets the single instance of GameServer.
 	 *
+	 * @return single instance of GameServer
 	 */
 	public static GameServer getInstance() {
 		if (instance == null) {
@@ -83,7 +92,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Sets the reference to the player that is acting as the server
+	 * Sets the reference to the player that is acting as the server.
+	 *
+	 * @param mPlayer
+	 *            the new player
 	 */
 	public void setPlayer(Player mPlayer) {
 		if (mPlayer != null) {
@@ -100,7 +112,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Runs the main thread of the game server
+	 * Runs the main thread of the game server.
 	 */
 	public void run() {
 
@@ -131,7 +143,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	/**
 	 * This method is responsible for sending and receiving messages from the
-	 * clients including managing the thread pool of clients
+	 * clients including managing the thread pool of clients.
+	 *
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void runLeaderState() throws IOException {
 
@@ -189,7 +204,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	/**
 	 * This runs when the server isn't the main dealer of the game and is a
-	 * slave to another server
+	 * slave to another server.
+	 *
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void runSlaveState() throws IOException {
 		// TODO slavestate for a cue to work
@@ -232,7 +250,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Initializes the server socket and connection state of the server
+	 * Initializes the server socket and connection state of the server.
+	 *
+	 * @return true, if successful
 	 */
 	public synchronized boolean connect() {
 
@@ -250,7 +270,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Disconnects the server from the clients by changing the server state
+	 * Disconnects the server from the clients by changing the server state.
 	 */
 	public synchronized void disconnect() {
 		mConnectionState = ServerConnectionState.DISCONNECTED;
@@ -264,124 +284,179 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Sends a message to all the clients in the thread pool
+	 * Sends a message to all the clients in the thread pool.
+	 *
+	 * @param object
+	 *            the object
 	 */
 	public void broadcastGameResultToNodes(Object object) {
 
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RST);
 	}
 
+	/**
+	 * Broadcast game ready to nodes.
+	 *
+	 * @param object
+	 *            the object
+	 */
 	public void broadcastGameReadyToNodes(Object object) {
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_RDY);
 	}
 
+	/**
+	 * Broadcast node card.
+	 *
+	 * @param object
+	 *            the object
+	 */
 	public void broadcastNodeCard(Object object) {
 		mPlayerClientManager.notifyAllClients(object, ClientConnectionState.CONNECTED, MessageType.BCT_CRD);
 
 	}
 
+	/**
+	 * Broadcast node list.
+	 */
 	public void broadcastNodeList() {
 		mPlayerClientManager.sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_NODE_LST);
 	}
 
+	/**
+	 * Broadcast update node list.
+	 */
 	public void broadcastUpdateNodeList() {
 		mPlayerClientManager.sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_NODE_UPT);
 	}
 
 	/**
-	 * This methods sends a card from the deck to the player
+	 * This methods sends a card from the deck to the player.
+	 *
+	 * @param card
+	 *            the card
+	 * @param id
+	 *            the id
 	 */
 	public void sendCard(Card card, int id) {
 		mPlayerClientManager.sendMessageToClient(card, id, ClientConnectionState.CONNECTED, MessageType.CRD);
 	}
 
+	/**
+	 * Removes the node.
+	 *
+	 * @param nodeID
+	 *            the node id
+	 */
 	public synchronized void removeNode(int nodeID) {
 		mPlayerClientManager.removeNode(nodeID);
 	}
 
 	/**
-	 * This sets the player as the dealer of the game
+	 * This sets the player as the dealer of the game.
 	 */
 	public void setPlayerDealer() {
 		mPlayer.setDealer(true);
 	}
 
+	/**
+	 * Sets the panel.
+	 *
+	 * @param mMainGamePanel
+	 *            the new panel
+	 */
 	public void setPanel(MainGamePanel mMainGamePanel) {
 		this.mMainGamePanel = mMainGamePanel;
 		this.mPlayerClientManager.setPanel(mMainGamePanel);
 	}
 
 	/**
-	 * This returns the leader state of the player
-	 * 
-	 * @return
+	 * This returns the leader state of the player.
+	 *
+	 * @return the checks if is leader
 	 */
 	public boolean getIsLeader() {
 		return mPlayer.isDealer();
 	}
 
 	/**
-	 * This update the sever details for the game client
+	 * This update the sever details for the game client.
+	 *
+	 * @param gameServerInfo
+	 *            the new game server leader
 	 */
 	public void setGameServerLeader(GamePlayerInfo gameServerInfo) {
 		mPlayer.setGameServerInfo(gameServerInfo);
 	}
 
 	/**
-	 * This returns the player object of this server
-	 * 
-	 * @return
+	 * This returns the player object of this server.
+	 *
+	 * @return the player
 	 */
 	public Player getPlayer() {
 		return mPlayer;
 	}
 
 	/**
-	 * This sets the game client object for this player server
-	 * 
+	 * This sets the game client object for this player server.
+	 *
 	 * @param mGameClient
+	 *            the new game client
 	 */
 	public void setGameClient(GameClient mGameClient) {
 		this.mGameClient = mGameClient;
 	}
 
 	/**
-	 * This returns the server details of the game client
-	 * 
-	 * @return
+	 * This returns the server details of the game client.
+	 *
+	 * @return the server details
 	 */
 	public String getServerDetails() {
 		return mGameClient.getServerDetails();
 	}
 
 	/**
-	 * This disconnects the client connection of the player
+	 * This disconnects the client connection of the player.
 	 */
 	public void disconnectClient() {
 		mGameClient.disconnect();
 	}
 
 	/**
-	 * Draws a card from the deck for the dealer
+	 * Draws a card from the deck for the dealer.
 	 */
 	public void dealerDrawnCard() {
 
 		mPlayerClientManager.dealerDrawnCard();
 	}
 
+	/**
+	 * Sets the is crt requested.
+	 *
+	 * @param isRequested
+	 *            the is requested
+	 * @param requestedTimestamp
+	 *            the requested timestamp
+	 */
 	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
 		mPlayerClientManager.setIsCRTRequested(isRequested, requestedTimestamp);
 	}
 
+	/**
+	 * Broadcast cr tis free.
+	 */
 	public void broadcastCRTisFree() {
 		mPlayerClientManager.broadcastCRTIsFree();
 	}
 
 	/**
-	 * Sets the requested timestamp
-	 * 
+	 * Sets the requested timestamp.
+	 *
 	 * @param isRequested
+	 *            the is requested
 	 * @param requestedTimestamp
+	 *            the requested timestamp
 	 */
 	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
 		this.isRequested = isRequested;
@@ -389,18 +464,18 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Returns the timestamp
-	 * 
-	 * @return
+	 * Returns the timestamp.
+	 *
+	 * @return the requested timestamp
 	 */
 	public long getRequestedTimestamp() {
 		return this.requestedTimestamp;
 	}
 
 	/**
-	 * Returns the is requested boolean
-	 * 
-	 * @return
+	 * Returns the is requested boolean.
+	 *
+	 * @return true, if is requested
 	 */
 
 	public boolean isRequested() {
@@ -408,18 +483,19 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Returns the number of nodes in the game
-	 * 
-	 * @return
+	 * Returns the number of nodes in the game.
+	 *
+	 * @return the numof nodes
 	 */
 	public synchronized int getNumofNodes() {
 		return mPlayerClientManager.getPlayerIDList().size();
 	}
 
 	/**
-	 * Reinitializes the game as a dealer after leader election
-	 * 
+	 * Reinitializes the game as a dealer after leader election.
+	 *
 	 * @param newDealer
+	 *            the new dealer
 	 */
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		System.out.println("1reInitGameAsDealer");
@@ -455,10 +531,12 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Reinitializes the game as a player after leader election
-	 * 
+	 * Reinitializes the game as a player after leader election.
+	 *
 	 * @param player
+	 *            the player
 	 * @param newDealer
+	 *            the new dealer
 	 */
 	public void reInitGameAsPlayer(GamePlayerInfo player, GamePlayerInfo newDealer) {
 
@@ -499,27 +577,30 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	/**
-	 * Resets the game
-	 * 
+	 * Resets the game.
+	 *
 	 * @param num
+	 *            the num
 	 */
 	public synchronized void resetGameStart(int num) {
 		this.GAME_START = num;
 	}
 
 	/**
-	 * Sets the number of players in the game
-	 * 
+	 * Sets the number of players in the game.
+	 *
 	 * @param gameSize
+	 *            the new game size
 	 */
 	public void setGameSize(int gameSize) {
 		this.GAME_START = gameSize;
 	}
 
 	/**
-	 * Sets the client socket manager of the server
-	 * 
+	 * Sets the client socket manager of the server.
+	 *
 	 * @param mGameClientSocketManager
+	 *            the new game client socket manager
 	 */
 	public void setGameClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
 		this.mGameClientSocketManager = mGameClientSocketManager;

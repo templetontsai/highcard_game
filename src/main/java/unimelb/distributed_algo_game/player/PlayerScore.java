@@ -20,6 +20,9 @@ public class PlayerScore implements Serializable {
 	/** The score. */
 	private int score = 0;
 
+	/**
+	 * Instantiates a new player score.
+	 */
 	public PlayerScore() {
 
 	}

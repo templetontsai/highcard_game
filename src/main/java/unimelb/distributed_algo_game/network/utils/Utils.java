@@ -62,6 +62,13 @@ public class Utils {
 		return winner;
 	}
 
+	/**
+	 * Compare rank.
+	 *
+	 * @param players
+	 *            the players
+	 * @return the int
+	 */
 	public static synchronized int compareRank(Map<Integer, Player> players) {
 
 		// Initializes the variables
@@ -105,6 +112,11 @@ public class Utils {
 		return winner_id;
 	}
 
+	/**
+	 * Gets the process timestamp.
+	 *
+	 * @return the process timestamp
+	 */
 	public synchronized static long getProcessTimestamp() {
 		return new Date().getTime();
 	}

@@ -17,8 +17,6 @@ public final class Clubs extends Card {
 	 *
 	 * @param cardRank
 	 *            the card rank
-	 * @param cardPattern
-	 *            the card pattern
 	 */
 	public Clubs(CardRank cardRank) {
 		super(cardRank, CardPattern.Clubs);
