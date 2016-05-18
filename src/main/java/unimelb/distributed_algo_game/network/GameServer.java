@@ -366,31 +366,52 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mGameClient.disconnect();
 	}
 
-
+	/**
+	 * Draws a card from the deck for the dealer
+	 */
 	public void dealerDrawnCard() {
 
 		mPlayerClientManager.dealerDrawnCard();
 	}
 
-
-
+	/**
+	 * Sets the requested timestamp
+	 * @param isRequested
+	 * @param requestedTimestamp
+	 */
 	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
 		this.isRequested = isRequested;
 		this.requestedTimestamp = requestedTimestamp;
 	}
 
+	/**
+	 * Returns the timestamp
+	 * @return
+	 */
 	public long getRequestedTimestamp() {
 		return this.requestedTimestamp;
 	}
 
+	/**
+	 * Returns the is requested boolean
+	 * @return
+	 */
 	public boolean isRequested() {
 		return this.isRequested;
 	}
 
+	/**
+	 * Returns the number of nodes in the game
+	 * @return
+	 */
 	public synchronized int getNumofNodes() {
 		return mPlayerClientManager.getPlayerIDList().size();
 	}
 
+	/**
+	 * Reinitializes the game as a dealer after leader election
+	 * @param newDealer
+	 */
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		System.out.println("1reInitGameAsDealer");
 		int playersLeft = mPlayerClientManager.getNumOfNodes();
@@ -426,6 +447,11 @@ public final class GameServer implements Runnable, NetworkInterface {
 		
 	}
 
+	/**
+	 * Reinitializes the game as a player after leader election
+	 * @param player
+	 * @param newDealer
+	 */
 	public void reInitGameAsPlayer(GamePlayerInfo player, GamePlayerInfo newDealer) {
 		
 		System.out.println("1reInitGameAsPlayer");
@@ -464,14 +490,26 @@ public final class GameServer implements Runnable, NetworkInterface {
 		p.play();
 	}
 
+	/**
+	 * Resets the game
+	 * @param num
+	 */
 	public synchronized void resetGameStart(int num) {
 		this.GAME_START = num;
 	}
 	
+	/**
+	 * Sets the number of players in the game
+	 * @param gameSize
+	 */
 	public void setGameSize(int gameSize) {
 		this.GAME_START = gameSize;
 	}
 	
+	/**
+	 * Sets the client socket manager of the server
+	 * @param mGameClientSocketManager
+	 */
 	public void setGameClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
 		this.mGameClientSocketManager = mGameClientSocketManager;
 	}

@@ -19,8 +19,13 @@ import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.token.Token;
 
+/**
+ * This is the game panel that manages the login for the player into the game
+ * @author Lupiya
+ *
+ */
 public class MainGamePanel extends JPanel {
-
+    //Initialize the variables
 	private JTextField ipTextField = null;
 	private JTextField portTextField = null;
 	private JTextField nodeField = null;
@@ -48,6 +53,11 @@ public class MainGamePanel extends JPanel {
 	
 	private boolean isNewLeader = false;
 
+	/**
+	 * Main constructor of the game panel
+	 * @param mainGameFrameGUI
+	 * @param isDealer
+	 */
 	public MainGamePanel(MainGameFrameGUI mainGameFrameGUI, boolean isDealer) {
 
 		self = this;
@@ -64,6 +74,9 @@ public class MainGamePanel extends JPanel {
 
 	}
 
+	/**
+	 * Initializes the dealer login panel
+	 */
 	public void initDealerPanel() {
 		ipTextField = new JTextField();
 		ipTextField.setBounds(153, 52, 114, 19);
@@ -103,6 +116,9 @@ public class MainGamePanel extends JPanel {
 		mPlayerPanelList = new ArrayList<CardPanel>();
 	}
 
+	/**
+	 * Initializes the player login panel
+	 */
 	public void initPlayerPanel() {
 		nodeField = new JTextField();
 		nodeField.setBounds(153, 52, 114, 19);
@@ -160,6 +176,11 @@ public class MainGamePanel extends JPanel {
 		mPlayerPanelList = new ArrayList<CardPanel>();
 	}
 
+	/**
+	 * Creates an action listener for the dealer's start button to initialize the game
+	 * @author Lupiya
+	 *
+	 */
 	final class DealerStartButtonActionListerner implements ActionListener {
 		public void actionPerformed(ActionEvent action) {
 			// TODO get ip and port from textfield and set init server
@@ -187,6 +208,11 @@ public class MainGamePanel extends JPanel {
 		}
 	}
 
+	/**
+	 * Creates an action listener for the player's start button to initialize the game
+	 * @author Lupiya
+	 *
+	 */
 	final class PlayerStartButtonActionListerner implements ActionListener {
 		public void actionPerformed(ActionEvent action) {
 			// TODO get ip and port from textfield and set init server
@@ -219,15 +245,28 @@ public class MainGamePanel extends JPanel {
 
 	}
 
+	/**
+	 * Updates the player list for the dealer game panel
+	 * @param nodeID
+	 */
 	public synchronized void updatePlayerList(int nodeID) {
 		if(!isNewLeader)
 			textArea.append("Node" + nodeID + " is joined\n");
 	}
 
+	/**
+	 * Sets the node ID for this panel
+	 * @param nodeID
+	 */
 	public void setNodeID(int nodeID) {
 		this.nodeID = nodeID;
 	}
 
+	/**
+	 * Displays the game table on the game panel
+	 * @param isEnable
+	 * @param mPlayerIDList
+	 */
 	public void showGameTable(boolean isEnable, List<Integer> mPlayerIDList) {
 
 		for (Integer i : mPlayerIDList) {
@@ -243,10 +282,19 @@ public class MainGamePanel extends JPanel {
 
 	}
 
+	/**
+	 * Updates the card drawn by the player on the game table
+	 * @param c
+	 * @param nodeID
+	 */
 	public void updateCard(Card c, int nodeID) {
 		gameTable.updateCard(c, nodeID);
 	}
 
+	/**
+	 * Shows a dialog box declaring the winner of the round
+	 * @param nodeID
+	 */
 	public void declareWinner(int nodeID) {
 		if (nodeID == this.nodeID)
 			JOptionPane.showMessageDialog(null, "You win");
@@ -256,25 +304,46 @@ public class MainGamePanel extends JPanel {
 
 	}
 
+	/**
+	 * Updates the game table with the new list of players
+	 * @param mPlayerIDList
+	 */
 	public void updateGameTable(List<Integer> mPlayerIDList) {
 		gameTable.updateGameTable(mPlayerIDList);
 	}
 
+	/**
+	 * Sets the dealer of this game panel
+	 * @param isDealer
+	 */
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
 		this.gameTable.setDealer(isDealer);
 	}
 	
+	/**
+	 * Sets the leader status of this panel
+	 * @param isNewLeader
+	 * @return
+	 */
 	public boolean setNewLeader(boolean isNewLeader) {
 		return this.isNewLeader = isNewLeader;
 	}
 	
+	/**
+	 * Sets the player of this game panel
+	 * @param mPlayer
+	 */
 	public void setPlayer(Player mPlayer) {
 		System.out.println("MainGamePanel" + mPlayer.getName());
 		p = mPlayer;
 		gameTable.setPlayer(mPlayer);
 	}
 	
+	/**
+	 * Updates the existing game table with a new game table
+	 * @param mGameTablePanel
+	 */
 	public void updateGameTable(GameTablePanel mGameTablePanel) {
 		mMainGameFrameGUI.validate();
 		mMainGameFrameGUI.remove(gameTable);
