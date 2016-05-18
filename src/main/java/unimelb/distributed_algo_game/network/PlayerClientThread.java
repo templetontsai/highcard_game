@@ -172,6 +172,12 @@ public class PlayerClientThread extends Thread {
 		}
 	}
 
+	/**
+	 * Starts a timer task to check if a node is still alive
+	 * 
+	 * @author Lupiya
+	 *
+	 */
 	final class checkNodeStillAliveTimerTask extends TimerTask {
 
 		@Override
@@ -200,6 +206,9 @@ public class PlayerClientThread extends Thread {
 
 	}
 
+	/**
+	 * Updates the list used by the GUI
+	 */
 	private void updateListAndGUI() {
 		if (mPlayerClientManager.isDealer()) {
 
@@ -216,6 +225,12 @@ public class PlayerClientThread extends Thread {
 		}
 	}
 
+	/**
+	 * Starts a still alive message timer task
+	 * 
+	 * @author Lupiya
+	 *
+	 */
 	final class StillAliveTimerTask extends TimerTask {
 
 		@Override
@@ -358,7 +373,7 @@ public class PlayerClientThread extends Thread {
 		case CRD:
 
 			connectionState = ClientConnectionState.CONNECTED;
-			
+
 			c = mPlayerClientManager.getCard(1);
 			mPlayerClientManager.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
 			// mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
@@ -441,8 +456,6 @@ public class PlayerClientThread extends Thread {
 		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
 		// Send message to the next node without changing it
 		if (messageNodeID > this.mGameDealerInfo.getNodeID()) {
-			// System.out.println(mGameDealerInfo.getNodeID()+" cannot be the
-			// new dealer");
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
 			mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -471,36 +484,8 @@ public class PlayerClientThread extends Thread {
 	}
 
 	/**
-	 * This sets the new coordinator of the game
-	 * 
-	 * @param mBodyMessage
+	 * Closes all the thread connections
 	 */
-	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
-
-		newDealer = (GamePlayerInfo) mBodyMessage.getGamePlayerInfo();
-		System.out.println("The new dealer is node " + newDealer.getNodeID());
-		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
-			// Update the new server details on the game client
-			// mGameServer.setGameServerLeader(newDealer);
-			// TODO the process to become new player
-
-			System.out.println("The new dealer is node " + newDealer.getNodeID() + "," + newDealer.getIPAddress() + ","
-					+ newDealer.getPort());
-			System.out.println("I am node  " + this.mGameDealerInfo.getNodeID() + ","
-					+ this.mGameDealerInfo.getIPAddress() + "," + this.mGameDealerInfo.getPort());
-
-			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = mBodyMessage;
-			mBodyMessage.setMessageType(MessageType.COD);
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
-			sendMessage(mMessage);
-
-			// mPlayerClientManager.reInitGameAsPlayer(this.mGameDealerInfo,
-			// newDealer);
-		}
-	}
-
 	public synchronized void closeConnection() {
 		if (checkNodeStillAliveTimer != null) {
 			checkNodeStillAliveTimer.cancel();

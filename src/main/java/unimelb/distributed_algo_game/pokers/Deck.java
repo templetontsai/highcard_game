@@ -16,14 +16,14 @@ import unimelb.distributed_algo_game.pokers.Card.CardRank;
  *
  * @author Ting-Ying Tsai
  */
-public final class Deck implements Serializable{
+public final class Deck implements Serializable {
 
 	/** The instance. */
 	// Initialize the variables for the deck class
 	private static Deck instance = null;
 
 	/** The Constant DECK_SIZE. */
-	private static final int DECK_SIZE = 3;// For testing changing it to 13
+	private static final int DECK_SIZE = 5;// For testing changing it to 13
 											// from 52
 
 	/** The deck. */
@@ -54,16 +54,17 @@ public final class Deck implements Serializable{
 	 * pattern/suite.
 	 */
 	private void init() {
-		/*for (CardRank cardRank : CardRank.values()) {
-			//TODO comment other pattern out for the simplicity of the game to demo
-			//deck.add(new Clubs(cardRank));
-			//deck.add(new Diamonds(cardRank));
-			//deck.add(new Hearts(cardRank));
-			//deck.add(new Spades(cardRank));
-		}*/
+		/*
+		 * for (CardRank cardRank : CardRank.values()) { //TODO comment other
+		 * pattern out for the simplicity of the game to demo //deck.add(new
+		 * Clubs(cardRank)); //deck.add(new Diamonds(cardRank)); //deck.add(new
+		 * Hearts(cardRank)); //deck.add(new Spades(cardRank)); }
+		 */
 		deck.add(new Clubs(CardRank.Ace));
 		deck.add(new Clubs(CardRank.Two));
 		deck.add(new Clubs(CardRank.Three));
+		deck.add(new Clubs(CardRank.Four));
+		deck.add(new Clubs(CardRank.Five));
 
 	}
 
@@ -82,19 +83,18 @@ public final class Deck implements Serializable{
 	 */
 	public Card getCard(int cardIndex) {
 		Card card = null;
-		
-		if(!deck.isEmpty()) {
+
+		if (!deck.isEmpty()) {
 			card = deck.get(cardIndex - 1);
-			deck.remove(cardIndex - 1);		
-			
+			deck.remove(cardIndex - 1);
+
 		} else {
 			resetDeck();
 			shuffle();
 			card = deck.get(cardIndex - 1);
 			deck.remove(cardIndex - 1);
 		}
-	
-		
+
 		return card;
 	}
 
@@ -123,15 +123,15 @@ public final class Deck implements Serializable{
 	private void resetDeck() {
 		deck.clear();
 		/*
-		for (CardRank cardRank : CardRank.values()) {
-			deck.add(new Clubs(cardRank));
-			//deck.add(new Hearts(cardRank));
-			//deck.add(new Diamonds(cardRank));
-			//deck.add(new Spades(cardRank));
-		}*/
+		 * for (CardRank cardRank : CardRank.values()) { deck.add(new
+		 * Clubs(cardRank)); //deck.add(new Hearts(cardRank)); //deck.add(new
+		 * Diamonds(cardRank)); //deck.add(new Spades(cardRank)); }
+		 */
 		deck.add(new Clubs(CardRank.Ace));
 		deck.add(new Clubs(CardRank.Two));
 		deck.add(new Clubs(CardRank.Three));
+		deck.add(new Clubs(CardRank.Four));
+		deck.add(new Clubs(CardRank.Five));
 
 	}
 

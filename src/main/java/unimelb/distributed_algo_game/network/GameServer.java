@@ -53,7 +53,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private MainGamePanel mMainGamePanel = null;
 	// This number is the total player number but not including node 0 itself
-	private int GAME_START = 3;
+	private int GAME_START = 4;
 
 	private GameClientSocketManager mGameClientSocketManager = null;
 
@@ -61,8 +61,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private boolean isRequested = false;
 	private long requestedTimestamp = -1;
-	
-
 
 	/**
 	 * Instantiates a new game server.
@@ -115,7 +113,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 				// Display the details of the exception error
 				System.out.println("Connection Closed in GameServer, leader state");
 
-			} 
+			}
 			// This runs if the player is a client
 		} else {
 			try {
@@ -125,7 +123,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 				// Display the details of the exception error
 				System.out.println("Connection Closed in GameServer, slave state");
 
-			} 
+			}
 
 		}
 
@@ -141,8 +139,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		if (mServerSocket != null) {
 			System.out.println("Server Start, Waiting....");
 			synchronized (mLock) {
-				
-	
+
 				// Only runs if the server is in a connected state
 				while (mConnectionState == ServerConnectionState.CONNECTED) {
 
@@ -162,12 +159,11 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
-					
 
-
-					System.out.println("GameServer: getPlayerIDList size: " + mPlayerClientManager.getPlayerIDList().size());
+					System.out.println(
+							"GameServer: getPlayerIDList size: " + mPlayerClientManager.getPlayerIDList().size());
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
-						
+
 						broadcastNodeList();
 						System.out.println("Game Start");
 
@@ -190,8 +186,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 			}
 		}
 	}
-	
-
 
 	/**
 	 * This runs when the server isn't the main dealer of the game and is a
@@ -367,75 +361,116 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mGameClient.disconnect();
 	}
 
-
+	/**
+	 * Draws a card from the deck for the dealer
+	 */
 	public void dealerDrawnCard() {
 
 		mPlayerClientManager.dealerDrawnCard();
 	}
 
-
-
 	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
 		mPlayerClientManager.setIsCRTRequested(isRequested, requestedTimestamp);
 	}
+
 	public void broadcastCRTisFree() {
 		mPlayerClientManager.broadcastCRTIsFree();
 	}
 
+	/**
+	 * Sets the requested timestamp
+	 * 
+	 * @param isRequested
+	 * @param requestedTimestamp
+	 */
+	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
+		this.isRequested = isRequested;
+		this.requestedTimestamp = requestedTimestamp;
+	}
+
+	/**
+	 * Returns the timestamp
+	 * 
+	 * @return
+	 */
+	public long getRequestedTimestamp() {
+		return this.requestedTimestamp;
+	}
+
+	/**
+	 * Returns the is requested boolean
+	 * 
+	 * @return
+	 */
 
 	public boolean isRequested() {
 		return this.isRequested;
 	}
 
+	/**
+	 * Returns the number of nodes in the game
+	 * 
+	 * @return
+	 */
 	public synchronized int getNumofNodes() {
 		return mPlayerClientManager.getPlayerIDList().size();
 	}
 
+	/**
+	 * Reinitializes the game as a dealer after leader election
+	 * 
+	 * @param newDealer
+	 */
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		System.out.println("1reInitGameAsDealer");
-		if(mPlayerClientManager != null) {
+		int playersLeft = mPlayerClientManager.getNumOfNodes();
+		if (mPlayerClientManager != null) {
 			System.out.println("0mPlayerClientManager destroy");
 			mPlayerClientManager.closeAllClientConnection();
 			mPlayerClientManager.removeAll();
 			mPlayerClientManager = null;
 		}
-		if(mGameClientSocketManager != null) {
+		if (mGameClientSocketManager != null) {
 			System.out.println("0mGameClientSocketManager destroy");
 			mGameClientSocketManager.closeAllClientConnection();
 			mGameClientSocketManager.removeAll();
 			mGameClientSocketManager = null;
 		}
 		disconnect();
-		/*try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		/*
+		 * try { Thread.sleep(1000); } catch (InterruptedException e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); }
+		 */
 		System.out.println("2reInitGameAsDealer");
-		
+
 		newDealer.setDealer(true);
 		mMainGamePanel.setDealer(true);
 		mMainGamePanel.setNewLeader(true);
 		Player p = new DealerPlayer("Dealer", newDealer, mMainGamePanel);
 		p.setDealer(true);
-		((DealerPlayer)p).setGameSize(2);
+		((DealerPlayer) p).setGameSize(playersLeft);
 		mMainGamePanel.setPlayer(p);
 		p.play();
-		
+
 	}
 
+	/**
+	 * Reinitializes the game as a player after leader election
+	 * 
+	 * @param player
+	 * @param newDealer
+	 */
 	public void reInitGameAsPlayer(GamePlayerInfo player, GamePlayerInfo newDealer) {
-		
+
 		System.out.println("1reInitGameAsPlayer");
-		if(mPlayerClientManager != null) {
+		if (mPlayerClientManager != null) {
 			System.out.println("1mPlayerClientManager destroy");
 			mPlayerClientManager.closeAllClientConnection();
 			mPlayerClientManager.removeAll();
 			mPlayerClientManager = null;
 		}
 		MainGamePanel mMainGamePanel = mGameClientSocketManager.getPanel();
-		if(mGameClientSocketManager != null) {
+		if (mGameClientSocketManager != null) {
 			System.out.println("1mGameClientSocketManager destroy");
 			mGameClientSocketManager.closeAllClientConnection();
 			mGameClientSocketManager.removeAll();
@@ -463,18 +498,31 @@ public final class GameServer implements Runnable, NetworkInterface {
 		p.play();
 	}
 
+	/**
+	 * Resets the game
+	 * 
+	 * @param num
+	 */
 	public synchronized void resetGameStart(int num) {
 		this.GAME_START = num;
 	}
-	
+
+	/**
+	 * Sets the number of players in the game
+	 * 
+	 * @param gameSize
+	 */
 	public void setGameSize(int gameSize) {
 		this.GAME_START = gameSize;
 	}
-	
+
+	/**
+	 * Sets the client socket manager of the server
+	 * 
+	 * @param mGameClientSocketManager
+	 */
 	public void setGameClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
 		this.mGameClientSocketManager = mGameClientSocketManager;
 	}
-	
-
 
 }

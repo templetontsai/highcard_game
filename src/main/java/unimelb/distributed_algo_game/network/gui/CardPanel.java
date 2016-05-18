@@ -13,19 +13,24 @@ import javax.swing.JPanel;
 
 import unimelb.distributed_algo_game.pokers.Card;
 
+/**
+ * This class draws the cards on the game table
+ * 
+ * @author Lupiya
+ *
+ */
 public class CardPanel extends JPanel {
-
+	// Initialize all the variables
 	private String message; // A message drawn on the canvas, which changes
-
 	private Font bigFont; // Font that will be used to display the message.
-
 	private Image cardImages; // Contains the image of all 52 cards
-
 	private int boardXCoords;
 	private int boardsYCoords;
 	private Card cardPassed;
 	private Boolean gameInProgress = false;
 	private JLabel idLabel;
+
+	private int nodeID = -1;
 
 	/**
 	 * Constructor creates fonts, sets the foreground and background colors and
@@ -42,12 +47,17 @@ public class CardPanel extends JPanel {
 		// setPreferredSize(new Dimension(300, 300));
 		idLabel = new JLabel("Node" + nodeID + "\n");
 		this.add(idLabel);
+		this.nodeID = nodeID;
 	} // end constructor
 
+	/**
+	 * Sets the game in progress boolean
+	 * 
+	 * @param gameInProgress
+	 */
 	public void setGameInProgress(boolean gameInProgress) {
 		this.gameInProgress = gameInProgress;
 	}
-	
 
 	/**
 	 * Load the image from the file "cards.png", which must be somewhere on the
@@ -55,14 +65,16 @@ public class CardPanel extends JPanel {
 	 * refer to the Image. If not, then cardImages will be null.
 	 */
 	private void loadImage() {
-		
-		
+
 		ClassLoader cl = CardPanel.class.getClassLoader();
-	       URL imageURL = cl.getResource("unimelb/distributed_algo_game/network/gui/cards.png");
-	       if (imageURL != null)
-	          cardImages = Toolkit.getDefaultToolkit().createImage(imageURL);
+		URL imageURL = cl.getResource("unimelb/distributed_algo_game/network/gui/cards.png");
+		if (imageURL != null)
+			cardImages = Toolkit.getDefaultToolkit().createImage(imageURL);
 	}
 
+	/**
+	 * Paints the card on the table
+	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if (cardImages == null) {
@@ -80,6 +92,14 @@ public class CardPanel extends JPanel {
 
 	}
 
+	/**
+	 * Set the dimensions of the card to be drawn
+	 * 
+	 * @param c
+	 * @param x
+	 * @param y
+	 * @param gameState
+	 */
 	public void setParameters(Card c, int x, int y, boolean gameState) {
 		boardXCoords = x;
 		boardsYCoords = y;
@@ -87,6 +107,12 @@ public class CardPanel extends JPanel {
 		gameInProgress = gameState;
 	}
 
+	/**
+	 * Sets the dimensions of the card to be drawn
+	 * 
+	 * @param c
+	 * @param gameState
+	 */
 	public void setParameters(Card c, boolean gameState) {
 		boardXCoords = 79;
 		boardsYCoords = 20;
@@ -94,6 +120,14 @@ public class CardPanel extends JPanel {
 		gameInProgress = gameState;
 	}
 
+	/**
+	 * Draws the card on the table
+	 * 
+	 * @param g
+	 * @param card
+	 * @param x
+	 * @param y
+	 */
 	public void drawCard(Graphics g, Card card, int x, int y) {
 		int cx; // x-coord of upper left corner of the card inside cardsImage
 		int cy; // y-coord of upper left corner of the card inside cardsImage
@@ -106,33 +140,41 @@ public class CardPanel extends JPanel {
 
 			switch (card.getPattern()) {
 			case Clubs:
-				cx = (card.getCardRank().getCode()- 1) * 79;
+				cx = (card.getCardRank().getCode() - 1) * 79;
 				cy = 0;
-				
+
 				break;
 			case Diamonds:
 				cx = (card.getCardRank().getCode() - 1) * 79;
 				cy = 123;
-				
+
 				break;
 			case Hearts:
 				cx = (card.getCardRank().getCode() - 1) * 79;
 				cy = 2 * 123;
-				
+
 				break;
 			case Spades:
 				cx = (card.getCardRank().getCode() - 1) * 79;
 				cy = 3 * 123;
-				
+
 				break;
 			default:
 				System.out.println("Unknown Pattern");
 
 			}
 		}
-		
+
 		g.drawImage(cardImages, x, y, x + 79, y + 123, cx, cy, cx + 79, cy + 123, this);
 	}
 
+	/**
+	 * Returns the node ID of the card panel
+	 * 
+	 * @return
+	 */
+	public int getNodeID() {
+		return nodeID;
+	}
 
 }

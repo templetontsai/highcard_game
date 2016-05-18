@@ -18,24 +18,19 @@ public class HighCardGameApp {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
-		
-		
-		
-	    if (args.length > 0) {
-	    	runGame(new Integer(args[0]).intValue());
+
+		if (args.length > 0) {
+			runGame(new Integer(args[0]).intValue());
 		}
-	    
 
 	}
-	
+
 	/**
 	 * This runs the game server of the game
 	 */
-	public static void runGame(int id){
-		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game",id);
-	
+	public static void runGame(int id) {
+		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game", id);
+
 	}
-	
-	
 
 }

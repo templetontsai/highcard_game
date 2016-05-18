@@ -16,10 +16,9 @@ public interface NetworkInterface {
 
 	/** The Constant GameServerName. */
 	public static final String GameServerName = "HighCard Game";
-	//ms
+	// ms
 	public static final int STILL_ALIVE_TIME_OUT = 5000;
 	public static final int STILL_ALIVE_ACK_TIME_OUT = 10 * 1000;
-	
 
 	/**
 	 * The Enum ServerConnectionState.
@@ -38,7 +37,7 @@ public interface NetworkInterface {
 		/** Ack */
 		ACK
 	};
-	
+
 	/**
 	 * The Enum ClientConnectionState.
 	 */
@@ -55,7 +54,6 @@ public interface NetworkInterface {
 		DISCONNECTED,
 
 	};
-
 
 	/**
 	 * Connect.

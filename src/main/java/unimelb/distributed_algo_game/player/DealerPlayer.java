@@ -33,7 +33,7 @@ public class DealerPlayer extends Player {
 	private Thread gameServerThread = null;
 
 	private JPanel mMainGameLoginDealerPanel = null;
-	
+
 	private int gameSize = -1;
 
 	/**
@@ -56,9 +56,9 @@ public class DealerPlayer extends Player {
 	public void play() {
 
 		gameServer.setPlayer(this);
-		if(gameSize != -1)
+		if (gameSize != -1)
 			gameServer.setGameSize(gameSize);
-		
+
 		gameServer.setPanel((MainGamePanel) mMainGameLoginDealerPanel);
 
 		gameServerThread = new Thread(gameServer);

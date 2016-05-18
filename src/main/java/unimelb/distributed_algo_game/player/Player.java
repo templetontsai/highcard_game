@@ -10,7 +10,6 @@ import unimelb.distributed_algo_game.pokers.Card;
 import unimelb.distributed_algo_game.pokers.Deck;
 import unimelb.distributed_algo_game.state.GameState;
 
-
 // TODO: Auto-generated Javadoc
 /**
  * The Class Player.
@@ -26,7 +25,6 @@ public abstract class Player implements Serializable, NetworkObserver {
 	/** The selected card. */
 	private Card selectedCard = null;
 
-
 	/** The player score. */
 	protected PlayerScore playerScore = null;
 
@@ -35,20 +33,20 @@ public abstract class Player implements Serializable, NetworkObserver {
 
 	/** The id. */
 	private int id = -1;
-	
+
 	/** The boolean of whether the player is a dealer or not. */
 	private boolean isDealer = false;
-	
+
 	/** The game state of the player. */
 	private GameState gameState = null;
-	
+
 	/** This is the deck of the dealer. */
 	private Deck mDeck = null;
-	
+
 	private GamePlayerInfo mGamePlayerInfo = null;
 
 	private GamePlayerInfo mGameServerInfo = null;
-	
+
 	private boolean isPlaying = false;
 
 	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState) {
@@ -58,7 +56,7 @@ public abstract class Player implements Serializable, NetworkObserver {
 		this.gameState = gameState;
 		this.isPlaying = true;
 	}
-	
+
 	public Player(String name, GamePlayerInfo gamePlayerInfo, GameState gameState, GamePlayerInfo gameServerInfo) {
 		this.name = name;
 		this.mGamePlayerInfo = gamePlayerInfo;
@@ -67,7 +65,7 @@ public abstract class Player implements Serializable, NetworkObserver {
 		this.mGameServerInfo = gameServerInfo;
 		this.isPlaying = true;
 	}
-	
+
 	public Player(String name, GamePlayerInfo gamePlayerInfo) {
 		this.name = name;
 		this.mGamePlayerInfo = gamePlayerInfo;
@@ -103,7 +101,6 @@ public abstract class Player implements Serializable, NetworkObserver {
 		return this.name;
 	}
 
-
 	/**
 	 * Returns the card user selected from the deck.
 	 *
@@ -112,7 +109,7 @@ public abstract class Player implements Serializable, NetworkObserver {
 	public Card getSelectedCard() {
 		return selectedCard;
 	}
-	
+
 	public int getPlayerScore() {
 		return playerScore.getScore();
 	}
@@ -146,6 +143,7 @@ public abstract class Player implements Serializable, NetworkObserver {
 
 	/**
 	 * This sets the player as the dealer of the game.
+	 * 
 	 * @param isDealer
 	 */
 	public void setDealer(boolean isDealer) {
@@ -154,34 +152,37 @@ public abstract class Player implements Serializable, NetworkObserver {
 		mDeck = Deck.getInstance();
 		mDeck.shuffle();
 	}
-	
+
 	/**
 	 * Returns the boolean of whether the player is a dealer or not.
+	 * 
 	 * @return
 	 */
 	public boolean isDealer() {
 		return this.isDealer;
 	}
-	
+
 	/**
 	 * Returns the card from the deck at the given index.
+	 * 
 	 * @param cardIndex
 	 * @return
 	 */
 	public Card getCard(int cardIndex) {
 		Card card = null;
-		if(this.isDealer)
+		if (this.isDealer)
 			card = mDeck.getCard(cardIndex);
 		else {
 			System.out.println("Only dealer can be in charge of giving cards");
 			throw new NullPointerException();
 		}
-		
+
 		return card;
 	}
-	
+
 	/**
 	 * Returns the game state of the player.
+	 * 
 	 * @return
 	 */
 	public GameState getGameState() {
@@ -190,30 +191,34 @@ public abstract class Player implements Serializable, NetworkObserver {
 
 	/**
 	 * Sets the game state of the player.
+	 * 
 	 * @param gameState
 	 */
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
-	}	
-	
+	}
+
 	/**
 	 * Returns the player connection information
+	 * 
 	 * @return
 	 */
 	public GamePlayerInfo getGamePlayerInfo() {
 		return this.mGamePlayerInfo;
 	}
-	
+
 	/**
 	 * Sets the server connection information
+	 * 
 	 * @param gameServerInfo
 	 */
-	public void setGameServerInfo(GamePlayerInfo gameServerInfo){
+	public void setGameServerInfo(GamePlayerInfo gameServerInfo) {
 		this.mGameServerInfo = gameServerInfo;
 	}
-	
+
 	/**
 	 * Returns the server connection information
+	 * 
 	 * @return
 	 */
 	public GamePlayerInfo getGameServerInfo() {
@@ -224,18 +229,18 @@ public abstract class Player implements Serializable, NetworkObserver {
 	 * Runs an update
 	 */
 	public abstract void update();
-	
-	public void setIsPlaying(boolean isPlaying){
+
+	public void setIsPlaying(boolean isPlaying) {
 		this.isPlaying = isPlaying;
 	}
-	
-	public boolean getIsPlaying(){
+
+	public boolean getIsPlaying() {
 		return isPlaying;
 	}
 
 	public abstract void play();
-	
-	public void setDealerInfo(GamePlayerInfo mGameServerInfo){
+
+	public void setDealerInfo(GamePlayerInfo mGameServerInfo) {
 		this.mGameServerInfo = mGameServerInfo;
 	}
 }

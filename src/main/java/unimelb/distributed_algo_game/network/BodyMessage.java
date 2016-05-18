@@ -9,12 +9,19 @@ import unimelb.distributed_algo_game.player.GamePlayerInfo;
  * @author Lupiya This class is generic type to carry JSON data in messages
  */
 public class BodyMessage implements Serializable {
+	// Initialize all the variables
 	private int nodeID;
 	private GamePlayerInfo mGamePlayerInfo;
 	private MessageType messageType;
 	private Object message;
 	private long timestamp;
 
+	/**
+	 * Acknowledgement codes enumeration
+	 * 
+	 * @author Lupiya
+	 *
+	 */
 	public enum ACKCode {
 		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), NODE_STILL_ALIVE(2), CLIENT_STILL_ALIVE(3), SERVER_STILL_ALIVE(
 				4), CRT_RPY(5), LEADER_ELE_ACK(6), SRV_TIME_ACK(7);
@@ -34,6 +41,13 @@ public class BodyMessage implements Serializable {
 			return code;
 		}
 	}
+
+	/**
+	 * Message type enumerations
+	 * 
+	 * @author Lupiya
+	 *
+	 */
 
 	public enum MessageType {
 		CON(0), ACK(1), BCT_RST(2), BCT_NODE_LST(3), BCT_CLIENT_LST(4), BCT_NODE_UPT(5), BCT_CLIENT_UPT(6), BCT_RDY(
@@ -67,6 +81,13 @@ public class BodyMessage implements Serializable {
 		this.message = message;
 	}
 
+	/**
+	 * Second constructor for this class
+	 * 
+	 * @param gamePlayerInfo
+	 * @param messageType
+	 * @param message
+	 */
 	public BodyMessage(GamePlayerInfo gamePlayerInfo, MessageType messageType, Object message) {
 		this.mGamePlayerInfo = gamePlayerInfo;
 		this.messageType = messageType;
@@ -108,10 +129,20 @@ public class BodyMessage implements Serializable {
 		this.message = message;
 	}
 
+	/**
+	 * Returns the player info of this message
+	 * 
+	 * @return
+	 */
 	public GamePlayerInfo getGamePlayerInfo() {
 		return this.mGamePlayerInfo;
 	}
 
+	/**
+	 * Sets the player info of this message
+	 * 
+	 * @param gamePlayerInfo
+	 */
 	public void setGamePlayerInfo(GamePlayerInfo gamePlayerInfo) {
 		this.mGamePlayerInfo = gamePlayerInfo;
 	}

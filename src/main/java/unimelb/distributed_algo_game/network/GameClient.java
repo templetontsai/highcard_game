@@ -75,7 +75,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	private int playerSSNodeID = -1;
 
-
 	private long csTimestampStart = -1;
 
 	private long csTimestampReturn = -1;
@@ -97,10 +96,17 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 		mNodeIDList = new ArrayList<Integer>();
 		mPlayerInfoList = new ArrayList<GamePlayerInfo>();
-	
 
 	}
 
+	/**
+	 * Constructor for the game client
+	 * 
+	 * @param mPlayer
+	 * @param ipAddress
+	 * @param port
+	 * @param isDealerCS
+	 */
 	public GameClient(Player mPlayer, String ipAddress, String port, boolean isDealerCS) {
 		if (mPlayer != null) {
 			this.mPlayer = mPlayer;
@@ -210,8 +216,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 			case NODE_ID_RECEIVED:
 				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID()
 						+ " NODE_ID_RECEIVED");
-			
-		
+
 				// Start the still alive timer beacon to the leader
 				sendStillAliveTimer = new Timer();
 				sendStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0,
@@ -235,13 +240,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 				this.isReplied = true;
 				break;
 			case SRV_TIME_ACK:
-				if(isDealerCS) {
+				if (isDealerCS) {
 					this.serverTimeStamp = mBodyMessage.getGamePlayerInfo().getServerTimeStamp();
 					this.csTimestampReturn = Utils.getProcessTimestamp();
-					long delta = this.serverTimeStamp + ( this.csTimestampStart - this.csTimestampReturn)/2;
+					long delta = this.serverTimeStamp + (this.csTimestampStart - this.csTimestampReturn) / 2;
 					System.out.println("Server Time Received: " + this.serverTimeStamp);
-					long csRequestedTimestamp = Utils.getProcessTimestamp() - delta; 
-			
+					long csRequestedTimestamp = Utils.getProcessTimestamp() - delta;
+
 					mGameClientSocketManager.setIsCRTRequested(true, csRequestedTimestamp);
 					mGameClientSocketManager.broadcastCRT(csRequestedTimestamp);
 				}
@@ -264,7 +269,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 					new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.CARD_RECEIVED));
 
 			sendMessage(mMessage);
-			//Client Socket1 to reply I am out of CRT, broadcast message to all the deferred node in list
+			// Client Socket1 to reply I am out of CRT, broadcast message to all
+			// the deferred node in list
 			mGameClientSocketManager.broadcastCRTisFree();
 
 			break;
@@ -333,10 +339,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println("Received election message from " + this.mPlayer.getGamePlayerInfo().getNodeID());
 			sendElectionMessage(mBodyMessage);
 			break;
-		case COD:
-			System.out.println("Received coordinator message from " + this.mPlayer.getGamePlayerInfo().getNodeID());
-			setNewCoordinator(mBodyMessage);
-			break;
 		case REINIT:
 			System.out.println("Reinit received");
 			// TODO start the process to become dealer
@@ -346,24 +348,30 @@ public final class GameClient implements Runnable, NetworkInterface {
 					+ this.mPlayer.getGamePlayerInfo().getPort());
 			mGameClientSocketManager.reInitGameAsDealer(this.mPlayer.getGamePlayerInfo());
 			break;
-		
+
 		default:
 
 			System.out.println("Uknown Message Type");
 
 		}
 	}
-	
+
 	public void sendRequestServerTime() {
 		this.csTimestampStart = Utils.getProcessTimestamp();
 		JSONObject mMessage = new JSONObject();
-		BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.SRV_TIME, "Request Server Time");
+		BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.SRV_TIME,
+				"Request Server Time");
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", bodyMessage);
-		
+
 		sendMessage(mMessage);
 	}
 
+	/**
+	 * This updates the node list
+	 * 
+	 * @param mPlayerInfoList
+	 */
 	private synchronized void updateNodeList(List<GamePlayerInfo> mPlayerInfoList) {
 		mNodeIDList.clear();
 		for (GamePlayerInfo info : mPlayerInfoList) {
@@ -371,6 +379,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 		}
 	}
 
+	/**
+	 * This method sends a still alive message to the dealer
+	 */
 	private void sendStillAliveMessage() {
 		if (isDealerCS) {
 			JSONObject mMessage = new JSONObject();
@@ -390,6 +401,12 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 	}
 
+	/**
+	 * Creates a new still alive timer task
+	 * 
+	 * @author Lupiya
+	 *
+	 */
 	final class StillAliveTimerTask extends TimerTask {
 
 		@Override
@@ -571,15 +588,28 @@ public final class GameClient implements Runnable, NetworkInterface {
 		play();
 	}
 
+	/**
+	 * Sets the client login panel
+	 * 
+	 * @param mainGameLoginClientPanel
+	 */
 	public void setPanel(MainGamePanel mainGameLoginClientPanel) {
 
 		this.mMainGameLoginClientPanel = mainGameLoginClientPanel;
 	}
 
+	/**
+	 * Returns the client login panel
+	 * 
+	 * @return
+	 */
 	public MainGamePanel getLoginPanel() {
 		return mMainGameLoginClientPanel;
 	}
 
+	/**
+	 * Sends a card request message to all the players in the game
+	 */
 	public void requestCard() {
 		JSONObject mMessage = new JSONObject();
 		BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.CRD, "request a card");
@@ -589,10 +619,20 @@ public final class GameClient implements Runnable, NetworkInterface {
 		sendMessage(mMessage);
 	}
 
+	/**
+	 * Sets the client socket manager for this game client
+	 * 
+	 * @param mGameClientSocketManager
+	 */
 	public void setClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
 		this.mGameClientSocketManager = mGameClientSocketManager;
 	}
 
+	/**
+	 * Returns the reply status of the mutual exclusion algorithm
+	 * 
+	 * @return
+	 */
 	public boolean getReply() {
 		return this.isReplied;
 	}
@@ -601,8 +641,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * Starts a new leader election
 	 */
 	public void startElection() {
-
-		mGameClientSocketManager.startElection();
+		int pos = (getMyPositionInList() % mPlayerInfoList.size());
+		int myNeighborID = mPlayerInfoList.get(pos).getNodeID();
+		if (myNeighborID == mPlayer.getGameServerInfo().getNodeID())
+			myNeighborID++;
+		mGameClientSocketManager.startElection(myNeighborID);
 	}
 
 	/**
@@ -612,9 +655,14 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * @param mBodyMessage
 	 */
 	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
+
 		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
 		// Send message to the next node without changing it
 		if (messageNodeID > this.mPlayer.getGamePlayerInfo().getNodeID()) {
+			int pos = (getMyPositionInList() % mPlayerInfoList.size());
+			int myNeighborID = mPlayerInfoList.get(pos).getNodeID();
+			if (myNeighborID == mPlayer.getGameServerInfo().getNodeID())
+				myNeighborID++;
 			// System.out.println(mGameDealerInfo.getNodeID()+" cannot be the
 			// new dealer");
 			JSONObject mMessage = new JSONObject();
@@ -622,17 +670,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 
-			mGameClientSocketManager.sendElectionMessage(mMessage);
-		} else if (messageNodeID < this.mPlayer.getGamePlayerInfo().getNodeID()) {
-			// Don't forward to reduce number of messages
+			mGameClientSocketManager.sendElectionMessage(mMessage, myNeighborID);
 
 		} else if (messageNodeID == this.mPlayer.getGamePlayerInfo().getNodeID()) {
 			// This means i have received my election message and I am the new
 			// coordinator
-
-			// mBodyMessage.setMessageType(MessageType.ACK);
-			// mBodyMessage.setMessage(this.mPlayer.getGamePlayerInfo());
-			// BodyMessage bodyMessage = mBodyMessage;
 			System.out.println("1Hell ya I'm in charge now ");
 
 			JSONObject mMessage = new JSONObject();
@@ -640,42 +682,53 @@ public final class GameClient implements Runnable, NetworkInterface {
 			mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.LEADER_ELE_ACK);
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", mBodyMessage);
-			sendMessage(mMessage);
+			mGameClientSocketManager.sendCoordinatorMessage(mMessage);
 
 		}
 
 	}
 
 	/**
-	 * This sets the new coordinator of the game
+	 * Returns the player of this game client
 	 * 
-	 * @param mBodyMessage
+	 * @return
 	 */
-	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
-
-		GamePlayerInfo newDealer = (GamePlayerInfo) mBodyMessage.getMessage();
-		System.out.println("The new dealer is node " + newDealer.getNodeID());
-		if (newDealer.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID()) {
-
-			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = mBodyMessage;
-			mBodyMessage.setMessageType(MessageType.COD);
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
-			mGameClientSocketManager.sendElectionMessage(mMessage);
-		}
-	}
-
 	public Player getPlayer() {
 		return mPlayer;
 	}
 
+	/**
+	 * Sets the node ID for the game client server socket connection
+	 * 
+	 * @param playerSSNodeID
+	 */
 	public void setPlayerSSNodeID(int playerSSNodeID) {
 		this.playerSSNodeID = playerSSNodeID;
 	}
 
+	/**
+	 * Returns the ID node of the game client socket server connection
+	 * 
+	 * @return
+	 */
 	public int getPlayerSSNodeID() {
 		return this.playerSSNodeID;
+	}
+
+	/**
+	 * This method returns the player's position in the client list
+	 * 
+	 * @return
+	 */
+	public int getMyPositionInList() {
+		int pos = 0;
+		int j = 0;
+		for (GamePlayerInfo i : mPlayerInfoList) {
+			if (i.getNodeID() == mPlayer.getGamePlayerInfo().getNodeID())
+				pos = j;
+			j++;
+		}
+		return pos + 1;
 	}
 
 	public synchronized long getLogicClock() {

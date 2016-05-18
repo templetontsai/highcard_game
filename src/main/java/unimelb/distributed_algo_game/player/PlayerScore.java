@@ -11,7 +11,7 @@ import java.io.Serializable;
  *
  * @author David This class is responsible for maintaining a player's score
  */
-public class PlayerScore implements Serializable{
+public class PlayerScore implements Serializable {
 
 	/** The player id. */
 	// Initialize the class variables
@@ -21,8 +21,9 @@ public class PlayerScore implements Serializable{
 	private int score = 0;
 
 	public PlayerScore() {
-		
+
 	}
+
 	/**
 	 * Constructor for the class that initializes the object.
 	 *

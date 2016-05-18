@@ -47,8 +47,9 @@ public class Utils {
 				matchDraw = true;
 			}
 			if (i > 0)
-				sb.append(", node" + players.get(i).getGamePlayerInfo().getNodeID() + " drew " + players.get(i).getSelectedCard().getCardRank()
-						+ " " + players.get(i).getSelectedCard().getPattern());
+				sb.append(", node" + players.get(i).getGamePlayerInfo().getNodeID() + " drew "
+						+ players.get(i).getSelectedCard().getCardRank() + " "
+						+ players.get(i).getSelectedCard().getPattern());
 		}
 		String winner = "";
 		// Ensures to check if there is a draw and awards no point in that case
@@ -61,25 +62,24 @@ public class Utils {
 		return winner;
 	}
 
-	
-
-	
 	public static synchronized int compareRank(Map<Integer, Player> players) {
 
 		// Initializes the variables
-		String matchDetails = "node" + players.get(0).getGamePlayerInfo().getNodeID() + " drew "
-				+ players.get(0).getSelectedCard().getCardRank() + " " + players.get(0).getSelectedCard().getPattern();
+		/**
+		 * String matchDetails = "node" +
+		 * players.get(0).getGamePlayerInfo().getNodeID() + " drew " +
+		 * players.get(0).getSelectedCard().getCardRank() + " " +
+		 * players.get(0).getSelectedCard().getPattern();
+		 **/
 		int winningScore = 0;
 		int playerID = 0;
 		boolean matchDraw = false;
-		StringBuilder sb = new StringBuilder(matchDetails);
+		StringBuilder sb = new StringBuilder("");
 		int i = 0;
 		// Iterates through the players and picks the highest score to determine
 		// the winner
-		for(Map.Entry<Integer, Player> p:players.entrySet())
-		{
+		for (Map.Entry<Integer, Player> p : players.entrySet()) {
 			i = p.getValue().getGamePlayerInfo().getNodeID();
-			
 
 			if (p.getValue().getSelectedCard().getCardRank().getCode() > winningScore) {
 				winningScore = p.getValue().getSelectedCard().getCardRank().getCode();
@@ -88,8 +88,9 @@ public class Utils {
 				matchDraw = true;
 			}
 			if (i > 0)
-				sb.append(", node" + players.get(i).getGamePlayerInfo().getNodeID() + " drew " + p.getValue().getSelectedCard().getCardRank()
-						+ " " + players.get(i).getSelectedCard().getPattern());
+				sb.append(", node" + players.get(i).getGamePlayerInfo().getNodeID() + " drew "
+						+ p.getValue().getSelectedCard().getCardRank() + " "
+						+ players.get(i).getSelectedCard().getPattern());
 		}
 		String winner = "";
 		int winner_id = -1;
@@ -103,9 +104,8 @@ public class Utils {
 		}
 		return winner_id;
 	}
-	
-	public synchronized static long getProcessTimestamp()
-	{
+
+	public synchronized static long getProcessTimestamp() {
 		return new Date().getTime();
 	}
 	/**
@@ -116,23 +116,17 @@ public class Utils {
 	 * @return the leader board
 	 */
 	/*
-	public static String getLeaderBoard(ArrayList<Player> players) {
-		String leaderboard = "";
-		ArrayList<PlayerScore> scoreBoard = new ArrayList<PlayerScore>();
-		for (int i = 0; i < players.size(); i++) {
-			scoreBoard.add(players.get(i).getPlayerScore());
-		}
-		Collections.sort(scoreBoard, new Comparator<PlayerScore>() {
-			public int compare(PlayerScore p1, PlayerScore p2) {
-				return Integer.compare(p2.getScore(), p1.getScore());
-			}
-		});
-
-		StringBuilder sb = new StringBuilder(leaderboard);
-		for (int i = 0; i < scoreBoard.size(); i++) {
-			int j = i + 1;
-			sb.append(j + ". Player " + scoreBoard.get(i).getPlayerID() + " - " + scoreBoard.get(i).getScore() + " \n");
-		}
-		return sb.toString();
-	}*/
+	 * public static String getLeaderBoard(ArrayList<Player> players) { String
+	 * leaderboard = ""; ArrayList<PlayerScore> scoreBoard = new
+	 * ArrayList<PlayerScore>(); for (int i = 0; i < players.size(); i++) {
+	 * scoreBoard.add(players.get(i).getPlayerScore()); }
+	 * Collections.sort(scoreBoard, new Comparator<PlayerScore>() { public int
+	 * compare(PlayerScore p1, PlayerScore p2) { return
+	 * Integer.compare(p2.getScore(), p1.getScore()); } });
+	 * 
+	 * StringBuilder sb = new StringBuilder(leaderboard); for (int i = 0; i <
+	 * scoreBoard.size(); i++) { int j = i + 1; sb.append(j + ". Player " +
+	 * scoreBoard.get(i).getPlayerID() + " - " + scoreBoard.get(i).getScore() +
+	 * " \n"); } return sb.toString(); }
+	 */
 }

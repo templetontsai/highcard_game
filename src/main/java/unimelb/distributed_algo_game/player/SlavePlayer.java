@@ -51,7 +51,7 @@ public class SlavePlayer extends Player {
 		this.mPanel = panel;
 		mGameClientSocketManager = new GameClientSocketManager(this);
 		mGameClientSocketManager.setPanel(panel);
-		
+
 	}
 
 	public SlavePlayer(GamePlayerInfo gamePlayerInfo) {
@@ -65,17 +65,16 @@ public class SlavePlayer extends Player {
 	public void play() {
 
 		gameServer.setPlayer(this);
-		//Set panel and this panel ref and will only be used when get elected as new leader
+		// Set panel and this panel ref and will only be used when get elected
+		// as new leader
 		gameServer.setPanel((MainGamePanel) mPanel);
-		
+
 		mGameClientSocketManager.setGameServer(gameServer);
-		
+
 		gameServer.setGameClientSocketManager(mGameClientSocketManager);
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
-		
-		
 
 		gameClient.setPanel(mPanel);
 		gameClient.setClientSocketManager(mGameClientSocketManager);
@@ -90,7 +89,6 @@ public class SlavePlayer extends Player {
 
 	}
 
-
 	/**
 	 * Runs an update
 	 */
@@ -104,11 +102,10 @@ public class SlavePlayer extends Player {
 		// gameClient.requestCard();
 
 		if (gameServer.getNumofNodes() >= 1) {
-			
-			
+
 			mGameClientSocketManager.sendRequestServerTime();
 			System.out.println("1requestCardFromDealer");
-			
+
 			while (!mGameClientSocketManager.getReply())
 				;
 			System.out.println("2requestCardFromDealer");
