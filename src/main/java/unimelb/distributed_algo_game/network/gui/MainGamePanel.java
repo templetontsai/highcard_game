@@ -45,6 +45,8 @@ public class MainGamePanel extends JPanel {
 	private JLabel lblNewLabel_1, serverIPLabel, serverPortLabel;
 
 	private PlayerStartButtonActionListerner mPlayerStartButtonActionListerner = null;
+	
+	private boolean isNewLeader = false;
 
 	public MainGamePanel(MainGameFrameGUI mainGameFrameGUI, boolean isDealer) {
 
@@ -218,7 +220,8 @@ public class MainGamePanel extends JPanel {
 	}
 
 	public synchronized void updatePlayerList(int nodeID) {
-		textArea.append("Node" + nodeID + " is joined\n");
+		if(!isNewLeader)
+			textArea.append("Node" + nodeID + " is joined\n");
 	}
 
 	public void setNodeID(int nodeID) {
@@ -260,6 +263,10 @@ public class MainGamePanel extends JPanel {
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
 		this.gameTable.setDealer(isDealer);
+	}
+	
+	public boolean setNewLeader(boolean isNewLeader) {
+		return this.isNewLeader = isNewLeader;
 	}
 
 }

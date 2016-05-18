@@ -14,6 +14,7 @@ import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.network.utils.Utils;
+import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.player.SlavePlayer;
@@ -33,6 +34,7 @@ public final class PlayerClientManager {
 	private MainGamePanel mMainGamePanel = null;
 	private GameServer mGameServer = null;
 	private boolean isDealerSS = false;
+	
 
 	private static final int GAME_SIZE = 3;
 
@@ -72,10 +74,17 @@ public final class PlayerClientManager {
 		mLocalPlayerList.put(gamePlayerInfo.getNodeID(), new SlavePlayer(gamePlayerInfo));
 		mNodeList.add(gamePlayerInfo);
 		if(isDealerSS) {
+		
 			mMainGamePanel.updatePlayerList(gamePlayerInfo.getNodeID());
 		}
 	
 
+	}
+	
+	public synchronized void closeAllClientConnection() {
+		for (Map.Entry<Integer, PlayerClientThread> t : mPlayerClientList.entrySet()) {
+			t.getValue().closeConnection();
+		}
 	}
 
 	public synchronized void removeNode(int nodeID) {
@@ -147,6 +156,22 @@ public final class PlayerClientManager {
 		if (mPlayerClientList.size() >= 1) {
 			for (Map.Entry<Integer, PlayerClientThread> entry : mPlayerClientList.entrySet()) {
 				this.isLockRound = entry.getValue().getClientStatus();
+			}
+
+		} else {
+
+			this.isLockRound = false;
+		}
+
+		return this.isLockRound;
+
+	}
+	
+
+	public synchronized boolean isPlayerReadyToPlay() {
+		if (mPlayerClientList.size() >= 1) {
+			for (Map.Entry<Integer, PlayerClientThread> entry : mPlayerClientList.entrySet()) {
+				this.isLockRound = entry.getValue().isPlayerReadyToPlay();
 			}
 
 		} else {
@@ -255,8 +280,8 @@ public final class PlayerClientManager {
 	}
 
 	public synchronized void updateGameTable() {
-		if (mMainGamePanel == null) {
-			System.out.println("mMainGamePanel == null");
+		if (!isDealerSS) {
+			System.out.println("This is not dealer server socket, do nothing");
 
 		} else {
 			mMainGamePanel.updateGameTable(getPlayerIDList());
@@ -298,5 +323,15 @@ public final class PlayerClientManager {
 	public boolean isDealerSS() {
 		return this.isDealerSS;
 	}
+	
+	public void reInitGameAsPlayer(GamePlayerInfo player, GamePlayerInfo newDealer) {
+		closeAllClientConnection();
+		mGameServer.reInitGameAsPlayer(player, newDealer);
+	}
+	
+	public void setIsPlaying(boolean isPlaying) {
+		this.mGameServer.setIsPlaying(isPlaying);
+	}
+
 
 }

@@ -59,7 +59,7 @@ public class DealerPlayer extends Player {
 		gameServer.setPlayer(this);
 
 		gameServer.setPanel((MainGamePanel) mMainGameLoginDealerPanel);
-
+		
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();

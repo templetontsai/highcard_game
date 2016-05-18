@@ -15,7 +15,7 @@ public class BodyMessage implements Serializable {
 	private Object message;
 
 	public enum ACKCode {
-		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), NODE_STILL_ALIVE(2), CLIENT_STILL_ALIVE(3), SERVER_STILL_ALIVE(4), CRT_RPY(5);
+		NODE_ID_RECEIVED(0), CARD_RECEIVED(1), NODE_STILL_ALIVE(2), CLIENT_STILL_ALIVE(3), SERVER_STILL_ALIVE(4), CRT_RPY(5), LEADER_ELE_ACK(6);
 		/** The code. */
 		private int code;
 
@@ -38,7 +38,7 @@ public class BodyMessage implements Serializable {
 	public enum MessageType {
 		CON(0), ACK(1), BCT_RST(2), BCT_NODE_LST(3), BCT_CLIENT_LST(4), BCT_NODE_UPT(5), BCT_CLIENT_UPT(6), BCT_RDY(7), BCT_CRD(8), BCT_CRT(9),
 
-		CRD(10), DSC(11), BCT(12), LST(13), ELE(14), COD(15);
+		CRD(10), DSC(11), BCT(12), LST(13), ELE(14), COD(15), REINIT(16), GAME_SRT(17);
 
 		/** The code. */
 		private int code;

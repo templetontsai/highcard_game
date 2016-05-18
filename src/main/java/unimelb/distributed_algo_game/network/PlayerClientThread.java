@@ -24,6 +24,7 @@ import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
+import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
 // TODO: Auto-generated Javadoc
@@ -52,30 +53,29 @@ public class PlayerClientThread extends Thread {
 	/** The boolean for running the client thread */
 	private boolean isRunning = false;
 
-
 	private PlayerClientManager mPlayerClientManager = null;
 
 	private int clientNodeID = -1;
 
 	private boolean isClientLockRound;
 
-	private boolean isClientStillAvle = false;
-
 	private GamePlayerInfo mGameDealerInfo = null;
 
 	private GamePlayerInfo mGameClientInfo = null;
-	
+
 	private Timer checkNodeStillAliveTimer = null;
-	
+
 	private Timer checkClientStillAliveTimer = null;
-	
+
 	private Timer serverStillAliveTimer = null;
 
-	private Card c;
-	
-	private boolean isDealerSS = false;
-	
+	private Card c = null;
 
+	private boolean isDealerSS = false;
+
+	private GamePlayerInfo newDealer = null;
+	
+	private boolean isPlayerReadyToPlay = false;
 
 	/**
 	 * Instantiates a new player client thread.
@@ -85,7 +85,8 @@ public class PlayerClientThread extends Thread {
 	 * @param clientID
 	 *            the client id
 	 */
-	public PlayerClientThread(Socket mSocket, PlayerClientManager mPlayerClientManager, GamePlayerInfo mGameDealerInfo) {
+	public PlayerClientThread(Socket mSocket, PlayerClientManager mPlayerClientManager,
+			GamePlayerInfo mGameDealerInfo) {
 		if (mSocket != null) {
 			this.mSocket = mSocket;
 		} else
@@ -156,35 +157,36 @@ public class PlayerClientThread extends Thread {
 
 		// Close the input and output streams to the server
 		try {
-			if(serverStillAliveTimer != null)
+			if (serverStillAliveTimer != null)
 				serverStillAliveTimer.cancel();
-			
+
 			mObjectInputStream.close();
 			mObjectOutputStream.close();
 
 			mSocket.close();
-			if(isDealerSS)
+			if (isDealerSS)
 				updateListAndGUI();
 			System.out.println("Client closed");
 		} catch (IOException ioe) {
 			System.out.println("Client closed");
-			if(isDealerSS)
+			if (isDealerSS)
 				updateListAndGUI();
-			
+
 		}
 	}
-	
+
 	final class checkNodeStillAliveTimerTask extends TimerTask {
 
 		@Override
 		public void run() {
-			
+
 			synchronized (mLock) {
 				isRunning = false;
 			}
 		}
 
 	}
+
 	/**
 	 * This receives a still alive message from the client
 	 *
@@ -193,17 +195,17 @@ public class PlayerClientThread extends Thread {
 
 		@Override
 		public void run() {
-			
+
 			synchronized (mLock) {
 				isRunning = false;
 			}
 		}
 
 	}
-	
+
 	private void updateListAndGUI() {
-		if(mPlayerClientManager.isDealer()) {
-			
+		if (mPlayerClientManager.isDealer()) {
+
 			mPlayerClientManager.removeNode(clientNodeID);
 			mPlayerClientManager.broadcastUpdateNodeList();
 
@@ -216,13 +218,15 @@ public class PlayerClientThread extends Thread {
 			mPlayerClientManager.broadcastUpdateNodeList();
 		}
 	}
-	
+
 	final class StillAliveTimerTask extends TimerTask {
 
 		@Override
 		public void run() {
-			//if(!isDealerSS)
-				//System.out.println("sending still alive from " + mGameDealerInfo.getNodeID() + " to " + mGameClientInfo.getNodeID());
+			// if(!isDealerSS)
+			// System.out.println("sending still alive from " +
+			// mGameDealerInfo.getNodeID() + " to " +
+			// mGameClientInfo.getNodeID());
 			sendStillAliveMessage();
 
 		}
@@ -250,11 +254,12 @@ public class PlayerClientThread extends Thread {
 		ClientConnectionState connectionState;
 		MessageType messagType = mBodyMessage.getMessageType();
 		Object message = mBodyMessage.getMessage();
-		//System.out.println(messagType.toString() + " from" + mBodyMessage.getGamePlayerInfo().getPort());
+		// System.out.println(messagType.toString() + " from" +
+		// mBodyMessage.getGamePlayerInfo().getPort());
 		switch (messagType) {
 		case CON:
 			// if the game is started already, don't respond to the message
-			if(isDealerSS) {
+			if (isDealerSS) {
 				if (!getClientStatus()) {
 					System.out.println("CON: DSS");
 
@@ -267,12 +272,12 @@ public class PlayerClientThread extends Thread {
 					mMessage.put("header", connectionState);
 					mMessage.put("body", mBodyMessage);
 					sendMessage(mMessage);
+					mPlayerClientManager.resetGameStart(mPlayerClientManager.getPlayerIDList().size());
 					// Start the still alive timer beacon to the leader
-					
+
 					serverStillAliveTimer = new Timer();
-					serverStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
-					
-				
+					serverStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0,
+							NetworkInterface.STILL_ALIVE_TIME_OUT);
 
 				}
 			} else {
@@ -288,22 +293,23 @@ public class PlayerClientThread extends Thread {
 				mMessage.put("body", mBodyMessage);
 				sendMessage(mMessage);
 				// Start the still alive timer beacon to the leader
-				
+
 				serverStillAliveTimer = new Timer();
-				serverStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0, NetworkInterface.STILL_ALIVE_TIME_OUT);
+				serverStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0,
+						NetworkInterface.STILL_ALIVE_TIME_OUT);
 			}
-			
-			
 
 			break;
 		// Used to acknowledge the server is still alive
 		case ACK:
 			ACKCode ackCode = (ACKCode) message;
-			//System.out.println(ackCode.toString() + " from" + mBodyMessage.getGamePlayerInfo().getPort());
+			// System.out.println(ackCode.toString() + " from" +
+			// mBodyMessage.getGamePlayerInfo().getPort());
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
-				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID());
-				
+				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID()
+						+ " numOfNode: " + mPlayerClientManager.getNumOfNodes());
+		
 				break;
 			case CARD_RECEIVED:
 				Map<Integer, Card> playerCard = new HashMap<Integer, Card>(1);
@@ -317,17 +323,34 @@ public class PlayerClientThread extends Thread {
 				if (checkNodeStillAliveTimer != null)
 					checkNodeStillAliveTimer.cancel();
 				checkNodeStillAliveTimer = new Timer();
-				checkNodeStillAliveTimer.schedule(new checkNodeStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+				checkNodeStillAliveTimer.schedule(new checkNodeStillAliveTimerTask(),
+						NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 
-				//System.out.println("Node: " + this.mGameClientInfo.getNodeID() + " is still alive");
+				// System.out.println("Node: " +
+				// this.mGameClientInfo.getNodeID() + " is still alive");
 				break;
 			case CLIENT_STILL_ALIVE:
 				if (checkClientStillAliveTimer != null)
 					checkClientStillAliveTimer.cancel();
 				checkClientStillAliveTimer = new Timer();
-				checkClientStillAliveTimer.schedule(new checkClientStillAliveTimerTask(), NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
+				checkClientStillAliveTimer.schedule(new checkClientStillAliveTimerTask(),
+						NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 
-				//System.out.println("Client: " + this.mGameClientInfo.getNodeID() + " is still alive");
+				// System.out.println("Client: " +
+				// this.mGameClientInfo.getNodeID() + " is still alive");
+				break;
+			case LEADER_ELE_ACK:
+				System.out.println("LEADER_ELE_ACK");
+				newDealer = (GamePlayerInfo) mBodyMessage.getGamePlayerInfo();
+				System.out.println("The new dealer is node " + newDealer.getNodeID() + "," + newDealer.getIPAddress()
+						+ "," + newDealer.getPort());
+				mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.REINIT, "REINIT");
+
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", mBodyMessage);
+				sendMessage(mMessage);
+	
+
 				break;
 			default:
 				System.out.println("Uknown ACK code");
@@ -338,13 +361,12 @@ public class PlayerClientThread extends Thread {
 		case CRD:
 
 			connectionState = ClientConnectionState.CONNECTED;
-			// Player specifies the card to, blocking for a bit to test ricart algo
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			// Player specifies the card to, blocking for a bit to test ricart
+			// algo
+			/*
+			 * try { Thread.sleep(5000); } catch (InterruptedException e) { //
+			 * TODO Auto-generated catch block e.printStackTrace(); }
+			 */
 			c = mPlayerClientManager.getCard(1);
 			mPlayerClientManager.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
 			// mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
@@ -362,9 +384,10 @@ public class PlayerClientThread extends Thread {
 			isClientLockRound = false;
 			break;
 		case BCT_CRT:
-			while (mPlayerClientManager.isRequested() && mPlayerClientManager.getRequestedTimestamp() > (long) mBodyMessage.getMessage())
+			while (mPlayerClientManager.isRequested()
+					&& mPlayerClientManager.getRequestedTimestamp() > (long) mBodyMessage.getMessage())
 				;// wait till out of critical session
-
+			System.out.println("BCT_CRT");
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", new BodyMessage(mGameDealerInfo, MessageType.ACK, ACKCode.CRT_RPY));
 
@@ -374,17 +397,18 @@ public class PlayerClientThread extends Thread {
 			System.out.println("Received election message from " + mBodyMessage.getGamePlayerInfo().getNodeID());
 			sendElectionMessage(mBodyMessage);
 			break;
-		case COD:
-			System.out.println("Received coordinator message from " + mBodyMessage.getNodeID());
-			setNewCoordinator(mBodyMessage);
+			
+		case GAME_SRT:
+			isPlayerReadyToPlay = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			break;
+
 		default:
 
 			System.out.println("Uknown Message Type");
 
 		}
 	}
-	
+
 	/**
 	 * This sends an election message to the node's neighbor after comparing the
 	 * received node ID to it's own
@@ -412,7 +436,7 @@ public class PlayerClientThread extends Thread {
 
 			mBodyMessage.setMessageType(MessageType.COD);
 			mBodyMessage.setMessage(this.mGameDealerInfo);
-			System.out.println("Hell ya I'm in charge now ");
+			System.out.println("2Hell ya I'm in charge now ");
 
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
@@ -431,11 +455,17 @@ public class PlayerClientThread extends Thread {
 	 */
 	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
 
-		GamePlayerInfo newDealer = (GamePlayerInfo) mBodyMessage.getMessage();
+		newDealer = (GamePlayerInfo) mBodyMessage.getGamePlayerInfo();
 		System.out.println("The new dealer is node " + newDealer.getNodeID());
 		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
 			// Update the new server details on the game client
 			// mGameServer.setGameServerLeader(newDealer);
+			// TODO the process to become new player
+
+			System.out.println("The new dealer is node " + newDealer.getNodeID() + "," + newDealer.getIPAddress() + ","
+					+ newDealer.getPort());
+			System.out.println("I am node  " + this.mGameDealerInfo.getNodeID() + ","
+					+ this.mGameDealerInfo.getIPAddress() + "," + this.mGameDealerInfo.getPort());
 
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
@@ -443,7 +473,25 @@ public class PlayerClientThread extends Thread {
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
 			sendMessage(mMessage);
+
+			// mPlayerClientManager.reInitGameAsPlayer(this.mGameDealerInfo,
+			// newDealer);
 		}
+	}
+
+	public synchronized void closeConnection() {
+		if (checkNodeStillAliveTimer != null) {
+			checkNodeStillAliveTimer.cancel();
+		}
+		if (checkClientStillAliveTimer != null) {
+			checkClientStillAliveTimer.cancel();
+		}
+
+		if (serverStillAliveTimer != null) {
+			serverStillAliveTimer.cancel();
+		}
+
+		isRunning = false;
 	}
 
 	/**
@@ -452,11 +500,19 @@ public class PlayerClientThread extends Thread {
 	 * @param mGameSendDataObject
 	 *            the m game send data object
 	 */
-	public void sendMessage(Object mGameSendDataObject) {
+	// public synchronized void sendMessage(Object mGameSendDataObject) {
+	public synchronized void sendMessage(Object mGameSendDataObject) {
 
 		try {
 			if (mObjectOutputStream != null && mGameSendDataObject != null) {
-
+				/*
+				 * System.out.println("Client send message type " +
+				 * ((BodyMessage) ((JSONObject)
+				 * mGameSendDataObject).get("body")).getMessageType().toString()
+				 * ); System.out.println("Client send message type " +
+				 * ((BodyMessage) ((JSONObject)
+				 * mGameSendDataObject).get("body")).getMessage().toString());
+				 */
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
 				// TODO object has to be reset, otherwise the client won't
@@ -464,17 +520,21 @@ public class PlayerClientThread extends Thread {
 				// However, this might cause issue if the packet is lost in
 				// between communication
 				mObjectOutputStream.reset();
+
+				if (((BodyMessage) ((JSONObject) mGameSendDataObject).get("body"))
+						.getMessageType() == MessageType.ACK.REINIT) {
+					mPlayerClientManager.reInitGameAsPlayer(this.mGameDealerInfo, newDealer);
+				}
 			}
 		} catch (IOException ioe) {
 
 			isRunning = false;
 			System.out.println("Connection lost in sendMessage, node: " + this.mGameClientInfo.getNodeID());
+			ioe.printStackTrace();
 
 		}
 
 	}
-
-
 
 	/**
 	 * Receive message from the client.
@@ -498,6 +558,7 @@ public class PlayerClientThread extends Thread {
 		} catch (IOException ioe) {
 
 			isRunning = false;
+			ioe.printStackTrace();
 			System.out.println("Connection lost in receiveMessage client, node: " + this.mGameClientInfo.getNodeID());
 
 		}
@@ -542,4 +603,11 @@ public class PlayerClientThread extends Thread {
 		return this.mGameClientInfo;
 	}
 
+	public boolean isPlayerReadyToPlay() {
+		return this.isPlayerReadyToPlay; 
+	}
+	
+	public void setisPlayerReadyToPlay(boolean isPlayerReadyToPlay) {
+		this.isPlayerReadyToPlay = isPlayerReadyToPlay;
+	}
 }

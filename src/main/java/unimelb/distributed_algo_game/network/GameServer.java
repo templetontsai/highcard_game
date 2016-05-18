@@ -49,7 +49,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private PlayerClientManager mPlayerClientManager = null;
 
-	private MainGamePanel mMainGameLoginDealerPanel = null;
+	private MainGamePanel mMainGamePanel = null;
 	// This number is the total player number but not including node 0 itself
 	private int GAME_START = 3;
 
@@ -59,6 +59,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private boolean isRequested = false;
 	private long requestedTimestamp = -1;
+	
+	private boolean isPlaying = false;
 
 	/**
 	 * Instantiates a new game server.
@@ -66,8 +68,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	protected GameServer() {
 		mLock = new Object();
 		mConnectionState = ServerConnectionState.DISCONNECTED;
-		
-		
+
 	}
 
 	/**
@@ -110,26 +111,19 @@ public final class GameServer implements Runnable, NetworkInterface {
 				runLeaderState();
 			} catch (IOException ioe) {
 				// Display the details of the exception error
-				ioe.printStackTrace();
+				System.out.println("Connection Closed in GameServer, leader state");
 
-			} finally {
-
-				System.out.println("Connection Closed");
-			}
-
+			} 
 			// This runs if the player is a client
 		} else {
 			try {
-				
+
 				runSlaveState();
 			} catch (IOException ioe) {
 				// Display the details of the exception error
-				ioe.printStackTrace();
+				System.out.println("Connection Closed in GameServer, slave state");
 
-			} finally {
-
-				System.out.println("Connection Closed");
-			}
+			} 
 
 		}
 
@@ -152,8 +146,9 @@ public final class GameServer implements Runnable, NetworkInterface {
 					// thread pool
 					mSocket = mServerSocket.accept();
 					System.out.println("a client connected to node" + mPlayer.getGamePlayerInfo().getNodeID());
-					PlayerClientThread t = new PlayerClientThread(mSocket, mPlayerClientManager, mPlayer.getGamePlayerInfo());
-					
+					PlayerClientThread t = new PlayerClientThread(mSocket, mPlayerClientManager,
+							mPlayer.getGamePlayerInfo());
+
 					t.setName("GameServer Socket Thread");
 					t.start();
 
@@ -163,11 +158,17 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
-	
-
-					broadcastNodeList();
+					
+					if(isPlaying) {
+						System.out.println("playingThread Start");
+						Thread playingThread = new Thread(new GamePlayThread());
+						playingThread.setName("playingThread");
+						playingThread.start();
+					}
+/*
+					System.out.println("GameServer: getPlayerIDList size: " + mPlayerClientManager.getPlayerIDList().size());
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
-
+						broadcastNodeList();
 						System.out.println("Game Start");
 
 						try {
@@ -176,19 +177,46 @@ public final class GameServer implements Runnable, NetworkInterface {
 							// TODO Adding error handling
 							e.printStackTrace();
 						}
-						
+
 						broadcastGameReadyToNodes(new Boolean(true));
-						
+
 						mPlayerClientManager.showGameTable();
-						
-						
-					}
+
+					}*/
 
 				}
 				// Close server port once the server is no longer running
 				mServerSocket.close();
 			}
 		}
+	}
+	
+	final class GamePlayThread implements Runnable {
+
+		@Override
+		public void run() {
+			
+			if(mPlayerClientManager.isPlayerReadyToPlay()) {
+				broadcastNodeList();
+				System.out.println("Game Start");
+
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Adding error handling
+					e.printStackTrace();
+				}
+
+				broadcastGameReadyToNodes(new Boolean(true));
+
+				mPlayerClientManager.showGameTable();
+				
+				while(isPlaying)
+					;
+			}
+				
+		}
+		
 	}
 
 	/**
@@ -210,7 +238,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 					System.out.println("Waiting for new server clients");
 					mSocket = mServerSocket.accept();
 					System.out.println("a client connected to node" + mPlayer.getGamePlayerInfo().getNodeID());
-					PlayerClientThread t = new PlayerClientThread(mSocket, mPlayerClientManager, mPlayer.getGamePlayerInfo());
+					PlayerClientThread t = new PlayerClientThread(mSocket, mPlayerClientManager,
+							mPlayer.getGamePlayerInfo());
 
 					t.setName("GameServer Socket Thread");
 					t.start();
@@ -220,8 +249,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 						;
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
-					
-					//mGameClientSocketManager.broadcastClientsList();
+
+					// mGameClientSocketManager.broadcastClientsList();
 
 				}
 				System.out.println("Slave Connection closed");
@@ -290,8 +319,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void broadcastUpdateNodeList() {
 		mPlayerClientManager.sendNodeList(ClientConnectionState.CONNECTED, MessageType.BCT_NODE_UPT);
 	}
-	
-
 
 	/**
 	 * This methods sends a card from the deck to the player
@@ -299,8 +326,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void sendCard(Card card, int id) {
 		mPlayerClientManager.sendMessageToClient(card, id, ClientConnectionState.CONNECTED, MessageType.CRD);
 	}
-
-
 
 	public synchronized void removeNode(int nodeID) {
 		mPlayerClientManager.removeNode(nodeID);
@@ -314,7 +339,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	}
 
 	public void setPanel(MainGamePanel mMainGamePanel) {
-		this.mMainGameLoginDealerPanel = mMainGamePanel;
+		this.mMainGamePanel = mMainGamePanel;
 		this.mPlayerClientManager.setPanel(mMainGamePanel);
 	}
 
@@ -333,8 +358,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 	public void setGameServerLeader(GamePlayerInfo gameServerInfo) {
 		mPlayer.setGameServerInfo(gameServerInfo);
 	}
-
-
 
 	/**
 	 * This returns the player object of this server
@@ -377,8 +400,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 		((SlavePlayer) mPlayer).rePlay();
 	}
 
-
-
 	public void dealerDrawnCard() {
 
 		mPlayerClientManager.dealerDrawnCard();
@@ -401,28 +422,56 @@ public final class GameServer implements Runnable, NetworkInterface {
 		return this.isRequested;
 	}
 
-
-
 	public synchronized int getNumofNodes() {
 		return mPlayerClientManager.getPlayerIDList().size();
 	}
 
-	public void startServer() {
-		mConnectionState = ServerConnectionState.CONNECTED;
-		DealerPlayer p = new DealerPlayer("Dealer", mPlayer.getGamePlayerInfo(), mMainGameLoginDealerPanel);
+	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
+		System.out.println("1reInitGameAsDealer");
+		mPlayerClientManager.closeAllClientConnection();
+		disconnect();
+		/*try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		System.out.println("2reInitGameAsDealer");
+		
+		newDealer.setDealer(true);
+		mMainGamePanel.setDealer(true);
+		mMainGamePanel.setNewLeader(true);
+		Player p = new DealerPlayer("Dealer", newDealer, mMainGamePanel);
+		p.setDealer(true);
+		p.play();
+	}
 
-		MainGameFrameGUI mainGui = new MainGameFrameGUI("High Card Game", p.getGamePlayerInfo().getNodeID());
-		MainGamePanel mainPanel = new MainGamePanel(mainGui, true);
-		((DealerPlayer) mPlayer).restartServer(mainPanel);
-
-
+	public void reInitGameAsPlayer(GamePlayerInfo player, GamePlayerInfo newDealer) {
+		
+		System.out.println("1reInitGameAsPlayer");
+		disconnect();
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("2reInitGameAsPlayer");
+		
+		player.setDealer(false);
+		newDealer.setDealer(true);
+		mMainGamePanel.setDealer(false);
+		Player p = new SlavePlayer("Player", player, newDealer, mMainGamePanel);
+		p.setDealer(false);
+		p.play();
 	}
 
 	public synchronized void resetGameStart(int num) {
 		this.GAME_START = num;
 	}
-
-
 	
+	public void setIsPlaying(boolean isPlaying) {
+		this.isPlaying = isPlaying;
+	}
 
 }

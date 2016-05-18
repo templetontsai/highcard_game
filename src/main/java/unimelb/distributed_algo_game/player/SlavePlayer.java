@@ -64,6 +64,9 @@ public class SlavePlayer extends Player {
 	public void play() {
 
 		gameServer.setPlayer(this);
+		//Set panel and this panel ref and will only be used when get elected as new leader
+		gameServer.setPanel((MainGamePanel) mPanel);
+		mGameClientSocketManager.setGameServer(gameServer);
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
@@ -113,9 +116,10 @@ public class SlavePlayer extends Player {
 			gameServer.setIsRequested(true, timestamp);
 			
 			mGameClientSocketManager.broadcastCRT(timestamp);
-			System.out.println("requestCardFromDealer");
+			System.out.println("1requestCardFromDealer");
 			while (!mGameClientSocketManager.getReply())
 				;
+			System.out.println("2requestCardFromDealer");
 			gameClient.requestCard();
 			gameServer.setIsRequested(false, Utils.getProcessTimestamp());
 		} else {

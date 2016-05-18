@@ -19,6 +19,7 @@ import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
+import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.NetworkObserver;
@@ -127,9 +128,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 				/** Main while loop for the thread */
 				while (isRunning) {
-
+					Thread.sleep(2000);
 					runState();
-					Thread.sleep(100);
+
 				}
 
 				/**
@@ -196,10 +197,16 @@ public final class GameClient implements Runnable, NetworkInterface {
 		switch (messageType) {
 		case ACK:
 			ACKCode ackCode = (ACKCode) mBodyMessage.getMessage();
+			// System.out.println("ACKCode:" + ackCode);
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
-				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID());
+				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID()
+						+ " NODE_ID_RECEIVED");
+				mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.GAME_SRT, new Boolean(true));
 
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", mBodyMessage);
+				sendMessage(mMessage);
 				// Start the still alive timer beacon to the leader
 				sendStillAliveTimer = new Timer();
 				sendStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0,
@@ -274,8 +281,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 
 			mPlayerInfoList = (List<GamePlayerInfo>) mBodyMessage.getMessage();
 			updateNodeList(mPlayerInfoList);
-			System.out
-					.println("BCT_NODE_LST: node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list");
+			System.out.println("BCT_NODE_LST: node" + mPlayer.getGamePlayerInfo().getNodeID() + " receives player list:"
+					+ mPlayerInfoList.size());
 
 			for (GamePlayerInfo info : mPlayerInfoList) {
 				mGameClientSocketManager.addSocketClient(info);
@@ -300,12 +307,21 @@ public final class GameClient implements Runnable, NetworkInterface {
 			System.out.println(mBodyMessage.getMessage());
 			break;
 		case ELE:
-			System.out.println("Received election message from " + mBodyMessage.getNodeID());
+			System.out.println("Received election message from " + this.mPlayer.getGamePlayerInfo().getNodeID());
 			sendElectionMessage(mBodyMessage);
 			break;
 		case COD:
-			System.out.println("Received coordinator message from " + mBodyMessage.getNodeID());
+			System.out.println("Received coordinator message from " + this.mPlayer.getGamePlayerInfo().getNodeID());
 			setNewCoordinator(mBodyMessage);
+			break;
+		case REINIT:
+			System.out.println("Reinit received");
+			// TODO start the process to become dealer
+			System.out.println(" start the process to become dealer");
+			System.out.println("The new dealer is node " + this.mPlayer.getGamePlayerInfo().getNodeID() + ","
+					+ this.mPlayer.getGamePlayerInfo().getIPAddress() + ","
+					+ this.mPlayer.getGamePlayerInfo().getPort());
+			mGameClientSocketManager.reInitGameAsDealer(this.mPlayer.getGamePlayerInfo());
 			break;
 		default:
 
@@ -403,6 +419,13 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 */
 	public void disconnect() {
 		System.out.println("Disconnecting from the game");
+		if (sendStillAliveTimer != null) {
+			sendStillAliveTimer.cancel();
+		}
+
+		if (checkServerTimer != null) {
+			checkServerTimer.cancel();
+		}
 		isRunning = false;
 	}
 
@@ -572,16 +595,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 			// This means i have received my election message and I am the new
 			// coordinator
 
-			mBodyMessage.setMessageType(MessageType.COD);
-			mBodyMessage.setMessage(this.mPlayer.getGamePlayerInfo());
-			System.out.println("Hell ya I'm in charge now ");
+			// mBodyMessage.setMessageType(MessageType.ACK);
+			// mBodyMessage.setMessage(this.mPlayer.getGamePlayerInfo());
+			// BodyMessage bodyMessage = mBodyMessage;
+			System.out.println("1Hell ya I'm in charge now ");
 
 			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = mBodyMessage;
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
 
-			mGameClientSocketManager.sendElectionMessage(mMessage);
+			mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.ACK, ACKCode.LEADER_ELE_ACK);
+			mMessage.put("header", ClientConnectionState.CONNECTED);
+			mMessage.put("body", mBodyMessage);
+			sendMessage(mMessage);
+
 		}
 
 	}
@@ -596,7 +621,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 		GamePlayerInfo newDealer = (GamePlayerInfo) mBodyMessage.getMessage();
 		System.out.println("The new dealer is node " + newDealer.getNodeID());
 		if (newDealer.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID()) {
-		
 
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;

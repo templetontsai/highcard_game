@@ -9,6 +9,7 @@ import org.json.simple.JSONObject;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.utils.Utils;
+import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 
@@ -16,14 +17,18 @@ public class GameClientSocketManager {
 
 	private List<GameClient> mListClients = null;
 	private Player mPlayer = null;
+	private GameServer mGameServer = null;
 	private boolean isReplied = false;
 
 	public GameClientSocketManager(Player mPlayer) {
 		mListClients = new ArrayList<GameClient>();
 		this.mPlayer = mPlayer;
+		
 	}
-
-
+	
+	public void setGameServer(GameServer mGameServer) {
+		this.mGameServer = mGameServer;
+	}
 
 	public void startElection() {
 		System.out.println("Current size of players is " + mListClients.size());
@@ -50,9 +55,6 @@ public class GameClientSocketManager {
 		}
 	}
 
-
-
-
 	public void broadcastCRT(long timestamp) {
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
@@ -71,12 +73,13 @@ public class GameClientSocketManager {
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				isReplied = c.getReply();
+				
 			}
 		} else {
 
 			isReplied = true;
 		}
-
+		
 		return isReplied;
 	}
 
@@ -103,7 +106,7 @@ public class GameClientSocketManager {
 
 	}
 
-	public void initGameClientsConnection() {
+	public synchronized void initGameClientsConnection() {
 		if (mListClients != null) {
 
 			for (GameClient client : mListClients) {
@@ -143,6 +146,24 @@ public class GameClientSocketManager {
 			mMessage.put("body", bodyMessage);
 			client.sendMessage(mMessage);
 		}
+	}
+	
+	public synchronized void closeAllClientConnection() {
+		if (mListClients != null) {
+
+			for (GameClient client : mListClients) {
+
+				client.disconnect();
+				
+
+			}
+
+		}
+	}
+
+	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
+		closeAllClientConnection();
+		mGameServer.reInitGameAsDealer(newDealer);
 	}
 
 }
