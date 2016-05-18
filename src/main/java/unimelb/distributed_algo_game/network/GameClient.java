@@ -202,11 +202,8 @@ public final class GameClient implements Runnable, NetworkInterface {
 			case NODE_ID_RECEIVED:
 				System.out.println("ACK Message received from node" + mBodyMessage.getGamePlayerInfo().getNodeID()
 						+ " NODE_ID_RECEIVED");
-				mBodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo(), MessageType.GAME_SRT, new Boolean(true));
-
-				mMessage.put("header", ClientConnectionState.CONNECTED);
-				mMessage.put("body", mBodyMessage);
-				sendMessage(mMessage);
+	
+				
 				// Start the still alive timer beacon to the leader
 				sendStillAliveTimer = new Timer();
 				sendStillAliveTimer.scheduleAtFixedRate(new StillAliveTimerTask(), 0,

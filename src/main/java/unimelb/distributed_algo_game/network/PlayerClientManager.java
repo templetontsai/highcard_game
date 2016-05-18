@@ -34,6 +34,7 @@ public final class PlayerClientManager {
 	private MainGamePanel mMainGamePanel = null;
 	private GameServer mGameServer = null;
 	private boolean isDealerSS = false;
+	private boolean isPlayerReadyToPlay = false;
 	
 
 	private static final int GAME_SIZE = 3;
@@ -168,20 +169,7 @@ public final class PlayerClientManager {
 	}
 	
 
-	public synchronized boolean isPlayerReadyToPlay() {
-		if (mPlayerClientList.size() >= 1) {
-			for (Map.Entry<Integer, PlayerClientThread> entry : mPlayerClientList.entrySet()) {
-				this.isLockRound = entry.getValue().isPlayerReadyToPlay();
-			}
 
-		} else {
-
-			this.isLockRound = false;
-		}
-
-		return this.isLockRound;
-
-	}
 
 	public synchronized String getPlayersSockets() {
 		StringBuilder sb = new StringBuilder();
@@ -329,9 +317,6 @@ public final class PlayerClientManager {
 		mGameServer.reInitGameAsPlayer(player, newDealer);
 	}
 	
-	public void setIsPlaying(boolean isPlaying) {
-		this.mGameServer.setIsPlaying(isPlaying);
-	}
 
 
 }

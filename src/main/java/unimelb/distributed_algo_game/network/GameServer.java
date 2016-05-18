@@ -139,6 +139,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 		if (mServerSocket != null) {
 			System.out.println("Server Start, Waiting....");
 			synchronized (mLock) {
+				
+	
 				// Only runs if the server is in a connected state
 				while (mConnectionState == ServerConnectionState.CONNECTED) {
 
@@ -159,13 +161,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addClient(t.getClientNodeID(), t);
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
 					
-					if(isPlaying) {
-						System.out.println("playingThread Start");
-						Thread playingThread = new Thread(new GamePlayThread());
-						playingThread.setName("playingThread");
-						playingThread.start();
-					}
-/*
+
+
 					System.out.println("GameServer: getPlayerIDList size: " + mPlayerClientManager.getPlayerIDList().size());
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
 						broadcastNodeList();
@@ -182,7 +179,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 						mPlayerClientManager.showGameTable();
 
-					}*/
+					}
 
 				}
 				// Close server port once the server is no longer running
@@ -191,33 +188,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		}
 	}
 	
-	final class GamePlayThread implements Runnable {
 
-		@Override
-		public void run() {
-			
-			if(mPlayerClientManager.isPlayerReadyToPlay()) {
-				broadcastNodeList();
-				System.out.println("Game Start");
-
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Adding error handling
-					e.printStackTrace();
-				}
-
-				broadcastGameReadyToNodes(new Boolean(true));
-
-				mPlayerClientManager.showGameTable();
-				
-				while(isPlaying)
-					;
-			}
-				
-		}
-		
-	}
 
 	/**
 	 * This runs when the server isn't the main dealer of the game and is a
@@ -470,8 +441,6 @@ public final class GameServer implements Runnable, NetworkInterface {
 		this.GAME_START = num;
 	}
 	
-	public void setIsPlaying(boolean isPlaying) {
-		this.isPlaying = isPlaying;
-	}
+
 
 }

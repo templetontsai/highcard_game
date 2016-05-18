@@ -75,7 +75,7 @@ public class PlayerClientThread extends Thread {
 
 	private GamePlayerInfo newDealer = null;
 	
-	private boolean isPlayerReadyToPlay = false;
+	
 
 	/**
 	 * Instantiates a new player client thread.
@@ -272,7 +272,7 @@ public class PlayerClientThread extends Thread {
 					mMessage.put("header", connectionState);
 					mMessage.put("body", mBodyMessage);
 					sendMessage(mMessage);
-					mPlayerClientManager.resetGameStart(mPlayerClientManager.getPlayerIDList().size());
+					
 					// Start the still alive timer beacon to the leader
 
 					serverStillAliveTimer = new Timer();
@@ -396,10 +396,6 @@ public class PlayerClientThread extends Thread {
 		case ELE:
 			System.out.println("Received election message from " + mBodyMessage.getGamePlayerInfo().getNodeID());
 			sendElectionMessage(mBodyMessage);
-			break;
-			
-		case GAME_SRT:
-			isPlayerReadyToPlay = ((Boolean) mBodyMessage.getMessage()).booleanValue();
 			break;
 
 		default:
@@ -603,11 +599,4 @@ public class PlayerClientThread extends Thread {
 		return this.mGameClientInfo;
 	}
 
-	public boolean isPlayerReadyToPlay() {
-		return this.isPlayerReadyToPlay; 
-	}
-	
-	public void setisPlayerReadyToPlay(boolean isPlayerReadyToPlay) {
-		this.isPlayerReadyToPlay = isPlayerReadyToPlay;
-	}
 }
