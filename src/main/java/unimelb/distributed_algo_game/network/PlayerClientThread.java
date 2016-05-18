@@ -175,6 +175,11 @@ public class PlayerClientThread extends Thread {
 		}
 	}
 
+	/**
+	 * Starts a timer task to check if a node is still alive
+	 * @author Lupiya
+	 *
+	 */
 	final class checkNodeStillAliveTimerTask extends TimerTask {
 
 		@Override
@@ -203,6 +208,9 @@ public class PlayerClientThread extends Thread {
 
 	}
 
+	/**
+	 * Updates the list used by the GUI
+	 */
 	private void updateListAndGUI() {
 		if (mPlayerClientManager.isDealer()) {
 
@@ -219,6 +227,11 @@ public class PlayerClientThread extends Thread {
 		}
 	}
 
+	/**
+	 * Starts a still alive message timer task
+	 * @author Lupiya
+	 *
+	 */
 	final class StillAliveTimerTask extends TimerTask {
 
 		@Override
@@ -415,8 +428,6 @@ public class PlayerClientThread extends Thread {
 		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
 		// Send message to the next node without changing it
 		if (messageNodeID > this.mGameDealerInfo.getNodeID()) {
-			// System.out.println(mGameDealerInfo.getNodeID()+" cannot be the
-			// new dealer");
 			JSONObject mMessage = new JSONObject();
 			BodyMessage bodyMessage = mBodyMessage;
 			mMessage.put("header", ClientConnectionState.CONNECTED);
@@ -444,7 +455,9 @@ public class PlayerClientThread extends Thread {
 
 	}
 
-
+	/**
+	 * Closes all the thread connections
+	 */
 	public synchronized void closeConnection() {
 		if (checkNodeStillAliveTimer != null) {
 			checkNodeStillAliveTimer.cancel();

@@ -83,6 +83,10 @@ public class GameClientSocketManager {
 		}
 	}
 	
+	/**
+	 * Broadcasts a coordinator message to all the players to announce the new leader
+	 * @param mMessage
+	 */
 	public void sendCoordinatorMessage(JSONObject mMessage){
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
@@ -211,6 +215,9 @@ public class GameClientSocketManager {
 		return this.isReplied;
 	}
 
+	/**
+	 * Broadcasts the client list to all the players in the game
+	 */
 	public synchronized void broadcastClientsList() {
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient client : mListClients) {
@@ -226,6 +233,9 @@ public class GameClientSocketManager {
 
 	}
 
+	/**
+	 * Closes all the existing client connections
+	 */
 	public synchronized void closeAllClientConnection() {
 		if (mListClients != null && mListClients.size() > 0) {
 
@@ -238,16 +248,27 @@ public class GameClientSocketManager {
 		}
 	}
 
+	/**
+	 * Reinitializes the game as the dealer
+	 * @param newDealer
+	 */
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		closeAllClientConnection();
 		mGameServer.reInitGameAsDealer(newDealer);
 	}
 
-	
+	/**
+	 * Returns the game panel 
+	 * @return
+	 */
 	public MainGamePanel getPanel() {
 		return this.mMainGamePanel;
 	}
 	
+	/**
+	 * Sets the game panel
+	 * @param mMainPanel
+	 */
 	public void setPanel(MainGamePanel mMainPanel) {
 		this.mMainGamePanel = mMainPanel;
 	}
