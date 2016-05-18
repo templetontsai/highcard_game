@@ -20,8 +20,6 @@ import unimelb.distributed_algo_game.state.GameState;
 
 public class DealerPlayer extends Player {
 
-
-
 	/** The game client. */
 	private GameClient gameClient = null;
 
@@ -35,6 +33,8 @@ public class DealerPlayer extends Player {
 	private Thread gameServerThread = null;
 
 	private JPanel mMainGameLoginDealerPanel = null;
+	
+	private int gameSize = -1;
 
 	/**
 	 * Public constructor that initializes a player object using name, id, game
@@ -53,13 +53,14 @@ public class DealerPlayer extends Player {
 
 	}
 
-
 	public void play() {
 
 		gameServer.setPlayer(this);
+		if(gameSize != -1)
+			gameServer.setGameSize(gameSize);
 
 		gameServer.setPanel((MainGamePanel) mMainGameLoginDealerPanel);
-		
+
 		gameServerThread = new Thread(gameServer);
 		gameServer.connect();
 		gameServerThread.start();
@@ -78,17 +79,9 @@ public class DealerPlayer extends Player {
 	public void dealerDrawnCard() {
 		gameServer.dealerDrawnCard();
 	}
-	
 
-	public void restartServer(MainGamePanel mainPanel){
-		GameServer newGameServer = GameServer.getInstance();
-		newGameServer.setPlayer(this);
-		Thread gameServerThread = new Thread(newGameServer);
-		newGameServer.connect();
-
-		gameServerThread.start();
-		//TODO broadcast info to the remaining players regarding player list then init panel
-		//mainPanel.updateGameTable(newGameServer.get.getPlayerList));
+	public void setGameSize(int gameSize) {
+		this.gameSize = gameSize;
 	}
 
 }

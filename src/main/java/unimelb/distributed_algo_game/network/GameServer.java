@@ -414,6 +414,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mMainGamePanel.setNewLeader(true);
 		Player p = new DealerPlayer("Dealer", newDealer, mMainGamePanel);
 		p.setDealer(true);
+		((DealerPlayer)p).setGameSize(2);
 		p.play();
 	}
 
@@ -439,6 +440,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public synchronized void resetGameStart(int num) {
 		this.GAME_START = num;
+	}
+	
+	public void setGameSize(int gameSize) {
+		this.GAME_START = gameSize;
 	}
 	
 
