@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.json.simple.JSONObject;
 
+import unimelb.distributed_algo_game.network.BodyMessage.ACKCode;
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
@@ -187,6 +188,7 @@ public final class PlayerClientManager {
 	 */
 	public synchronized void sendNodeList(ClientConnectionState mConnectionState, MessageType messageType) {
 
+		System.out.println("sendNodeList: " + mPlayerClientList.size());
 		if (mNodeList != null && mNodeList.size() > 0) {
 			for (Map.Entry<Integer, PlayerClientThread> t : mPlayerClientList.entrySet()) {
 				JSONObject mMessage = new JSONObject();
@@ -210,7 +212,7 @@ public final class PlayerClientManager {
 			for (Integer i : requestedCRTQueue) {
 				JSONObject mMessage = new JSONObject();
 				BodyMessage bodyMessage = new BodyMessage(this.mPlayer.getGamePlayerInfo().getNodeID(),
-						MessageType.BCT_CRT_FREE, "CRT is Free");
+						MessageType.ACK, ACKCode.CRT_RPY);
 				mMessage.put("header", ClientConnectionState.CONNECTED);
 				mMessage.put("body", bodyMessage);
 				mPlayerClientList.get(i).sendMessage(mMessage);
@@ -274,11 +276,12 @@ public final class PlayerClientManager {
 
 		int winnerNodeID = -1;
 		if (isLockRound()) {
-			winnerNodeID = Utils.compareRank(mLocalPlayerList);
-			notifyAllClients(winnerNodeID, ClientConnectionState.CONNECTED, MessageType.BCT_RST);
 			for (Map.Entry<Integer, PlayerClientThread> entry : mPlayerClientList.entrySet()) {
 				entry.getValue().setClientStatus(false);
 			}
+			winnerNodeID = Utils.compareRank(mLocalPlayerList);
+			notifyAllClients(winnerNodeID, ClientConnectionState.CONNECTED, MessageType.BCT_RST);
+		
 		}
 		return winnerNodeID;
 	}
@@ -411,14 +414,7 @@ public final class PlayerClientManager {
 		return mPlayer.getCard(index);
 	}
 
-	/**
-	 * Resets the game
-	 * 
-	 * @param num
-	 */
-	public synchronized void resetGameStart(int num) {
-		mGameServer.resetGameStart(num);
-	}
+
 
 	/**
 	 * Sets the card requested boolean

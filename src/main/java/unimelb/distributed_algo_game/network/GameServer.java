@@ -61,6 +61,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private boolean isRequested = false;
 	private long requestedTimestamp = -1;
+	
+	private int NEW_GAME_START = -1;
 
 	/**
 	 * Instantiates a new game server.
@@ -134,7 +136,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * clients including managing the thread pool of clients
 	 */
 	private void runLeaderState() throws IOException {
-
+		NEW_GAME_START = GAME_START;
 		// Only runs if the socket is open
 		if (mServerSocket != null) {
 			System.out.println("Server Start, Waiting....");
@@ -161,10 +163,11 @@ public final class GameServer implements Runnable, NetworkInterface {
 					mPlayerClientManager.addNode(t.getClientGamePlayerInfo());
 
 					System.out.println(
-							"GameServer: getPlayerIDList size: " + mPlayerClientManager.getPlayerIDList().size());
+							"GameServer: getPlayerIDList size: " + mPlayerClientManager.getPlayerIDList().size() + "GAME_START:" + GAME_START);
+					broadcastNodeList();
 					if (mPlayerClientManager.getPlayerIDList().size() == GAME_START) {
 
-						broadcastNodeList();
+						
 						System.out.println("Game Start");
 
 						try {
@@ -173,7 +176,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 							// TODO Adding error handling
 							e.printStackTrace();
 						}
-
+						
 						broadcastGameReadyToNodes(new Boolean(true));
 
 						mPlayerClientManager.showGameTable();
@@ -423,7 +426,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 */
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		System.out.println("1reInitGameAsDealer");
-		int playersLeft = mPlayerClientManager.getNumOfNodes();
+		
+		
 		if (mPlayerClientManager != null) {
 			System.out.println("0mPlayerClientManager destroy");
 			mPlayerClientManager.closeAllClientConnection();
@@ -448,7 +452,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mMainGamePanel.setNewLeader(true);
 		Player p = new DealerPlayer("Dealer", newDealer, mMainGamePanel);
 		p.setDealer(true);
-		((DealerPlayer) p).setGameSize(playersLeft);
+		
+		((DealerPlayer) p).setGameSize(this.NEW_GAME_START);
 		mMainGamePanel.setPlayer(p);
 		p.play();
 
@@ -498,14 +503,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		p.play();
 	}
 
-	/**
-	 * Resets the game
-	 * 
-	 * @param num
-	 */
-	public synchronized void resetGameStart(int num) {
-		this.GAME_START = num;
-	}
+
 
 	/**
 	 * Sets the number of players in the game

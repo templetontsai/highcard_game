@@ -215,7 +215,7 @@ public class PlayerClientThread extends Thread {
 			mPlayerClientManager.removeNode(clientNodeID);
 			mPlayerClientManager.broadcastUpdateNodeList();
 
-			mPlayerClientManager.resetGameStart(mPlayerClientManager.getNumOfNodes());
+			//mPlayerClientManager.resetGameStart(mPlayerClientManager.getNumOfNodes());
 			mPlayerClientManager.updateGameTable();
 
 			System.out.println("Node:" + clientNodeID + " has left the game");
@@ -235,10 +235,7 @@ public class PlayerClientThread extends Thread {
 
 		@Override
 		public void run() {
-			// if(!isDealerSS)
-			// System.out.println("sending still alive from " +
-			// mGameDealerInfo.getNodeID() + " to " +
-			// mGameClientInfo.getNodeID());
+
 			sendStillAliveMessage();
 
 		}
@@ -254,6 +251,8 @@ public class PlayerClientThread extends Thread {
 		mMessage.put("header", ClientConnectionState.CONNECTED);
 		mMessage.put("body", mBodyMessage);
 		sendMessage(mMessage);
+		
+		
 	}
 
 	/**
@@ -266,8 +265,7 @@ public class PlayerClientThread extends Thread {
 		ClientConnectionState connectionState;
 		MessageType messagType = mBodyMessage.getMessageType();
 		Object message = mBodyMessage.getMessage();
-		// System.out.println(messagType.toString() + " from" +
-		// mBodyMessage.getGamePlayerInfo().getPort());
+
 		switch (messagType) {
 		case CON:
 			// if the game is started already, don't respond to the message
@@ -316,8 +314,7 @@ public class PlayerClientThread extends Thread {
 		// Used to acknowledge the server is still alive
 		case ACK:
 			ACKCode ackCode = (ACKCode) message;
-			// System.out.println(ackCode.toString() + " from" +
-			// mBodyMessage.getGamePlayerInfo().getPort());
+
 			switch (ackCode) {
 			case NODE_ID_RECEIVED:
 				System.out.println("NODE_ID_RECEIVED ACK Message received from node" + mBodyMessage.getNodeID()
@@ -339,8 +336,7 @@ public class PlayerClientThread extends Thread {
 				checkNodeStillAliveTimer.schedule(new checkNodeStillAliveTimerTask(),
 						NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 
-				// System.out.println("Node: " +
-				// this.mGameClientInfo.getNodeID() + " is still alive");
+			
 				break;
 			case CLIENT_STILL_ALIVE:
 				if (checkClientStillAliveTimer != null)
@@ -349,8 +345,7 @@ public class PlayerClientThread extends Thread {
 				checkClientStillAliveTimer.schedule(new checkClientStillAliveTimerTask(),
 						NetworkInterface.STILL_ALIVE_ACK_TIME_OUT);
 
-				// System.out.println("Client: " +
-				// this.mGameClientInfo.getNodeID() + " is still alive");
+			
 				break;
 			case LEADER_ELE_ACK:
 				System.out.println("LEADER_ELE_ACK");
@@ -376,7 +371,6 @@ public class PlayerClientThread extends Thread {
 
 			c = mPlayerClientManager.getCard(1);
 			mPlayerClientManager.updatePlayerCard(mBodyMessage.getGamePlayerInfo().getNodeID(), c);
-			// mBodyMessage = new BodyMessage(this.nodeID, MessageType.CRD, c);
 			mBodyMessage = new BodyMessage(mGameDealerInfo, MessageType.CRD, c);
 
 			mMessage.put("header", connectionState);
@@ -512,14 +506,7 @@ public class PlayerClientThread extends Thread {
 
 		try {
 			if (mObjectOutputStream != null && mGameSendDataObject != null) {
-				/*
-				 * System.out.println("Client send message type " +
-				 * ((BodyMessage) ((JSONObject)
-				 * mGameSendDataObject).get("body")).getMessageType().toString()
-				 * ); System.out.println("Client send message type " +
-				 * ((BodyMessage) ((JSONObject)
-				 * mGameSendDataObject).get("body")).getMessage().toString());
-				 */
+			
 				mObjectOutputStream.writeObject(mGameSendDataObject);
 				mObjectOutputStream.flush();
 				// TODO object has to be reset, otherwise the client won't
