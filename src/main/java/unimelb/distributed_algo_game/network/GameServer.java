@@ -53,7 +53,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private MainGamePanel mMainGamePanel = null;
 	// This number is the total player number but not including node 0 itself
-	private int GAME_START = 4;
+	private int GAME_START = 3;
 
 	private GameClientSocketManager mGameClientSocketManager = null;
 
