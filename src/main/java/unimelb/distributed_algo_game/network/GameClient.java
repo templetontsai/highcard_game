@@ -564,8 +564,11 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * Starts a new leader election
 	 */
 	public void startElection() {
-
-		mGameClientSocketManager.startElection();
+		int pos = (getMyPositionInList()%mPlayerInfoList.size());
+		int myNeighborID = mPlayerInfoList.get(pos).getNodeID();
+		if(myNeighborID==mPlayer.getGameServerInfo().getNodeID())
+			myNeighborID++;
+		mGameClientSocketManager.startElection(myNeighborID);
 	}
 
 	/**
@@ -575,6 +578,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 	 * @param mBodyMessage
 	 */
 	public synchronized void sendElectionMessage(BodyMessage mBodyMessage) {
+		
 		int messageNodeID = Integer.parseInt((String) mBodyMessage.getMessage());
 		// Send message to the next node without changing it
 		if (messageNodeID > this.mPlayer.getGamePlayerInfo().getNodeID()) {
@@ -584,8 +588,9 @@ public final class GameClient implements Runnable, NetworkInterface {
 			BodyMessage bodyMessage = mBodyMessage;
 			mMessage.put("header", ClientConnectionState.CONNECTED);
 			mMessage.put("body", bodyMessage);
-
+			
 			mGameClientSocketManager.sendElectionMessage(mMessage);
+			
 		} else if (messageNodeID < this.mPlayer.getGamePlayerInfo().getNodeID()) {
 			// Don't forward to reduce number of messages
 
@@ -640,5 +645,18 @@ public final class GameClient implements Runnable, NetworkInterface {
 	public int getPlayerSSNodeID() {
 		return this.playerSSNodeID;
 	}
+	
+	public int getMyPositionInList(){
+		int pos = 0;
+		int j = 0;
+		for(GamePlayerInfo i: mPlayerInfoList){
+			if(i.getNodeID()==mPlayer.getGamePlayerInfo().getNodeID())
+				pos = j;
+			j++;
+		}
+		return pos+1;
+	}
+	
+	
 
 }

@@ -102,7 +102,14 @@ public class GameTablePanel extends JPanel {
 	}
 
 	public void updateCard(Card c, int nodeID) {
-		CardPanel panel = mPlayerCardPanelList.get(nodeID);
+		int pos = -1;
+		int j = 0;
+		for(CardPanel i: mPlayerCardPanelList){
+			if(i.getNodeID()==nodeID)
+				pos = j;
+			j++;
+		}
+		CardPanel panel = mPlayerCardPanelList.get(pos);
 		
 		panel.setParameters(c, true);
 		this.repaint();

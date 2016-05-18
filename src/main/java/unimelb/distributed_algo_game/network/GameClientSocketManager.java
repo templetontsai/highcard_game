@@ -29,7 +29,7 @@ public class GameClientSocketManager {
 		this.mGameServer = mGameServer;
 	}
 
-	public void startElection() {
+	public void startElection(int neighborID) {
 		System.out.println("Current size of players is " + mListClients.size());
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
@@ -39,8 +39,10 @@ public class GameClientSocketManager {
 				mMessage.put("header", ClientConnectionState.CONNECTED);
 				mMessage.put("body", mBodyMessage);
 
-				System.out.println("Sending start election message to " + c.getPlayerSSNodeID());
-				c.sendMessage(mMessage);
+				if(c.getPlayerSSNodeID()==neighborID){
+					System.out.println("Sending start election message to " + c.getPlayerSSNodeID());
+				    c.sendMessage(mMessage);
+				}
 			}
 		}
 	}
@@ -49,7 +51,7 @@ public class GameClientSocketManager {
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				System.out.println("Sending election message to " + c.getPlayerSSNodeID());
-				c.sendMessage(mMessage);
+				   c.sendMessage(mMessage);
 			}
 		}
 	}
@@ -188,6 +190,5 @@ public class GameClientSocketManager {
 	public void setPanel(MainGamePanel mMainPanel) {
 		this.mMainGamePanel = mMainPanel;
 	}
-
-
+    
 }

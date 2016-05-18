@@ -67,12 +67,12 @@ public class Utils {
 	public static synchronized int compareRank(Map<Integer, Player> players) {
 
 		// Initializes the variables
-		String matchDetails = "node" + players.get(0).getGamePlayerInfo().getNodeID() + " drew "
-				+ players.get(0).getSelectedCard().getCardRank() + " " + players.get(0).getSelectedCard().getPattern();
+		/**String matchDetails = "node" + players.get(0).getGamePlayerInfo().getNodeID() + " drew "
+				+ players.get(0).getSelectedCard().getCardRank() + " " + players.get(0).getSelectedCard().getPattern();**/
 		int winningScore = 0;
 		int playerID = 0;
 		boolean matchDraw = false;
-		StringBuilder sb = new StringBuilder(matchDetails);
+		StringBuilder sb = new StringBuilder("");
 		int i = 0;
 		// Iterates through the players and picks the highest score to determine
 		// the winner

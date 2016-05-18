@@ -322,6 +322,4 @@ public final class PlayerClientManager {
 		mGameServer.reInitGameAsPlayer(player, newDealer);
 	}
 	
-
-
 }

@@ -26,6 +26,8 @@ public class CardPanel extends JPanel {
 	private Card cardPassed;
 	private Boolean gameInProgress = false;
 	private JLabel idLabel;
+	
+	private int nodeID = -1;
 
 	/**
 	 * Constructor creates fonts, sets the foreground and background colors and
@@ -42,6 +44,7 @@ public class CardPanel extends JPanel {
 		// setPreferredSize(new Dimension(300, 300));
 		idLabel = new JLabel("Node" + nodeID + "\n");
 		this.add(idLabel);
+		this.nodeID = nodeID;
 	} // end constructor
 
 	public void setGameInProgress(boolean gameInProgress) {
@@ -132,6 +135,10 @@ public class CardPanel extends JPanel {
 		}
 		
 		g.drawImage(cardImages, x, y, x + 79, y + 123, cx, cy, cx + 79, cy + 123, this);
+	}
+	
+	public int getNodeID(){
+		return nodeID;
 	}
 
 
