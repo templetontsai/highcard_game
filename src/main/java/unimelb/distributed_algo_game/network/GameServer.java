@@ -62,7 +62,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 	private boolean isRequested = false;
 	private long requestedTimestamp = -1;
 	
-	private int NEW_GAME_START = -1;
+	
+	
 
 	/**
 	 * Instantiates a new game server.
@@ -136,7 +137,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 	 * clients including managing the thread pool of clients
 	 */
 	private void runLeaderState() throws IOException {
-		NEW_GAME_START = GAME_START;
+		
 		// Only runs if the socket is open
 		if (mServerSocket != null) {
 			System.out.println("Server Start, Waiting....");
@@ -180,6 +181,8 @@ public final class GameServer implements Runnable, NetworkInterface {
 						broadcastGameReadyToNodes(new Boolean(true));
 
 						mPlayerClientManager.showGameTable();
+						GAME_START = mPlayerClientManager.getNumOfNodes();
+						System.out.println("1. GAME_START:" + GAME_START);
 
 					}
 
@@ -453,7 +456,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		Player p = new DealerPlayer("Dealer", newDealer, mMainGamePanel);
 		p.setDealer(true);
 		
-		((DealerPlayer) p).setGameSize(this.NEW_GAME_START);
+		((DealerPlayer) p).setGameSize(this.GAME_START - 1);
 		mMainGamePanel.setPlayer(p);
 		p.play();
 

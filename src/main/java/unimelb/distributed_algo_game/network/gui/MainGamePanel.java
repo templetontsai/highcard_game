@@ -192,8 +192,8 @@ public class MainGamePanel extends JPanel {
 			String ipAddress = ipTextField.getText();
 			String port = portTextField.getText();
 
-			//String ipAddress = "localhost";
-			//String port = "5000";
+			/*String ipAddress = "localhost";
+			String port = "5000";*/
 
 			if (!ipAddress.equals("") && !port.equals("")) {
 				System.out.println(ipAddress + "-" + port);
@@ -228,10 +228,10 @@ public class MainGamePanel extends JPanel {
 			String serverIPAddress = serverIPTextField.getText();
 			String serverPort = serverPortTextField.getText();
 
-			/*
-			 * String ipAddress = "localhost"; String port = "500" + nodeID;
-			 * String serverIPAddress = "localhost"; String serverPort = "5000";
-			 */
+			
+			  /*String ipAddress = "localhost"; String port = "500" + nodeID;
+			  String serverIPAddress = "localhost"; String serverPort = "5000";*/
+			 
 			if (!ipAddress.equals("") && !port.equals("") && !serverIPAddress.equals("") && !serverPort.equals("")) {
 				String gamePlayerInfo[] = { Integer.toString(nodeID), ipAddress, port };
 				String gameServerInfo[] = { "0", serverIPAddress, serverPort };

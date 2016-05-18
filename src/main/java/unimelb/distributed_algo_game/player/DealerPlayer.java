@@ -56,8 +56,9 @@ public class DealerPlayer extends Player {
 	public void play() {
 
 		gameServer.setPlayer(this);
-		if (gameSize != -1)
-			gameServer.setGameSize(gameSize - 1);
+		
+		if(gameSize != -1)
+			gameServer.setGameSize(gameSize);
 
 		gameServer.setPanel((MainGamePanel) mMainGameLoginDealerPanel);
 
