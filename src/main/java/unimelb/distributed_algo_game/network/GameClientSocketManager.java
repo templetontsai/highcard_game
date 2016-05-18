@@ -186,9 +186,6 @@ public class GameClientSocketManager {
 	public void sendRequestServerTime() {
 		this.mGameClientDealer.sendRequestServerTime();
 	}
-	public synchronized int getNumOfNodes() {
-		return mListClients.size();
-	}
 
 	public void setIsCRTRequested(boolean isRequested, long requestedTimestamp) {
 		mGameServer.setIsCRTRequested(isRequested, requestedTimestamp);

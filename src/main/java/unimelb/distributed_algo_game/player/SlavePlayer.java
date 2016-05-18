@@ -107,12 +107,7 @@ public class SlavePlayer extends Player {
 			System.out.println("1requestCardFromDealer");
 
 			while (!mGameClientSocketManager.getReply())
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					
-					e.printStackTrace();
-				}
+				;
 			System.out.println("2requestCardFromDealer");
 			gameClient.requestCard();
 			gameServer.setIsCRTRequested(false, Utils.getProcessTimestamp());

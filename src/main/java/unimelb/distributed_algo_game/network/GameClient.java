@@ -331,8 +331,6 @@ public final class GameClient implements Runnable, NetworkInterface {
 			break;
 		case BCT_CRT_FREE:
 			System.out.println(mBodyMessage.getMessage());
-			//check
-			
 			break;
 		case DSC:
 			System.out.println(mBodyMessage.getMessage());
