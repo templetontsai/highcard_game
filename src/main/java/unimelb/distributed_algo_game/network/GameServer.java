@@ -53,7 +53,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	private MainGamePanel mMainGamePanel = null;
 	// This number is the total player number but not including node 0 itself
-	private int GAME_START = 4;
+	private int GAME_START = 3;
 
 	private GameClientSocketManager mGameClientSocketManager = null;
 
@@ -393,6 +393,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		System.out.println("1reInitGameAsDealer");
+		int playersLeft = mPlayerClientManager.getNumOfNodes();
 		if(mPlayerClientManager != null) {
 			System.out.println("0mPlayerClientManager destroy");
 			mPlayerClientManager.closeAllClientConnection();
@@ -419,7 +420,7 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mMainGamePanel.setNewLeader(true);
 		Player p = new DealerPlayer("Dealer", newDealer, mMainGamePanel);
 		p.setDealer(true);
-		((DealerPlayer)p).setGameSize(2);
+		((DealerPlayer)p).setGameSize(playersLeft);
 		mMainGamePanel.setPlayer(p);
 		p.play();
 		

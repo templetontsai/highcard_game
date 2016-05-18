@@ -322,4 +322,8 @@ public final class PlayerClientManager {
 		mGameServer.reInitGameAsPlayer(player, newDealer);
 	}
 	
+	public List<GamePlayerInfo> getNodeList(){
+		return mNodeList;
+	}
+	
 }

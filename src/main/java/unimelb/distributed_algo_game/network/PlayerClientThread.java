@@ -444,36 +444,6 @@ public class PlayerClientThread extends Thread {
 
 	}
 
-	/**
-	 * This sets the new coordinator of the game
-	 * 
-	 * @param mBodyMessage
-	 */
-	public synchronized void setNewCoordinator(BodyMessage mBodyMessage) {
-
-		newDealer = (GamePlayerInfo) mBodyMessage.getGamePlayerInfo();
-		System.out.println("The new dealer is node " + newDealer.getNodeID());
-		if (newDealer.getNodeID() != this.mGameDealerInfo.getNodeID()) {
-			// Update the new server details on the game client
-			// mGameServer.setGameServerLeader(newDealer);
-			// TODO the process to become new player
-
-			System.out.println("The new dealer is node " + newDealer.getNodeID() + "," + newDealer.getIPAddress() + ","
-					+ newDealer.getPort());
-			System.out.println("I am node  " + this.mGameDealerInfo.getNodeID() + ","
-					+ this.mGameDealerInfo.getIPAddress() + "," + this.mGameDealerInfo.getPort());
-
-			JSONObject mMessage = new JSONObject();
-			BodyMessage bodyMessage = mBodyMessage;
-			mBodyMessage.setMessageType(MessageType.COD);
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
-			sendMessage(mMessage);
-
-			// mPlayerClientManager.reInitGameAsPlayer(this.mGameDealerInfo,
-			// newDealer);
-		}
-	}
 
 	public synchronized void closeConnection() {
 		if (checkNodeStillAliveTimer != null) {
