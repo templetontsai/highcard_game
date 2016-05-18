@@ -268,5 +268,19 @@ public class MainGamePanel extends JPanel {
 	public boolean setNewLeader(boolean isNewLeader) {
 		return this.isNewLeader = isNewLeader;
 	}
+	
+	public void setPlayer(Player mPlayer) {
+		System.out.println("MainGamePanel" + mPlayer.getName());
+		gameTable.setPlayer(mPlayer);
+	}
+	
+	public void updateGameTable(GameTablePanel mGameTablePanel) {
+		System.out.println( "updateGameTable" + ((SlavePlayer)p).getGamePlayerInfo().getNodeID());
+		this.gameTable = null;
+		this.gameTable = mGameTablePanel;
+		mMainGameFrameGUI.setContentPane(gameTable);
+		mMainGameFrameGUI.revalidate();
+		
+	}
 
 }

@@ -15,7 +15,7 @@ import unimelb.distributed_algo_game.player.Player;
 import unimelb.distributed_algo_game.player.SlavePlayer;
 import unimelb.distributed_algo_game.pokers.Card;
 
-class GameTablePanel extends JPanel {
+public class GameTablePanel extends JPanel {
 
 	private List<CardPanel> mPlayerCardPanelList = null;
 	private JButton btn = null;
@@ -92,6 +92,7 @@ class GameTablePanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 
+			System.out.println("GameTable, actionPerformed" + mPlayer.getName());
 			((SlavePlayer) mPlayer).requestCardFromDealer();
 			btn.setEnabled(false);
 
@@ -125,6 +126,12 @@ class GameTablePanel extends JPanel {
 	
 	public void setDealer(boolean isDealer) {
 		this.isDealer = isDealer;
+	}
+	
+	public void setPlayer(Player mPlayer) {
+		System.out.println("1GameTable " + mPlayer.getName());
+		this.mPlayer = mPlayer;
+		System.out.println("2GameTable " + this.mPlayer.getName());
 	}
 
 

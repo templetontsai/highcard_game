@@ -6,9 +6,11 @@ package unimelb.distributed_algo_game.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
-import unimelb.distributed_algo_game.network.gui.MainGameFrameGUI;
+import unimelb.distributed_algo_game.network.gui.GameTablePanel;
 import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.DealerPlayer;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
@@ -364,21 +366,13 @@ public final class GameServer implements Runnable, NetworkInterface {
 		mGameClient.disconnect();
 	}
 
-	/**
-	 * This reconnects a client to the server
-	 */
-	public void reconnectClient() {
-		((SlavePlayer) mPlayer).rePlay();
-	}
 
 	public void dealerDrawnCard() {
 
 		mPlayerClientManager.dealerDrawnCard();
 	}
 
-	public boolean getReply() {
-		return mGameClientSocketManager.isAllCRTReplied();
-	}
+
 
 	public void setIsRequested(boolean isRequested, long requestedTimestamp) {
 		this.isRequested = isRequested;
@@ -399,7 +393,18 @@ public final class GameServer implements Runnable, NetworkInterface {
 
 	public void reInitGameAsDealer(GamePlayerInfo newDealer) {
 		System.out.println("1reInitGameAsDealer");
-		mPlayerClientManager.closeAllClientConnection();
+		if(mPlayerClientManager != null) {
+			System.out.println("0mPlayerClientManager destroy");
+			mPlayerClientManager.closeAllClientConnection();
+			mPlayerClientManager.removeAll();
+			mPlayerClientManager = null;
+		}
+		if(mGameClientSocketManager != null) {
+			System.out.println("0mGameClientSocketManager destroy");
+			mGameClientSocketManager.closeAllClientConnection();
+			mGameClientSocketManager.removeAll();
+			mGameClientSocketManager = null;
+		}
 		disconnect();
 		/*try {
 			Thread.sleep(1000);
@@ -415,12 +420,27 @@ public final class GameServer implements Runnable, NetworkInterface {
 		Player p = new DealerPlayer("Dealer", newDealer, mMainGamePanel);
 		p.setDealer(true);
 		((DealerPlayer)p).setGameSize(2);
+		mMainGamePanel.setPlayer(p);
 		p.play();
+		
 	}
 
 	public void reInitGameAsPlayer(GamePlayerInfo player, GamePlayerInfo newDealer) {
 		
 		System.out.println("1reInitGameAsPlayer");
+		if(mPlayerClientManager != null) {
+			System.out.println("1mPlayerClientManager destroy");
+			mPlayerClientManager.closeAllClientConnection();
+			mPlayerClientManager.removeAll();
+			mPlayerClientManager = null;
+		}
+		MainGamePanel mMainGamePanel = mGameClientSocketManager.getPanel();
+		if(mGameClientSocketManager != null) {
+			System.out.println("1mGameClientSocketManager destroy");
+			mGameClientSocketManager.closeAllClientConnection();
+			mGameClientSocketManager.removeAll();
+			mGameClientSocketManager = null;
+		}
 		disconnect();
 		try {
 			Thread.sleep(5000);
@@ -433,7 +453,12 @@ public final class GameServer implements Runnable, NetworkInterface {
 		player.setDealer(false);
 		newDealer.setDealer(true);
 		mMainGamePanel.setDealer(false);
-		Player p = new SlavePlayer("Player", player, newDealer, mMainGamePanel);
+		Player p = new SlavePlayer("REPlayer", player, newDealer, mMainGamePanel);
+		List<Integer> mPlayerIDList = new ArrayList<Integer>();
+		mPlayerIDList.add(p.getGamePlayerInfo().getNodeID());
+		GameTablePanel gameTable = new GameTablePanel(mPlayerIDList, false, p);
+		mMainGamePanel.setPlayer(p);
+		mMainGamePanel.updateGameTable(gameTable);
 		p.setDealer(false);
 		p.play();
 	}
@@ -444,6 +469,10 @@ public final class GameServer implements Runnable, NetworkInterface {
 	
 	public void setGameSize(int gameSize) {
 		this.GAME_START = gameSize;
+	}
+	
+	public void setGameClientSocketManager(GameClientSocketManager mGameClientSocketManager) {
+		this.mGameClientSocketManager = mGameClientSocketManager;
 	}
 	
 

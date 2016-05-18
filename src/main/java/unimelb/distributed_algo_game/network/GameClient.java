@@ -282,6 +282,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 					+ mPlayerInfoList.size());
 
 			for (GamePlayerInfo info : mPlayerInfoList) {
+				
 				mGameClientSocketManager.addSocketClient(info);
 			}
 
@@ -448,7 +449,7 @@ public final class GameClient implements Runnable, NetworkInterface {
 				System.out.println("mObjectOutputStream is null");
 			}
 		} catch (IOException ioe) {
-
+			ioe.printStackTrace();
 			isRunning = false;
 			if (isDealerCS)
 				System.out.println("dealer node has left game");

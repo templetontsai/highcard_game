@@ -34,8 +34,7 @@ public final class PlayerClientManager {
 	private MainGamePanel mMainGamePanel = null;
 	private GameServer mGameServer = null;
 	private boolean isDealerSS = false;
-	private boolean isPlayerReadyToPlay = false;
-	
+
 
 	private static final int GAME_SIZE = 3;
 
@@ -103,6 +102,12 @@ public final class PlayerClientManager {
 			mLocalPlayerList.remove(toRemove);
 			mPlayerClientList.remove(toRemove);
 		}
+	}
+	
+	public synchronized void removeAll() {
+		mNodeList.clear();
+		mLocalPlayerList.clear();
+		mPlayerClientList.clear();
 	}
 
 	/**

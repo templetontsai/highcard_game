@@ -2,14 +2,12 @@ package unimelb.distributed_algo_game.network;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.json.simple.JSONObject;
 
 import unimelb.distributed_algo_game.network.BodyMessage.MessageType;
 import unimelb.distributed_algo_game.network.NetworkInterface.ClientConnectionState;
-import unimelb.distributed_algo_game.network.utils.Utils;
-import unimelb.distributed_algo_game.player.DealerPlayer;
+import unimelb.distributed_algo_game.network.gui.MainGamePanel;
 import unimelb.distributed_algo_game.player.GamePlayerInfo;
 import unimelb.distributed_algo_game.player.Player;
 
@@ -19,13 +17,14 @@ public class GameClientSocketManager {
 	private Player mPlayer = null;
 	private GameServer mGameServer = null;
 	private boolean isReplied = false;
+	private MainGamePanel mMainGamePanel;
 
 	public GameClientSocketManager(Player mPlayer) {
 		mListClients = new ArrayList<GameClient>();
 		this.mPlayer = mPlayer;
-		
+
 	}
-	
+
 	public void setGameServer(GameServer mGameServer) {
 		this.mGameServer = mGameServer;
 	}
@@ -56,6 +55,8 @@ public class GameClientSocketManager {
 	}
 
 	public void broadcastCRT(long timestamp) {
+		System.out.println("broadcastCRT, mListClients: " + mListClients.size());
+		System.out.println(mPlayer.getGamePlayerInfo().getPort());
 		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient c : mListClients) {
 				JSONObject mMessage = new JSONObject();
@@ -71,22 +72,30 @@ public class GameClientSocketManager {
 	public boolean getReply() {
 		boolean isReplied = false;
 		if (mListClients != null && mListClients.size() > 0) {
+			// System.out.println("isReplied: " + mListClients.size());
 			for (GameClient c : mListClients) {
 				isReplied = c.getReply();
-				
+				// System.out.println("isReplied: " + isReplied);
 			}
 		} else {
 
 			isReplied = true;
 		}
-		
+
 		return isReplied;
+	}
+	
+	public synchronized void removeAll() {
+		mListClients.clear();
 	}
 
 	public void addSocketClient(GamePlayerInfo gameClientInfo) {
-		System.out.println("Socket Client Size:" + mListClients.size());
-		if (gameClientInfo.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID()
-				&& gameClientInfo.getNodeID() != 0) {
+		System.out.println("1Socket Client Size:" + mListClients.size());
+
+		if (gameClientInfo.getNodeID() != this.mPlayer.getGamePlayerInfo().getNodeID() && !gameClientInfo.isDealer()) {
+
+			System.out.println("I am node: " + this.mPlayer.getGamePlayerInfo().getNodeID()
+					+ " adding my socket client node: " + gameClientInfo.getNodeID());
 			GameClient client = new GameClient(this.mPlayer, gameClientInfo.getIPAddress(), gameClientInfo.getPort(),
 					false);
 			client.setPlayerSSNodeID(gameClientInfo.getNodeID());
@@ -95,8 +104,10 @@ public class GameClientSocketManager {
 			// mGameClientSocketManager.addSocketClient(gameClient);
 			client.setClientSocketManager(this);
 			mListClients.add(client);
-			System.out.println("Socket Client Size:" + mListClients.size());
+			System.out.println("2Socket Client Size:" + mListClients.size());
 		}
+
+		System.out.println("3Socket Client Size:" + mListClients.size());
 	}
 
 	public void removeSocketClient(GameClient gameClient) {
@@ -107,7 +118,8 @@ public class GameClientSocketManager {
 	}
 
 	public synchronized void initGameClientsConnection() {
-		if (mListClients != null) {
+		System.out.println("1 initGameClientsConnection Socket Client Size:" + mListClients.size());
+		if (mListClients != null && mListClients.size() > 0) {
 
 			for (GameClient client : mListClients) {
 
@@ -123,7 +135,7 @@ public class GameClientSocketManager {
 	}
 
 	public synchronized boolean isAllCRTReplied() {
-		if (mListClients.size() >= 1) {
+		if (mListClients != null && mListClients.size() > 0) {
 			for (GameClient client : mListClients) {
 				this.isReplied = client.getReply();
 			}
@@ -137,24 +149,26 @@ public class GameClientSocketManager {
 	}
 
 	public synchronized void broadcastClientsList() {
-		for (GameClient client : mListClients) {
-			JSONObject mMessage = new JSONObject();
+		if (mListClients != null && mListClients.size() > 0) {
+			for (GameClient client : mListClients) {
+				JSONObject mMessage = new JSONObject();
 
-			BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), MessageType.BCT_CLIENT_LST,
-					client.getServerDetails());
-			mMessage.put("header", ClientConnectionState.CONNECTED);
-			mMessage.put("body", bodyMessage);
-			client.sendMessage(mMessage);
+				BodyMessage bodyMessage = new BodyMessage(mPlayer.getGamePlayerInfo(), MessageType.BCT_CLIENT_LST,
+						client.getServerDetails());
+				mMessage.put("header", ClientConnectionState.CONNECTED);
+				mMessage.put("body", bodyMessage);
+				client.sendMessage(mMessage);
+			}
 		}
+
 	}
-	
+
 	public synchronized void closeAllClientConnection() {
-		if (mListClients != null) {
+		if (mListClients != null && mListClients.size() > 0) {
 
 			for (GameClient client : mListClients) {
 
 				client.disconnect();
-				
 
 			}
 
@@ -165,5 +179,15 @@ public class GameClientSocketManager {
 		closeAllClientConnection();
 		mGameServer.reInitGameAsDealer(newDealer);
 	}
+
+	
+	public MainGamePanel getPanel() {
+		return this.mMainGamePanel;
+	}
+	
+	public void setPanel(MainGamePanel mMainPanel) {
+		this.mMainGamePanel = mMainPanel;
+	}
+
 
 }
